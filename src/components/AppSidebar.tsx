@@ -14,7 +14,8 @@ import {
   LogOut,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -90,6 +91,13 @@ function NavGroup({ label, items, collapsed }: NavGroupProps) {
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { signOut, profile, roles } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -101,7 +109,9 @@ export function AppSidebar() {
           {!collapsed && (
             <div>
               <h2 className="text-sm font-semibold text-sidebar-foreground font-display">Prime</h2>
-              <p className="text-xs text-sidebar-foreground/50">Business Suites</p>
+              <p className="text-xs text-sidebar-foreground/50">
+                {profile?.company_name || 'Business Suite'}
+              </p>
             </div>
           )}
         </div>
@@ -133,6 +143,15 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleSignOut}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground/50 transition-all hover:bg-destructive/10 hover:text-destructive cursor-pointer"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              {!collapsed && <span className="text-sm">Sign Out</span>}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>

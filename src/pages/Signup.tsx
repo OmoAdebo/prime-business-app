@@ -5,24 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
-import { AppRole } from '@/lib/supabase';
-
-const roleOptions: { value: AppRole; label: string; description: string }[] = [
-  { value: 'business_owner', label: 'Business Owner', description: 'Full access to finances, sales & employees' },
-  { value: 'store_manager', label: 'Store Manager', description: 'Manage store operations & inventory' },
-  { value: 'accountant', label: 'Accountant', description: 'Bookkeeping, reports & tax management' },
-  { value: 'employee', label: 'Employee', description: 'Limited access to assigned tasks' },
-];
 
 export default function Signup() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [companyName, setCompanyName] = useState('');
-  const [role, setRole] = useState<AppRole>('business_owner');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -35,12 +25,16 @@ export default function Signup() {
     }
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: fullName, company_name: companyName, requested_role: role },
+        data: {
+          full_name: fullName,
+          company_name: companyName,
+          requested_role: 'business_owner',
+        },
       },
     });
 
@@ -48,22 +42,6 @@ export default function Signup() {
       toast.error(error.message);
       setLoading(false);
       return;
-    }
-
-    // Update the default role if not employee
-    if (data.user && role !== 'employee') {
-      await supabase
-        .from('user_roles')
-        .update({ role })
-        .eq('user_id', data.user.id);
-    }
-
-    // Update company name in profile
-    if (data.user && companyName) {
-      await supabase
-        .from('profiles')
-        .update({ company_name: companyName })
-        .eq('id', data.user.id);
     }
 
     toast.success('Account created! Check your email to confirm.');
@@ -77,7 +55,7 @@ export default function Signup() {
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg mb-4">
             P
           </div>
-          <h1 className="text-2xl font-bold font-display text-foreground">Create your account</h1>
+          <h1 className="text-2xl font-bold font-display text-foreground">Create your business account</h1>
           <p className="text-muted-foreground mt-1">Get started with Prime Business Suite</p>
         </div>
 
@@ -101,10 +79,11 @@ export default function Signup() {
                   placeholder="Acme Inc."
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
+                  required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Business Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -134,30 +113,16 @@ export default function Signup() {
                   </button>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Your Role</Label>
-                <Select value={role} onValueChange={(v) => setRole(v as AppRole)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roleOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        <div>
-                          <span className="font-medium">{opt.label}</span>
-                          <span className="text-muted-foreground ml-2 text-xs">— {opt.description}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <p className="text-xs text-muted-foreground">
+                By signing up you'll be registered as a <span className="font-medium text-primary">Business Owner</span>. 
+                You can invite team members after setup.
+              </p>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <span className="animate-spin h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
                 ) : (
                   <>
-                    <UserPlus className="h-4 w-4 mr-2" /> Create Account
+                    <UserPlus className="h-4 w-4 mr-2" /> Create Business Account
                   </>
                 )}
               </Button>

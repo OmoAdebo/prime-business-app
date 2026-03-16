@@ -14,8 +14,9 @@ import {
   LogOut,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { AppRole } from "@/lib/supabase";
 import {
   Sidebar,
   SidebarContent,
@@ -31,43 +32,61 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 
-const mainItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Banking", url: "/banking", icon: Landmark },
-  { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen },
-  { title: "Invoicing", url: "/invoicing", icon: FileText },
+interface NavItem {
+  title: string;
+  url: string;
+  icon: React.ElementType;
+  allowedRoles: AppRole[];
+}
+
+const allRoles: AppRole[] = ['super_admin', 'business_owner', 'store_manager', 'accountant', 'employee'];
+
+const mainItems: NavItem[] = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, allowedRoles: allRoles },
+  { title: "Banking", url: "/banking", icon: Landmark, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },
+  { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },
+  { title: "Invoicing", url: "/invoicing", icon: FileText, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
 ];
 
-const operationsItems = [
-  { title: "Inventory", url: "/inventory", icon: Package },
-  { title: "Payroll & HR", url: "/payroll", icon: Users },
-  { title: "Debt & Credit", url: "/debt-credit", icon: CreditCard },
-  { title: "Online Store", url: "/store", icon: Store },
+const operationsItems: NavItem[] = [
+  { title: "Inventory", url: "/inventory", icon: Package, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'employee'] },
+  { title: "Payroll & HR", url: "/payroll", icon: Users, allowedRoles: ['super_admin', 'business_owner', 'employee'] },
+  { title: "Debt & Credit", url: "/debt-credit", icon: CreditCard, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },
+  { title: "Online Store", url: "/store", icon: Store, allowedRoles: ['super_admin', 'business_owner', 'store_manager'] },
 ];
 
-const insightItems = [
-  { title: "Capital Access", url: "/capital", icon: PiggyBank },
-  { title: "Reports", url: "/reports", icon: BarChart3 },
+const insightItems: NavItem[] = [
+  { title: "Capital Access", url: "/capital", icon: PiggyBank, allowedRoles: ['super_admin', 'business_owner'] },
+  { title: "Reports", url: "/reports", icon: BarChart3, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
 ];
 
-const bottomItems = [
-  { title: "Settings", url: "/settings", icon: Settings },
-  { title: "Help & Support", url: "/help", icon: HelpCircle },
+const bottomItems: NavItem[] = [
+  { title: "Settings", url: "/settings", icon: Settings, allowedRoles: allRoles },
+  { title: "Help & Support", url: "/help", icon: HelpCircle, allowedRoles: allRoles },
 ];
+
+function filterByRole(items: NavItem[], userRoles: AppRole[]): NavItem[] {
+  if (userRoles.length === 0) return items.filter(i => i.allowedRoles.includes('employee'));
+  return items.filter(item => userRoles.some(r => item.allowedRoles.includes(r)));
+}
 
 interface NavGroupProps {
   label: string;
-  items: typeof mainItems;
+  items: NavItem[];
   collapsed: boolean;
+  userRoles: AppRole[];
 }
 
-function NavGroup({ label, items, collapsed }: NavGroupProps) {
+function NavGroup({ label, items, collapsed, userRoles }: NavGroupProps) {
+  const filtered = filterByRole(items, userRoles);
+  if (filtered.length === 0) return null;
+
   return (
     <SidebarGroup>
       {!collapsed && <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider">{label}</SidebarGroupLabel>}
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
+          {filtered.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild>
                 <NavLink
@@ -99,6 +118,8 @@ export function AppSidebar() {
     navigate("/login");
   };
 
+  const filteredBottom = filterByRole(bottomItems, roles);
+
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="p-4">
@@ -120,16 +141,16 @@ export function AppSidebar() {
       <Separator className="bg-sidebar-border" />
 
       <SidebarContent className="px-2 py-2">
-        <NavGroup label="Overview" items={mainItems} collapsed={collapsed} />
-        <NavGroup label="Operations" items={operationsItems} collapsed={collapsed} />
-        <NavGroup label="Insights" items={insightItems} collapsed={collapsed} />
+        <NavGroup label="Overview" items={mainItems} collapsed={collapsed} userRoles={roles} />
+        <NavGroup label="Operations" items={operationsItems} collapsed={collapsed} userRoles={roles} />
+        <NavGroup label="Insights" items={insightItems} collapsed={collapsed} userRoles={roles} />
       </SidebarContent>
 
       <Separator className="bg-sidebar-border" />
 
       <SidebarFooter className="px-2 py-2">
         <SidebarMenu>
-          {bottomItems.map((item) => (
+          {filteredBottom.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild>
                 <NavLink

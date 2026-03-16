@@ -6,23 +6,32 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Eye, EyeOff, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
 
-export default function Signup() {
+const ADMIN_INVITE_CODE = 'PRIME-ADMIN-2026';
+
+export default function AdminRegister() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [companyName, setCompanyName] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+
+    if (inviteCode !== ADMIN_INVITE_CODE) {
+      toast.error('Invalid invite code');
       return;
     }
+
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+
     setLoading(true);
 
     const { error } = await supabase.auth.signUp({
@@ -32,8 +41,7 @@ export default function Signup() {
         emailRedirectTo: window.location.origin,
         data: {
           full_name: fullName,
-          company_name: companyName,
-          requested_role: 'business_owner',
+          requested_role: 'super_admin',
         },
       },
     });
@@ -44,7 +52,7 @@ export default function Signup() {
       return;
     }
 
-    toast.success('Account created! Check your email to confirm.');
+    toast.success('Admin account created! Check your email to confirm.');
     navigate('/login');
   };
 
@@ -55,39 +63,39 @@ export default function Signup() {
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg mb-4">
             P
           </div>
-          <h1 className="text-2xl font-bold font-display text-foreground">Create your business account</h1>
-          <p className="text-muted-foreground mt-1">Get started with Prime Business Suite</p>
+          <h1 className="text-2xl font-bold font-display text-foreground">Admin Registration</h1>
+          <p className="text-muted-foreground mt-1">Create a Prime platform admin account</p>
         </div>
 
         <Card>
           <CardContent className="pt-6">
-            <form onSubmit={handleSignup} className="space-y-4">
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="inviteCode">Invite Code</Label>
+                <Input
+                  id="inviteCode"
+                  placeholder="Enter admin invite code"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value)}
+                  required
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="fullName">Full Name</Label>
                 <Input
                   id="fullName"
-                  placeholder="John Doe"
+                  placeholder="Admin Name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="company">Company Name</Label>
-                <Input
-                  id="company"
-                  placeholder="Acme Inc."
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Business Email</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@company.com"
+                  placeholder="admin@prime.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -99,7 +107,7 @@ export default function Signup() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Min. 6 characters"
+                    placeholder="Min. 8 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -113,16 +121,12 @@ export default function Signup() {
                   </button>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                By signing up you'll be registered as a <span className="font-medium text-primary">Business Owner</span>. 
-                You can invite team members after setup.
-              </p>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <span className="animate-spin h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
                 ) : (
                   <>
-                    <UserPlus className="h-4 w-4 mr-2" /> Create Business Account
+                    <ShieldCheck className="h-4 w-4 mr-2" /> Create Admin Account
                   </>
                 )}
               </Button>
@@ -131,9 +135,9 @@ export default function Signup() {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
-          <Link to="/login" className="text-primary font-medium hover:underline">
-            Sign in
+          Business owner?{' '}
+          <Link to="/signup" className="text-primary font-medium hover:underline">
+            Sign up here
           </Link>
         </p>
       </div>

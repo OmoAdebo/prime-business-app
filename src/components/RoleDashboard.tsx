@@ -91,6 +91,9 @@ export default function RoleDashboard() {
         ))}
       </div>
 
+      {/* Super Admin: show user management */}
+      {primaryRole === 'super_admin' && <AdminUserManagement />}
+
       {/* Show full dashboard for admin/owner roles */}
       {(primaryRole === 'super_admin' || primaryRole === 'business_owner') && <Dashboard />}
     </div>

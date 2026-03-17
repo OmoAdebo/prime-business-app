@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { AdminUserManagement } from '@/components/AdminUserManagement';
 
 interface QuickAction {
   title: string;

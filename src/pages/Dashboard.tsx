@@ -46,7 +46,7 @@ const weeklyData = [
 const kpiCards = [
   {
     title: "Total Revenue",
-    value: "$0.00",
+    value: "₦0.00",
     change: "—",
     trend: "up" as const,
     icon: DollarSign,
@@ -54,7 +54,7 @@ const kpiCards = [
   },
   {
     title: "Net Profit",
-    value: "$0.00",
+    value: "₦0.00",
     change: "—",
     trend: "up" as const,
     icon: TrendingUp,

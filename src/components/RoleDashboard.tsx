@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { AdminUserManagement } from '@/components/AdminUserManagement';
 
 interface QuickAction {
   title: string;
@@ -89,6 +90,9 @@ export default function RoleDashboard() {
           </Card>
         ))}
       </div>
+
+      {/* Super Admin: show user management */}
+      {primaryRole === 'super_admin' && <AdminUserManagement />}
 
       {/* Show full dashboard for admin/owner roles */}
       {(primaryRole === 'super_admin' || primaryRole === 'business_owner') && <Dashboard />}

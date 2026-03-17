@@ -41,6 +41,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/admin-register" element={<AdminRegister />} />
+            <Route path="/accept-invite/:token" element={<AcceptInvite />} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<RoleDashboard />} />
               <Route path="/banking" element={<Banking />} />

@@ -18,7 +18,7 @@ interface UserRow {
   created_at: string;
 }
 
-const SUPABASE_URL = "https://zoukfdfpbmcyapkbujnr.supabase.co";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 export function AdminUserManagement() {
   const [search, setSearch] = useState("");

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Users, Search, Building2, Shield } from "lucide-react";
+import { Loader2, Users, Search, Building2, Shield, Ban, CheckCircle } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface UserRow {
   user_id: string;
@@ -16,8 +18,11 @@ interface UserRow {
   created_at: string;
 }
 
+const SUPABASE_URL = "https://zoukfdfpbmcyapkbujnr.supabase.co";
+
 export function AdminUserManagement() {
   const [search, setSearch] = useState("");
+  const queryClient = useQueryClient();
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin-all-users"],
@@ -25,6 +30,38 @@ export function AdminUserManagement() {
       const { data, error } = await supabase.rpc("get_all_users_with_roles");
       if (error) throw error;
       return (data as UserRow[]) || [];
+    },
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({ userId, activate }: { userId: string; activate: boolean }) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/toggle-user-status`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ user_id: userId, is_active: activate }),
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to toggle user status");
+      return result;
+    },
+    onSuccess: (_, { activate }) => {
+      toast({
+        title: activate ? "User activated" : "User deactivated",
+        description: activate
+          ? "The user can now log in again."
+          : "The user has been banned and cannot log in.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
     },
   });
 
@@ -111,6 +148,7 @@ export function AdminUserManagement() {
                   <TableHead>Company</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Joined</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -130,6 +168,32 @@ export function AdminUserManagement() {
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {new Date(u.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {u.role !== "super_admin" && (
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => toggleMutation.mutate({ userId: u.user_id, activate: false })}
+                            disabled={toggleMutation.isPending}
+                          >
+                            <Ban className="h-3.5 w-3.5 mr-1" />
+                            Deactivate
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-success hover:text-success"
+                            onClick={() => toggleMutation.mutate({ userId: u.user_id, activate: true })}
+                            disabled={toggleMutation.isPending}
+                          >
+                            <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                            Activate
+                          </Button>
+                        </div>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

@@ -1,6 +1,3 @@
-// Deploy this to YOUR Supabase project (zoukfdfpbmcyapkbujnr)
-// Command: supabase functions deploy toggle-user-status --project-ref zoukfdfpbmcyapkbujnr
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -14,7 +11,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify the caller is a super_admin
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -25,9 +21,10 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 
     // Client with caller's JWT to check their role
-    const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+    const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     })
 
@@ -66,7 +63,7 @@ Deno.serve(async (req) => {
     })
 
     const { error: authError } = await adminClient.auth.admin.updateUserById(user_id, {
-      ban_duration: is_active ? 'none' : '876600h', // ~100 years ban
+      ban_duration: is_active ? 'none' : '876600h',
     })
 
     if (authError) {

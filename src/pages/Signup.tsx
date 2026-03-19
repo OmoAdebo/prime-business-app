@@ -6,9 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Eye, EyeOff, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, Building2, User } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+type AccountType = 'business_owner' | 'employee';
 
 export default function Signup() {
+  const [accountType, setAccountType] = useState<AccountType>('business_owner');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,16 +29,21 @@ export default function Signup() {
     }
     setLoading(true);
 
+    const metadata: Record<string, string> = {
+      full_name: fullName,
+      requested_role: accountType,
+    };
+
+    if (accountType === 'business_owner') {
+      metadata.company_name = companyName;
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: {
-          full_name: fullName,
-          company_name: companyName,
-          requested_role: 'business_owner',
-        },
+        data: metadata,
       },
     });
 
@@ -55,8 +64,38 @@ export default function Signup() {
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg mb-4">
             P
           </div>
-          <h1 className="text-2xl font-bold font-display text-foreground">Create your business account</h1>
+          <h1 className="text-2xl font-bold font-display text-foreground">Create your account</h1>
           <p className="text-muted-foreground mt-1">Get started with Prime Business Suite</p>
+        </div>
+
+        {/* Account Type Selector */}
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setAccountType('business_owner')}
+            className={cn(
+              'flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all text-sm font-medium',
+              accountType === 'business_owner'
+                ? 'border-primary bg-primary/5 text-primary'
+                : 'border-border bg-card text-muted-foreground hover:border-primary/40'
+            )}
+          >
+            <Building2 className="h-6 w-6" />
+            Business Owner
+          </button>
+          <button
+            type="button"
+            onClick={() => setAccountType('employee')}
+            className={cn(
+              'flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all text-sm font-medium',
+              accountType === 'employee'
+                ? 'border-primary bg-primary/5 text-primary'
+                : 'border-border bg-card text-muted-foreground hover:border-primary/40'
+            )}
+          >
+            <User className="h-6 w-6" />
+            Individual
+          </button>
         </div>
 
         <Card>
@@ -72,27 +111,32 @@ export default function Signup() {
                   required
                 />
               </div>
+
+              {accountType === 'business_owner' && (
+                <div className="space-y-2">
+                  <Label htmlFor="company">Company Name</Label>
+                  <Input
+                    id="company"
+                    placeholder="Acme Inc."
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
-                <Label htmlFor="company">Company Name</Label>
-                <Input
-                  id="company"
-                  placeholder="Acme Inc."
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Business Email</Label>
+                <Label htmlFor="email">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@company.com"
+                  placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
@@ -113,16 +157,22 @@ export default function Signup() {
                   </button>
                 </div>
               </div>
+
               <p className="text-xs text-muted-foreground">
-                By signing up you'll be registered as a <span className="font-medium text-primary">Business Owner</span>. 
-                You can invite team members after setup.
+                {accountType === 'business_owner' ? (
+                  <>You'll be registered as a <span className="font-medium text-primary">Business Owner</span>. You can invite team members after setup.</>
+                ) : (
+                  <>You'll be registered as an <span className="font-medium text-primary">Individual</span>. You can connect with businesses from your dashboard.</>
+                )}
               </p>
+
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <span className="animate-spin h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
                 ) : (
                   <>
-                    <UserPlus className="h-4 w-4 mr-2" /> Create Business Account
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    {accountType === 'business_owner' ? 'Create Business Account' : 'Create Individual Account'}
                   </>
                 )}
               </Button>

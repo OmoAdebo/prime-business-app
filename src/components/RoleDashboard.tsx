@@ -1,5 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { AppRole } from '@/lib/supabase';
+import { AppRole } from '@/contexts/AuthContext';
 import Dashboard from '@/pages/Dashboard';
 import {
   BookOpen, Package, Users, CreditCard, FileText, Store, BarChart3, Landmark, PiggyBank, Settings,

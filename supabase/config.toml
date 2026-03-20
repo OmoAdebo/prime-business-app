@@ -1,1 +1,4 @@
 project_id = "upvdcpysadfapuquxaae"
+
+[functions.toggle-user-status]
+verify_jwt = false

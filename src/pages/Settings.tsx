@@ -13,7 +13,7 @@ import { User, Shield, Users, Mail, Phone, Building2, Loader2, UserPlus, Clock, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { AppRole } from "@/lib/supabase";
+import type { AppRole } from "@/contexts/AuthContext";
 
 // ─── Profile Tab ───
 function ProfileTab() {

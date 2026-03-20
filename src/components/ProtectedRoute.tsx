@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { AppRole } from '@/lib/supabase';
+import { AppRole } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;

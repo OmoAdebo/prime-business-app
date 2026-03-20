@@ -16,7 +16,7 @@ import {
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { AppRole } from "@/lib/supabase";
+import { AppRole } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,

@@ -43,7 +43,7 @@ interface NavItem {
   allowedRoles: AppRole[];
 }
 
-const allRoles: AppRole[] = ['super_admin', 'business_owner', 'store_manager', 'accountant', 'employee'];
+const allRoles: AppRole[] = ['super_admin', 'business_owner', 'store_manager', 'accountant', 'employee', 'individual'];
 
 const mainItems: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, allowedRoles: allRoles },

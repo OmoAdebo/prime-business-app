@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, UserPlus, Building2, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type AccountType = 'business_owner' | 'employee';
+type AccountType = 'business_owner' | 'individual';
 
 export default function Signup() {
   const [accountType, setAccountType] = useState<AccountType>('business_owner');

@@ -44,6 +44,11 @@ const roleQuickActions: Record<AppRole, QuickAction[]> = {
     { title: 'My Payroll', icon: Users, path: '/payroll', color: 'bg-primary/10 text-primary' },
     { title: 'Inventory', icon: Package, path: '/inventory', color: 'bg-accent text-accent-foreground' },
   ],
+  individual: [
+    { title: 'Browse Businesses', icon: Store, path: '/dashboard', color: 'bg-primary/10 text-primary' },
+    { title: 'My Profile', icon: Users, path: '/settings', color: 'bg-accent text-accent-foreground' },
+    { title: 'Reports', icon: BarChart3, path: '/reports', color: 'bg-secondary/20 text-secondary-foreground' },
+  ],
 };
 
 const roleGreetings: Record<AppRole, string> = {
@@ -52,6 +57,7 @@ const roleGreetings: Record<AppRole, string> = {
   store_manager: 'Store operations overview — inventory, sales & orders.',
   accountant: 'Financial overview — books, reports & reconciliation.',
   employee: 'Welcome — here are your tasks and payroll info.',
+  individual: 'Welcome — discover and connect with businesses on the platform.',
 };
 
 export default function RoleDashboard() {

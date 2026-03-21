@@ -14,6 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_settings: {
+        Row: {
+          brand_name: string | null
+          business_id: string
+          created_at: string
+          email_format: string | null
+          id: string
+          logo_url: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_name?: string | null
+          business_id: string
+          created_at?: string
+          email_format?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_name?: string | null
+          business_id?: string
+          created_at?: string
+          email_format?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_settings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      businesses: {
+        Row: {
+          business_address: string | null
+          cac_document_url: string | null
+          cac_number: string | null
+          company_name: string
+          created_at: string
+          id: string
+          industry: string | null
+          lga: string | null
+          owner_id: string
+          rejection_reason: string | null
+          state: string | null
+          tin_number: string | null
+          updated_at: string
+          utility_bill_url: string | null
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          business_address?: string | null
+          cac_document_url?: string | null
+          cac_number?: string | null
+          company_name: string
+          created_at?: string
+          id?: string
+          industry?: string | null
+          lga?: string | null
+          owner_id: string
+          rejection_reason?: string | null
+          state?: string | null
+          tin_number?: string | null
+          updated_at?: string
+          utility_bill_url?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          business_address?: string | null
+          cac_document_url?: string | null
+          cac_number?: string | null
+          company_name?: string
+          created_at?: string
+          id?: string
+          industry?: string | null
+          lga?: string | null
+          owner_id?: string
+          rejection_reason?: string | null
+          state?: string | null
+          tin_number?: string | null
+          updated_at?: string
+          utility_bill_url?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

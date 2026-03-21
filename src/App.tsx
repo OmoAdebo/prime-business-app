@@ -25,6 +25,13 @@ import Help from "./pages/Help";
 import AdminRegister from "./pages/AdminRegister";
 import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Pricing from "./pages/Pricing";
+import Customers from "./pages/Customers";
+import Budgeting from "./pages/Budgeting";
+import StoreManagement from "./pages/StoreManagement";
+import SystemReview from "./pages/SystemReview";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +49,9 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/admin-register" element={<AdminRegister />} />
             <Route path="/accept-invite/:token" element={<AcceptInvite />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<RoleDashboard />} />
               <Route path="/banking" element={<Banking />} />
@@ -55,6 +65,10 @@ const App = () => (
               <Route path="/reports" element={<Reports />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/help" element={<Help />} />
+              <Route path="/customers" element={<Customers />} />
+              <Route path="/budgeting" element={<Budgeting />} />
+              <Route path="/store-management" element={<StoreManagement />} />
+              <Route path="/system-review" element={<SystemReview />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

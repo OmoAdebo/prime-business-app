@@ -12,6 +12,10 @@ import {
   Settings,
   HelpCircle,
   LogOut,
+  Calculator,
+  Monitor,
+  ShoppingBag,
+  UserCheck,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -50,14 +54,18 @@ const mainItems: NavItem[] = [
 
 const operationsItems: NavItem[] = [
   { title: "Inventory", url: "/inventory", icon: Package, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'employee'] },
+  { title: "Customers", url: "/customers", icon: UserCheck, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
   { title: "Payroll & HR", url: "/payroll", icon: Users, allowedRoles: ['super_admin', 'business_owner', 'employee'] },
   { title: "Debt & Credit", url: "/debt-credit", icon: CreditCard, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },
   { title: "Online Store", url: "/store", icon: Store, allowedRoles: ['super_admin', 'business_owner', 'store_manager'] },
+  { title: "Store Management", url: "/store-management", icon: ShoppingBag, allowedRoles: ['super_admin', 'business_owner', 'store_manager'] },
+  { title: "Budgeting", url: "/budgeting", icon: Calculator, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },
 ];
 
 const insightItems: NavItem[] = [
   { title: "Capital Access", url: "/capital", icon: PiggyBank, allowedRoles: ['super_admin', 'business_owner'] },
   { title: "Reports", url: "/reports", icon: BarChart3, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
+  { title: "System Review", url: "/system-review", icon: Monitor, allowedRoles: ['super_admin'] },
 ];
 
 const bottomItems: NavItem[] = [
@@ -124,7 +132,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold text-sm">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
             P
           </div>
           {!collapsed && (

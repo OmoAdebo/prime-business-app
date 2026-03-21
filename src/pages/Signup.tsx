@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, UserPlus, Building2, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type AccountType = 'business_owner' | 'employee';
+type AccountType = 'business_owner' | 'individual';
 
 export default function Signup() {
   const [accountType, setAccountType] = useState<AccountType>('business_owner');
@@ -85,10 +85,10 @@ export default function Signup() {
           </button>
           <button
             type="button"
-            onClick={() => setAccountType('employee')}
+            onClick={() => setAccountType('individual')}
             className={cn(
               'flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all text-sm font-medium',
-              accountType === 'employee'
+              accountType === 'individual'
                 ? 'border-primary bg-primary/5 text-primary'
                 : 'border-border bg-card text-muted-foreground hover:border-primary/40'
             )}

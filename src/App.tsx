@@ -18,6 +18,7 @@ import Inventory from "./pages/Inventory";
 import Payroll from "./pages/Payroll";
 import DebtCredit from "./pages/DebtCredit";
 import OnlineStore from "./pages/OnlineStore";
+import POS from "./pages/POS";
 import Capital from "./pages/Capital";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
@@ -60,6 +61,7 @@ const App = () => (
               <Route path="/inventory" element={<Inventory />} />
               <Route path="/payroll" element={<Payroll />} />
               <Route path="/debt-credit" element={<DebtCredit />} />
+              <Route path="/pos" element={<POS />} />
               <Route path="/store" element={<OnlineStore />} />
               <Route path="/capital" element={<Capital />} />
               <Route path="/reports" element={<Reports />} />

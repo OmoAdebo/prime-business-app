@@ -18,6 +18,7 @@ import Inventory from "./pages/Inventory";
 import Payroll from "./pages/Payroll";
 import DebtCredit from "./pages/DebtCredit";
 import OnlineStore from "./pages/OnlineStore";
+import POS from "./pages/POS";
 import Capital from "./pages/Capital";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";

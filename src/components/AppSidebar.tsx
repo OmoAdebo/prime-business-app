@@ -16,6 +16,7 @@ import {
   Monitor,
   ShoppingBag,
   UserCheck,
+  ShoppingCart,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";

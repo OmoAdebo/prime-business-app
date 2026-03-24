@@ -16,6 +16,7 @@ import {
   Monitor,
   ShoppingBag,
   UserCheck,
+  ShoppingCart,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -53,6 +54,7 @@ const mainItems: NavItem[] = [
 ];
 
 const operationsItems: NavItem[] = [
+  { title: "POS", url: "/pos", icon: ShoppingCart, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'employee'] },
   { title: "Inventory", url: "/inventory", icon: Package, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'employee'] },
   { title: "Customers", url: "/customers", icon: UserCheck, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
   { title: "Payroll & HR", url: "/payroll", icon: Users, allowedRoles: ['super_admin', 'business_owner', 'employee'] },

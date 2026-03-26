@@ -65,6 +65,50 @@ export type Database = {
           },
         ]
       }
+      activity_logs: {
+        Row: {
+          action: string
+          business_id: string | null
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          business_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          business_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance: {
         Row: {
           business_id: string
@@ -2622,6 +2666,33 @@ export type Database = {
           id?: string
           invited_by?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      voice_usage: {
+        Row: {
+          action_type: string | null
+          command_text: string | null
+          created_at: string
+          id: string
+          success: boolean | null
+          user_id: string
+        }
+        Insert: {
+          action_type?: string | null
+          command_text?: string | null
+          created_at?: string
+          id?: string
+          success?: boolean | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string | null
+          command_text?: string | null
+          created_at?: string
+          id?: string
+          success?: boolean | null
           user_id?: string
         }
         Relationships: []

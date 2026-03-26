@@ -79,23 +79,25 @@ export default function RoleDashboard() {
         </span>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {actions.map((action) => (
-          <Card
-            key={action.title}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate(action.path)}
-          >
-            <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-              <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${action.color}`}>
-                <action.icon className="h-5 w-5" />
-              </div>
-              <span className="text-sm font-medium text-foreground">{action.title}</span>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Quick Actions - hidden for business_owner since sidebar covers navigation */}
+      {primaryRole !== 'business_owner' && actions.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {actions.map((action) => (
+            <Card
+              key={action.title}
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => navigate(action.path)}
+            >
+              <CardContent className="p-4 flex flex-col items-center text-center gap-3">
+                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${action.color}`}>
+                  <action.icon className="h-5 w-5" />
+                </div>
+                <span className="text-sm font-medium text-foreground">{action.title}</span>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Super Admin: show user management */}
       {primaryRole === 'super_admin' && <AdminUserManagement />}

@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   UserCheck,
   ShoppingCart,
+  Mic,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";

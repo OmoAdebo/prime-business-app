@@ -69,6 +69,7 @@ const insightItems: NavItem[] = [
   { title: "Capital Access", url: "/capital", icon: PiggyBank, allowedRoles: ['super_admin', 'business_owner'] },
   { title: "Reports", url: "/reports", icon: BarChart3, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
   { title: "System Review", url: "/system-review", icon: Monitor, allowedRoles: ['super_admin'] },
+  { title: "Voice Command", url: "/voice", icon: Mic, allowedRoles: allRoles },
 ];
 
 const bottomItems: NavItem[] = [

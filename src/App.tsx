@@ -33,6 +33,7 @@ import Customers from "./pages/Customers";
 import Budgeting from "./pages/Budgeting";
 import StoreManagement from "./pages/StoreManagement";
 import SystemReview from "./pages/SystemReview";
+import VoiceCommand from "./pages/VoiceCommand";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ const App = () => (
               <Route path="/budgeting" element={<Budgeting />} />
               <Route path="/store-management" element={<StoreManagement />} />
               <Route path="/system-review" element={<SystemReview />} />
+              <Route path="/voice" element={<VoiceCommand />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

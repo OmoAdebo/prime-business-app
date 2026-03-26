@@ -33,6 +33,7 @@ import Customers from "./pages/Customers";
 import Budgeting from "./pages/Budgeting";
 import StoreManagement from "./pages/StoreManagement";
 import SystemReview from "./pages/SystemReview";
+import VoiceCommand from "./pages/VoiceCommand";
 
 const queryClient = new QueryClient();
 

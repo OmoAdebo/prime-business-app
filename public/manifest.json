@@ -1,0 +1,17 @@
+{
+  "name": "Prime Business Suites",
+  "short_name": "Prime",
+  "description": "All-in-one business management platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#22c55e",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

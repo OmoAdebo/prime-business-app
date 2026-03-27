@@ -88,13 +88,13 @@ export default function Dashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {kpiCards.map((kpi) => (
           <Card key={kpi.title} className="group hover:shadow-md transition-shadow">
-            <CardContent className="p-5">
+            <CardContent className="p-3 sm:p-5">
               <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                  <kpi.icon className="h-5 w-5 text-primary" />
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <kpi.icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
                 {kpi.change !== "—" && (
                   <div className={`flex items-center gap-1 text-xs font-medium ${kpi.trend === "up" ? "text-success" : "text-destructive"}`}>
@@ -104,7 +104,7 @@ export default function Dashboard() {
                 )}
               </div>
               <div className="mt-3">
-                <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
+                <p className="text-lg sm:text-2xl font-bold text-foreground">{kpi.value}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{kpi.desc}</p>
               </div>
             </CardContent>
@@ -113,7 +113,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
         {/* Revenue Chart */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2">

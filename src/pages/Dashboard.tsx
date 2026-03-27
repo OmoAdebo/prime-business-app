@@ -104,7 +104,7 @@ export default function Dashboard() {
                 )}
               </div>
               <div className="mt-3">
-                <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
+                <p className="text-lg sm:text-2xl font-bold text-foreground">{kpi.value}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{kpi.desc}</p>
               </div>
             </CardContent>

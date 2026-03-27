@@ -231,7 +231,7 @@ export default function POS() {
         </TabsList>
 
         <TabsContent value="pos" className="mt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             {/* Product Grid */}
             <div className="lg:col-span-2 space-y-4">
               <div className="relative">

@@ -231,9 +231,9 @@ export default function POS() {
         </TabsList>
 
         <TabsContent value="pos" className="mt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             {/* Product Grid */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className="lg:col-span-3 space-y-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -245,11 +245,11 @@ export default function POS() {
               </div>
 
               {productsLoading ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-28 rounded-lg" />)}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2 sm:gap-3">
+                  {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-24 sm:h-28 rounded-lg" />)}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto pr-1">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-h-[50vh] lg:max-h-[60vh] overflow-y-auto pr-1">
                   {filteredProducts.map((product) => (
                     <motion.div
                       key={product.id}
@@ -284,7 +284,7 @@ export default function POS() {
             </div>
 
             {/* Cart */}
-            <Card className="h-fit sticky top-4">
+            <Card className="lg:col-span-2 h-fit lg:sticky top-4">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5" />

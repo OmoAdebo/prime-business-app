@@ -1360,6 +1360,53 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          business_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string | null
+          metadata: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          metadata?: Json | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          metadata?: Json | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
@@ -2705,6 +2752,19 @@ export type Database = {
       accept_invitation: {
         Args: { _token: string; _user_id: string }
         Returns: boolean
+      }
+      check_overdue_invoices: { Args: never; Returns: undefined }
+      create_notification: {
+        Args: {
+          _action_url?: string
+          _business_id?: string
+          _message?: string
+          _metadata?: Json
+          _title: string
+          _type?: string
+          _user_id: string
+        }
+        Returns: string
       }
       get_all_users_with_roles: {
         Args: never

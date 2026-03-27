@@ -284,7 +284,7 @@ export default function POS() {
             </div>
 
             {/* Cart */}
-            <Card className="h-fit sticky top-4">
+            <Card className="lg:col-span-2 h-fit lg:sticky top-4">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5" />

@@ -249,7 +249,7 @@ export default function POS() {
                   {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-24 sm:h-28 rounded-lg" />)}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto pr-1">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-h-[50vh] lg:max-h-[60vh] overflow-y-auto pr-1">
                   {filteredProducts.map((product) => (
                     <motion.div
                       key={product.id}

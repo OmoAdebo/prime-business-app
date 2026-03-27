@@ -797,9 +797,13 @@ export type Database = {
           address: string | null
           business_id: string
           created_at: string
+          email: string | null
           id: string
           is_active: boolean
+          manager_id: string | null
           name: string
+          operating_hours: string | null
+          phone: string | null
           type: string | null
           updated_at: string
         }
@@ -807,9 +811,13 @@ export type Database = {
           address?: string | null
           business_id: string
           created_at?: string
+          email?: string | null
           id?: string
           is_active?: boolean
+          manager_id?: string | null
           name: string
+          operating_hours?: string | null
+          phone?: string | null
           type?: string | null
           updated_at?: string
         }
@@ -817,9 +825,13 @@ export type Database = {
           address?: string | null
           business_id?: string
           created_at?: string
+          email?: string | null
           id?: string
           is_active?: boolean
+          manager_id?: string | null
           name?: string
+          operating_hours?: string | null
+          phone?: string | null
           type?: string | null
           updated_at?: string
         }
@@ -2472,6 +2484,58 @@ export type Database = {
             columns: ["storefront_id"]
             isOneToOne: false
             referencedRelation: "storefronts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_staff: {
+        Row: {
+          assigned_at: string
+          business_id: string
+          employee_id: string
+          id: string
+          is_active: boolean
+          location_id: string
+          role: string
+        }
+        Insert: {
+          assigned_at?: string
+          business_id: string
+          employee_id: string
+          id?: string
+          is_active?: boolean
+          location_id: string
+          role?: string
+        }
+        Update: {
+          assigned_at?: string
+          business_id?: string
+          employee_id?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_staff_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_staff_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees_hr"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_staff_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_locations"
             referencedColumns: ["id"]
           },
         ]

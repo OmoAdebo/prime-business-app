@@ -91,7 +91,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {kpiCards.map((kpi) => (
           <Card key={kpi.title} className="group hover:shadow-md transition-shadow">
-            <CardContent className="p-5">
+            <CardContent className="p-3 sm:p-5">
               <div className="flex items-center justify-between">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
                   <kpi.icon className="h-5 w-5 text-primary" />

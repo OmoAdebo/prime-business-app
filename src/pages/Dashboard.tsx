@@ -93,8 +93,8 @@ export default function Dashboard() {
           <Card key={kpi.title} className="group hover:shadow-md transition-shadow">
             <CardContent className="p-3 sm:p-5">
               <div className="flex items-center justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                  <kpi.icon className="h-5 w-5 text-primary" />
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <kpi.icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
                 {kpi.change !== "—" && (
                   <div className={`flex items-center gap-1 text-xs font-medium ${kpi.trend === "up" ? "text-success" : "text-destructive"}`}>

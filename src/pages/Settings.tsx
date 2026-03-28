@@ -143,10 +143,75 @@ function SecurityTab() {
   );
 }
 
+// ─── Nigerian States & LGAs ───
+const NIGERIAN_STATES_LGAS: Record<string, string[]> = {
+  "Abia": ["Aba North","Aba South","Arochukwu","Bende","Ikwuano","Isiala Ngwa North","Isiala Ngwa South","Isuikwuato","Obi Ngwa","Ohafia","Osisioma","Ugwunagbo","Ukwa East","Ukwa West","Umuahia North","Umuahia South","Umu Nneochi"],
+  "Adamawa": ["Demsa","Fufore","Ganye","Gayuk","Gombi","Grie","Hong","Jada","Lamurde","Madagali","Maiha","Mayo Belwa","Michika","Mubi North","Mubi South","Numan","Shelleng","Song","Toungo","Yola North","Yola South"],
+  "Akwa Ibom": ["Abak","Eastern Obolo","Eket","Esit Eket","Essien Udim","Etim Ekpo","Etinan","Ibeno","Ibesikpo Asutan","Ibiono-Ibom","Ika","Ikono","Ikot Abasi","Ikot Ekpene","Ini","Itu","Mbo","Mkpat-Enin","Nsit-Atai","Nsit-Ibom","Nsit-Ubium","Obot Akara","Okobo","Onna","Oron","Oruk Anam","Udung-Uko","Ukanafun","Uruan","Urue-Offong/Oruko","Uyo"],
+  "Anambra": ["Aguata","Anambra East","Anambra West","Anaocha","Awka North","Awka South","Ayamelum","Dunukofia","Ekwusigo","Idemili North","Idemili South","Ihiala","Njikoka","Nnewi North","Nnewi South","Ogbaru","Onitsha North","Onitsha South","Orumba North","Orumba South","Oyi"],
+  "Bauchi": ["Alkaleri","Bauchi","Bogoro","Damban","Darazo","Dass","Gamawa","Ganjuwa","Giade","Itas/Gadau","Jama'are","Katagum","Kirfi","Misau","Ningi","Shira","Tafawa Balewa","Toro","Warji","Zaki"],
+  "Bayelsa": ["Brass","Ekeremor","Kolokuma/Opokuma","Nembe","Ogbia","Sagbama","Southern Ijaw","Yenagoa"],
+  "Benue": ["Ado","Agatu","Apa","Buruku","Gboko","Guma","Gwer East","Gwer West","Katsina-Ala","Konshisha","Kwande","Logo","Makurdi","Obi","Ogbadibo","Ohimini","Oju","Okpokwu","Otukpo","Tarka","Ukum","Ushongo","Vandeikya"],
+  "Borno": ["Abadam","Askira/Uba","Bama","Bayo","Biu","Chibok","Damboa","Dikwa","Gubio","Guzamala","Gwoza","Hawul","Jere","Kaga","Kala/Balge","Konduga","Kukawa","Kwaya Kusar","Mafa","Magumeri","Maiduguri","Marte","Mobbar","Monguno","Ngala","Nganzai","Shani"],
+  "Cross River": ["Abi","Akamkpa","Akpabuyo","Bakassi","Bekwarra","Biase","Boki","Calabar Municipal","Calabar South","Etung","Ikom","Obanliku","Obubra","Obudu","Odukpani","Ogoja","Yakurr","Yala"],
+  "Delta": ["Aniocha North","Aniocha South","Bomadi","Burutu","Ethiope East","Ethiope West","Ika North East","Ika South","Isoko North","Isoko South","Ndokwa East","Ndokwa West","Okpe","Oshimili North","Oshimili South","Patani","Sapele","Udu","Ughelli North","Ughelli South","Ukwuani","Uvwie","Warri North","Warri South","Warri South West"],
+  "Ebonyi": ["Abakaliki","Afikpo North","Afikpo South","Ebonyi","Ezza North","Ezza South","Ikwo","Ishielu","Ivo","Izzi","Ohaozara","Ohaukwu","Onicha"],
+  "Edo": ["Akoko-Edo","Egor","Esan Central","Esan North-East","Esan South-East","Esan West","Etsako Central","Etsako East","Etsako West","Igueben","Ikpoba-Okha","Oredo","Orhionmwon","Ovia North-East","Ovia South-West","Owan East","Owan West","Uhunmwonde"],
+  "Ekiti": ["Ado Ekiti","Efon","Ekiti East","Ekiti South-West","Ekiti West","Emure","Gbonyin","Ido Osi","Ijero","Ikere","Ikole","Ilejemeje","Irepodun/Ifelodun","Ise/Orun","Moba","Oye"],
+  "Enugu": ["Aninri","Awgu","Enugu East","Enugu North","Enugu South","Ezeagu","Igbo Etiti","Igbo Eze North","Igbo Eze South","Isi Uzo","Nkanu East","Nkanu West","Nsukka","Oji River","Udenu","Udi","Uzo-Uwani"],
+  "FCT": ["Abaji","Bwari","Gwagwalada","Kuje","Kwali","Municipal Area Council"],
+  "Gombe": ["Akko","Balanga","Billiri","Dukku","Funakaye","Gombe","Kaltungo","Kwami","Nafada","Shongom","Yamaltu/Deba"],
+  "Imo": ["Aboh Mbaise","Ahiazu Mbaise","Ehime Mbano","Ezinihitte","Ideato North","Ideato South","Ihitte/Uboma","Ikeduru","Isiala Mbano","Isu","Mbaitoli","Ngor Okpala","Njaba","Nkwerre","Nwangele","Obowo","Oguta","Ohaji/Egbema","Okigwe","Onuimo","Orlu","Orsu","Oru East","Oru West","Owerri Municipal","Owerri North","Owerri West"],
+  "Jigawa": ["Auyo","Babura","Biriniwa","Birnin Kudu","Buji","Dutse","Gagarawa","Garki","Gumel","Guri","Gwaram","Gwiwa","Hadejia","Jahun","Kafin Hausa","Kaugama","Kazaure","Kiri Kasama","Kiyawa","Maigatari","Malam Madori","Miga","Ringim","Roni","Sule Tankarkar","Taura","Yankwashi"],
+  "Kaduna": ["Birnin Gwari","Chikun","Giwa","Igabi","Ikara","Jaba","Jema'a","Kachia","Kaduna North","Kaduna South","Kagarko","Kajuru","Kaura","Kauru","Kubau","Kudan","Lere","Makarfi","Sabon Gari","Sanga","Soba","Zangon Kataf","Zaria"],
+  "Kano": ["Ajingi","Albasu","Bagwai","Bebeji","Bichi","Bunkure","Dala","Dambatta","Dawakin Kudu","Dawakin Tofa","Doguwa","Fagge","Gabasawa","Garko","Garun Mallam","Gaya","Gezawa","Gwale","Gwarzo","Kabo","Kano Municipal","Karaye","Kibiya","Kiru","Kumbotso","Kunchi","Kura","Madobi","Makoda","Minjibir","Nasarawa","Rano","Rimin Gado","Rogo","Shanono","Sumaila","Takai","Tarauni","Tofa","Tsanyawa","Tudun Wada","Ungogo","Warawa","Wudil"],
+  "Katsina": ["Bakori","Batagarawa","Batsari","Baure","Bindawa","Charanchi","Dandume","Danja","Dan Musa","Daura","Dutsi","Dutsin Ma","Faskari","Funtua","Ingawa","Jibia","Kafur","Kaita","Kankara","Kankia","Katsina","Kurfi","Kusada","Mai'Adua","Malumfashi","Mani","Mashi","Matazu","Musawa","Rimi","Sabuwa","Safana","Sandamu","Zango"],
+  "Kebbi": ["Aleiro","Arewa Dandi","Argungu","Augie","Bagudo","Birnin Kebbi","Bunza","Dandi","Fakai","Gwandu","Jega","Kalgo","Koko/Besse","Maiyama","Ngaski","Sakaba","Shanga","Suru","Wasagu/Danko","Yauri","Zuru"],
+  "Kogi": ["Adavi","Ajaokuta","Ankpa","Bassa","Dekina","Ibaji","Idah","Igalamela Odolu","Ijumu","Kabba/Bunu","Kogi","Lokoja","Mopa Muro","Ofu","Ogori/Magongo","Okehi","Okene","Olamaboro","Omala","Yagba East","Yagba West"],
+  "Kwara": ["Asa","Baruten","Edu","Ekiti","Ifelodun","Ilorin East","Ilorin South","Ilorin West","Irepodun","Isin","Kaiama","Moro","Offa","Oke Ero","Oyun","Pategi"],
+  "Lagos": ["Agege","Ajeromi-Ifelodun","Alimosho","Amuwo-Odofin","Apapa","Badagry","Epe","Eti Osa","Ibeju-Lekki","Ifako-Ijaiye","Ikeja","Ikorodu","Kosofe","Lagos Island","Lagos Mainland","Mushin","Ojo","Oshodi-Isolo","Shomolu","Surulere"],
+  "Nasarawa": ["Akwanga","Awe","Doma","Karu","Keana","Keffi","Kokona","Lafia","Nasarawa","Nasarawa Egon","Obi","Toto","Wamba"],
+  "Niger": ["Agaie","Agwara","Bida","Borgu","Bosso","Chanchaga","Edati","Gbako","Gurara","Katcha","Kontagora","Lapai","Lavun","Magama","Mariga","Mashegu","Mokwa","Munya","Paikoro","Rafi","Rijau","Shiroro","Suleja","Tafa","Wushishi"],
+  "Ogun": ["Abeokuta North","Abeokuta South","Ado-Odo/Ota","Egbado North","Egbado South","Ewekoro","Ifo","Ijebu East","Ijebu North","Ijebu North East","Ijebu Ode","Ikenne","Imeko Afon","Ipokia","Obafemi Owode","Odeda","Odogbolu","Ogun Waterside","Remo North","Sagamu","Shagamu"],
+  "Ondo": ["Akoko North-East","Akoko North-West","Akoko South-East","Akoko South-West","Akure North","Akure South","Ese Odo","Idanre","Ifedore","Ilaje","Ile Oluji/Okeigbo","Irele","Odigbo","Okitipupa","Ondo East","Ondo West","Ose","Owo"],
+  "Osun": ["Aiyedaade","Aiyedire","Atakunmosa East","Atakunmosa West","Boluwaduro","Boripe","Ede North","Ede South","Egbedore","Ejigbo","Ife Central","Ife East","Ife North","Ife South","Ifedayo","Ifelodun","Ila","Ilesa East","Ilesa West","Irepodun","Irewole","Isokan","Iwo","Obokun","Odo Otin","Ola Oluwa","Olorunda","Oriade","Orolu","Osogbo"],
+  "Oyo": ["Afijio","Akinyele","Atiba","Atisbo","Egbeda","Ibadan North","Ibadan North-East","Ibadan North-West","Ibadan South-East","Ibadan South-West","Ibarapa Central","Ibarapa East","Ibarapa North","Ido","Irepo","Iseyin","Itesiwaju","Iwajowa","Kajola","Lagelu","Ogbomosho North","Ogbomosho South","Ogo Oluwa","Oluyole","Ona Ara","Orelope","Ori Ire","Oyo East","Oyo West","Saki East","Saki West","Surulere"],
+  "Plateau": ["Barkin Ladi","Bassa","Bokkos","Jos East","Jos North","Jos South","Kanam","Kanke","Langtang North","Langtang South","Mangu","Mikang","Pankshin","Qua'an Pan","Riyom","Shendam","Wase"],
+  "Rivers": ["Abua/Odual","Ahoada East","Ahoada West","Akuku-Toru","Andoni","Asari-Toru","Bonny","Degema","Eleme","Emohua","Etche","Gokana","Ikwerre","Khana","Obio/Akpor","Ogba/Egbema/Ndoni","Ogu/Bolo","Okrika","Omuma","Opobo/Nkoro","Oyigbo","Port Harcourt","Tai"],
+  "Sokoto": ["Binji","Bodinga","Dange Shuni","Gada","Goronyo","Gudu","Gwadabawa","Illela","Isa","Kebbe","Kware","Rabah","Sabon Birni","Shagari","Silame","Sokoto North","Sokoto South","Tambuwal","Tangaza","Tureta","Wamako","Wurno","Yabo"],
+  "Taraba": ["Ardo Kola","Bali","Donga","Gashaka","Gassol","Ibi","Jalingo","Karim Lamido","Kurmi","Lau","Sardauna","Takum","Ussa","Wukari","Yorro","Zing"],
+  "Yobe": ["Bade","Bursari","Damaturu","Fika","Fune","Geidam","Gujba","Gulani","Jakusko","Karasuwa","Machina","Nangere","Nguru","Potiskum","Tarmuwa","Yunusari","Yusufari"],
+  "Zamfara": ["Anka","Bakura","Birnin Magaji/Kiyaw","Bukkuyum","Bungudu","Gummi","Gusau","Kaura Namoda","Maradun","Maru","Shinkafi","Talata Mafara","Tsafe","Zurmi"],
+};
+
+const NIGERIAN_STATES = Object.keys(NIGERIAN_STATES_LGAS).sort();
+
+const INDUSTRIES = [
+  "Agriculture", "Construction", "Education", "Finance", "Healthcare",
+  "Hospitality", "Logistics", "Manufacturing", "Oil & Gas", "Retail",
+  "Technology", "Other",
+];
+
+// ─── Validation helpers ───
+const VALIDATION = {
+  cac: { regex: /^RC\d{5,7}$/i, message: "Must be RC followed by 5–7 digits (e.g. RC1234567)" },
+  tin: { regex: /^\d{10}$/, message: "Must be exactly 10 digits" },
+  address: { minLength: 10, message: "Must be at least 10 characters" },
+};
+
+function getFieldErrors(form: { cac_number: string; tin_number: string; business_address: string; state: string; lga: string; industry: string }) {
+  const errors: Record<string, string> = {};
+  if (form.cac_number && !VALIDATION.cac.regex.test(form.cac_number)) errors.cac_number = VALIDATION.cac.message;
+  if (form.tin_number && !VALIDATION.tin.regex.test(form.tin_number)) errors.tin_number = VALIDATION.tin.message;
+  if (form.business_address && form.business_address.length < VALIDATION.address.minLength) errors.business_address = VALIDATION.address.message;
+  return errors;
+}
+
 // ─── Business Verification Tab ───
 function BusinessVerificationTab() {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [form, setForm] = useState({
     cac_number: "",
     tin_number: "",
@@ -183,20 +248,29 @@ function BusinessVerificationTab() {
     }
   }, [business]);
 
+  const errors = getFieldErrors(form);
+  const hasErrors = Object.keys(errors).length > 0;
+
+  const lgas = form.state ? (NIGERIAN_STATES_LGAS[form.state] || []) : [];
+
+  const handleFieldChange = (field: string, value: string) => {
+    setTouched((t) => ({ ...t, [field]: true }));
+    if (field === "state") {
+      setForm((f) => ({ ...f, state: value, lga: "" }));
+    } else {
+      setForm((f) => ({ ...f, [field]: value }));
+    }
+  };
+
   const handleSave = async () => {
-    if (!user) return;
+    if (!user || hasErrors) return;
     setSaving(true);
     if (business) {
-      const { error } = await supabase
-        .from("businesses")
-        .update({ ...form })
-        .eq("id", business.id);
+      const { error } = await supabase.from("businesses").update({ ...form }).eq("id", business.id);
       if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
       else toast({ title: "Business updated" });
     } else {
-      const { error } = await supabase
-        .from("businesses")
-        .insert({ owner_id: user.id, company_name: form.cac_number ? "My Business" : "My Business", ...form });
+      const { error } = await supabase.from("businesses").insert({ owner_id: user.id, company_name: "My Business", ...form });
       if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
       else toast({ title: "Business profile created" });
     }
@@ -206,9 +280,7 @@ function BusinessVerificationTab() {
   const handleFileUpload = async (field: "cac_document_url" | "utility_bill_url", file: File) => {
     if (!user || !business) return;
     const path = `${user.id}/${field}_${Date.now()}_${file.name}`;
-    const { error: uploadError } = await supabase.storage
-      .from("business-documents")
-      .upload(path, file);
+    const { error: uploadError } = await supabase.storage.from("business-documents").upload(path, file);
     if (uploadError) {
       toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
       return;
@@ -222,6 +294,11 @@ function BusinessVerificationTab() {
     if (s === "approved") return "text-primary";
     if (s === "rejected") return "text-destructive";
     return "text-warning";
+  };
+
+  const FieldError = ({ field }: { field: string }) => {
+    if (!touched[field] || !errors[field]) return null;
+    return <p className="text-xs text-destructive mt-1">{errors[field]}</p>;
   };
 
   if (isLoading) return <div className="py-8 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></div>;
@@ -246,29 +323,89 @@ function BusinessVerificationTab() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* CAC Registration Number */}
           <div className="space-y-2">
             <Label>CAC Registration Number</Label>
-            <Input value={form.cac_number} onChange={(e) => setForm((f) => ({ ...f, cac_number: e.target.value }))} placeholder="RC123456" />
+            <Input
+              value={form.cac_number}
+              onChange={(e) => handleFieldChange("cac_number", e.target.value.toUpperCase())}
+              onBlur={() => setTouched((t) => ({ ...t, cac_number: true }))}
+              placeholder="RC1234567"
+              maxLength={9}
+              className={touched.cac_number && errors.cac_number ? "border-destructive" : ""}
+            />
+            <p className="text-xs text-muted-foreground">Format: RC followed by 5–7 digits</p>
+            <FieldError field="cac_number" />
           </div>
+
+          {/* TIN Number */}
           <div className="space-y-2">
             <Label>TIN Number</Label>
-            <Input value={form.tin_number} onChange={(e) => setForm((f) => ({ ...f, tin_number: e.target.value }))} placeholder="Tax Identification Number" />
+            <Input
+              value={form.tin_number}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                handleFieldChange("tin_number", val);
+              }}
+              onBlur={() => setTouched((t) => ({ ...t, tin_number: true }))}
+              placeholder="1234567890"
+              maxLength={10}
+              className={touched.tin_number && errors.tin_number ? "border-destructive" : ""}
+            />
+            <p className="text-xs text-muted-foreground">Exactly 10 digits</p>
+            <FieldError field="tin_number" />
           </div>
-          <div className="space-y-2">
+
+          {/* Business Address */}
+          <div className="space-y-2 md:col-span-2">
             <Label>Business Address</Label>
-            <Input value={form.business_address} onChange={(e) => setForm((f) => ({ ...f, business_address: e.target.value }))} placeholder="Full business address" />
+            <Input
+              value={form.business_address}
+              onChange={(e) => handleFieldChange("business_address", e.target.value)}
+              onBlur={() => setTouched((t) => ({ ...t, business_address: true }))}
+              placeholder="Full business address (min. 10 characters)"
+              className={touched.business_address && errors.business_address ? "border-destructive" : ""}
+            />
+            <FieldError field="business_address" />
           </div>
+
+          {/* State */}
           <div className="space-y-2">
             <Label>State</Label>
-            <Input value={form.state} onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))} placeholder="e.g. Lagos" />
+            <Select value={form.state} onValueChange={(v) => handleFieldChange("state", v)}>
+              <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
+              <SelectContent>
+                {NIGERIAN_STATES.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* LGA */}
           <div className="space-y-2">
             <Label>LGA</Label>
-            <Input value={form.lga} onChange={(e) => setForm((f) => ({ ...f, lga: e.target.value }))} placeholder="Local Government Area" />
+            <Select value={form.lga} onValueChange={(v) => handleFieldChange("lga", v)} disabled={!form.state}>
+              <SelectTrigger><SelectValue placeholder={form.state ? "Select LGA" : "Select a state first"} /></SelectTrigger>
+              <SelectContent>
+                {lgas.map((l) => (
+                  <SelectItem key={l} value={l}>{l}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* Industry */}
           <div className="space-y-2">
             <Label>Industry / Sector</Label>
-            <Input value={form.industry} onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value }))} placeholder="e.g. Retail, Technology" />
+            <Select value={form.industry} onValueChange={(v) => handleFieldChange("industry", v)}>
+              <SelectTrigger><SelectValue placeholder="Select industry" /></SelectTrigger>
+              <SelectContent>
+                {INDUSTRIES.map((i) => (
+                  <SelectItem key={i} value={i}>{i}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -294,10 +431,13 @@ function BusinessVerificationTab() {
         )}
 
         <Separator />
-        <Button onClick={handleSave} disabled={saving}>
+        <Button onClick={handleSave} disabled={saving || hasErrors}>
           {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
           {business ? "Update Business Profile" : "Create Business Profile"}
         </Button>
+        {hasErrors && Object.keys(touched).length > 0 && (
+          <p className="text-xs text-destructive">Please fix the validation errors above before saving.</p>
+        )}
       </CardContent>
     </Card>
   );

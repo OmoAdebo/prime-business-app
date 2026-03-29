@@ -108,5 +108,6 @@ export function AppLayout() {
         </div>
       </div>
     </SidebarProvider>
+    </BrandingProvider>
   );
 }

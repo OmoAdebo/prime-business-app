@@ -92,56 +92,212 @@ function ProfileTab() {
   );
 }
 
+// ─── Password Strength Helper ───
+function getPasswordStrength(pw: string) {
+  const criteria = [
+    { label: "At least 8 characters", met: pw.length >= 8 },
+    { label: "Uppercase letter", met: /[A-Z]/.test(pw) },
+    { label: "Lowercase letter", met: /[a-z]/.test(pw) },
+    { label: "Number", met: /\d/.test(pw) },
+    { label: "Special character (!@#$...)", met: /[^A-Za-z0-9]/.test(pw) },
+  ];
+  const score = criteria.filter((c) => c.met).length;
+  let level: string, color: string, percent: number;
+  if (score <= 1) { level = "Weak"; color = "bg-destructive"; percent = 20; }
+  else if (score <= 2) { level = "Weak"; color = "bg-destructive"; percent = 40; }
+  else if (score <= 3) { level = "Fair"; color = "bg-yellow-500"; percent = 60; }
+  else if (score <= 4) { level = "Strong"; color = "bg-green-500"; percent = 80; }
+  else { level = "Very Strong"; color = "bg-green-600"; percent = 100; }
+  return { criteria, score, level, color, percent, allMet: score === 5 };
+}
+
 // ─── Security Tab ───
 function SecurityTab() {
+  const { session } = useAuth();
   const [saving, setSaving] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const strength = getPasswordStrength(password);
+  const passwordsMatch = password === confirmPassword;
+  const canSubmit = strength.allMet && passwordsMatch && confirmPassword.length > 0;
 
   const handleChangePassword = async () => {
-    if (password.length < 6) {
-      toast({ title: "Error", description: "Password must be at least 6 characters.", variant: "destructive" });
-      return;
-    }
-    if (password !== confirmPassword) {
-      toast({ title: "Error", description: "Passwords do not match.", variant: "destructive" });
-      return;
-    }
+    if (!canSubmit) return;
     setSaving(true);
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Password updated", description: "Your password has been changed." });
+      toast({ title: "Password updated", description: "Your password has been changed successfully." });
+      setCurrentPassword("");
       setPassword("");
       setConfirmPassword("");
     }
     setSaving(false);
   };
 
+  const lastSignIn = session?.user?.last_sign_in_at;
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Shield className="h-5 w-5 text-primary" /> Security
-        </CardTitle>
-        <CardDescription>Change your password to keep your account secure.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4 max-w-md">
-        <div className="space-y-2">
-          <Label htmlFor="new-password">New Password</Label>
-          <Input id="new-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter new password" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="confirm-password">Confirm Password</Label>
-          <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" />
-        </div>
-        <Button onClick={handleChangePassword} disabled={saving}>
-          {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-          Update Password
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      {/* Change Password Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" /> Change Password
+          </CardTitle>
+          <CardDescription>Use a strong password to protect your account.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5 max-w-md">
+          {/* Current Password */}
+          <div className="space-y-2">
+            <Label htmlFor="current-password">Current Password</Label>
+            <div className="relative">
+              <Input
+                id="current-password"
+                type={showCurrent ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrent(!showCurrent)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+
+          {/* New Password */}
+          <div className="space-y-2">
+            <Label htmlFor="new-password">New Password</Label>
+            <div className="relative">
+              <Input
+                id="new-password"
+                type={showNew ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter new password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNew(!showNew)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+
+            {/* Strength Meter */}
+            {password.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Password strength</span>
+                  <span className={`font-medium ${strength.percent >= 80 ? "text-green-600" : strength.percent >= 60 ? "text-yellow-600" : "text-destructive"}`}>
+                    {strength.level}
+                  </span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${strength.color}`}
+                    style={{ width: `${strength.percent}%` }}
+                  />
+                </div>
+                <ul className="grid grid-cols-1 gap-1 pt-1">
+                  {strength.criteria.map((c) => (
+                    <li key={c.label} className="flex items-center gap-2 text-xs">
+                      {c.met ? (
+                        <Check className="h-3.5 w-3.5 text-green-600" />
+                      ) : (
+                        <X className="h-3.5 w-3.5 text-muted-foreground" />
+                      )}
+                      <span className={c.met ? "text-foreground" : "text-muted-foreground"}>{c.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Confirm Password */}
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <div className="relative">
+              <Input
+                id="confirm-password"
+                type={showConfirm ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {confirmPassword.length > 0 && !passwordsMatch && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <X className="h-3 w-3" /> Passwords do not match
+              </p>
+            )}
+            {confirmPassword.length > 0 && passwordsMatch && (
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <Check className="h-3 w-3" /> Passwords match
+              </p>
+            )}
+          </div>
+
+          <Button onClick={handleChangePassword} disabled={saving || !canSubmit}>
+            {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            Update Password
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Session & Security Info Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Monitor className="h-5 w-5 text-primary" /> Session & Security
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 max-w-lg">
+          {lastSignIn && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Last sign-in</span>
+              <span className="font-medium">{new Date(lastSignIn).toLocaleString()}</span>
+            </div>
+          )}
+          <Separator />
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Current session</span>
+            <Badge variant="secondary" className="gap-1">
+              <CheckCircle className="h-3 w-3 text-green-600" /> Active
+            </Badge>
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <ShieldCheck className="h-4 w-4" /> Two-factor authentication
+            </div>
+            <Badge variant="outline">Coming Soon</Badge>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

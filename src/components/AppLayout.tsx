@@ -1,5 +1,6 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { BrandingProvider } from "@/contexts/BrandingContext";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Search, Settings, LogOut, ChevronDown, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -601,17 +601,24 @@ function BusinessVerificationTab() {
   );
 }
 
+// ─── Font Options ───
+const FONT_OPTIONS = ['DM Sans', 'Inter', 'Poppins', 'Nunito', 'Roboto'];
+
+const BRAND_DEFAULTS = {
+  brand_name: "",
+  primary_color: "#22c55e",
+  secondary_color: "#f59e0b",
+  accent_color: "#f59e0b",
+  font_family: "DM Sans",
+  email_format: "first.last@domain",
+};
+
 // ─── Branding Tab ───
 function BrandingTab() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    brand_name: "",
-    primary_color: "#22c55e",
-    secondary_color: "#f59e0b",
-    email_format: "first.last@domain",
-  });
+  const [form, setForm] = useState({ ...BRAND_DEFAULTS });
 
   const { data: business } = useQuery({
     queryKey: ["my-business"],
@@ -638,6 +645,8 @@ function BrandingTab() {
         brand_name: settings.brand_name || "",
         primary_color: settings.primary_color || "#22c55e",
         secondary_color: settings.secondary_color || "#f59e0b",
+        accent_color: (settings as any).accent_color || settings.secondary_color || "#f59e0b",
+        font_family: (settings as any).font_family || "DM Sans",
         email_format: settings.email_format || "first.last@domain",
       });
     }
@@ -649,17 +658,31 @@ function BrandingTab() {
       return;
     }
     setSaving(true);
+    const payload = {
+      brand_name: form.brand_name,
+      primary_color: form.primary_color,
+      secondary_color: form.secondary_color,
+      accent_color: form.accent_color,
+      font_family: form.font_family,
+      email_format: form.email_format,
+    };
     if (settings) {
-      const { error } = await supabase.from("business_settings").update(form).eq("id", settings.id);
+      const { error } = await supabase.from("business_settings").update(payload).eq("id", settings.id);
       if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-      else toast({ title: "Branding saved" });
+      else toast({ title: "Branding saved", description: "Your theme will apply across all dashboards." });
     } else {
-      const { error } = await supabase.from("business_settings").insert({ business_id: business.id, ...form });
+      const { error } = await supabase.from("business_settings").insert({ business_id: business.id, ...payload });
       if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-      else toast({ title: "Branding saved" });
+      else toast({ title: "Branding saved", description: "Your theme will apply across all dashboards." });
     }
     queryClient.invalidateQueries({ queryKey: ["my-business-settings"] });
     setSaving(false);
+    // Reload to apply branding
+    setTimeout(() => window.location.reload(), 500);
+  };
+
+  const handleReset = () => {
+    setForm({ ...BRAND_DEFAULTS });
   };
 
   const handleLogoUpload = async (file: File) => {
@@ -677,67 +700,142 @@ function BrandingTab() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Palette className="h-5 w-5 text-primary" /> Branding & Preferences
-        </CardTitle>
-        <CardDescription>Customise your business brand and team email format.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Brand Name</Label>
-            <Input value={form.brand_name} onChange={(e) => setForm((f) => ({ ...f, brand_name: e.target.value }))} placeholder="Your brand display name" />
-          </div>
-          <div className="space-y-2">
-            <Label>Logo</Label>
-            <Input type="file" accept=".png,.jpg,.jpeg,.svg" onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleLogoUpload(f);
-            }} />
-            {settings?.logo_url && <p className="text-xs text-primary">✓ Logo uploaded</p>}
-          </div>
-          <div className="space-y-2">
-            <Label>Primary Color</Label>
-            <div className="flex items-center gap-2">
-              <Input type="color" value={form.primary_color} onChange={(e) => setForm((f) => ({ ...f, primary_color: e.target.value }))} className="w-14 h-10 p-1" />
-              <Input value={form.primary_color} onChange={(e) => setForm((f) => ({ ...f, primary_color: e.target.value }))} className="flex-1" />
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Palette className="h-5 w-5 text-primary" /> Branding & Theme
+          </CardTitle>
+          <CardDescription>Customise your brand identity. Changes apply to your dashboard and your team's dashboards.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Brand Name</Label>
+              <Input value={form.brand_name} onChange={(e) => setForm((f) => ({ ...f, brand_name: e.target.value }))} placeholder="Your brand display name" />
+            </div>
+            <div className="space-y-2">
+              <Label>Logo</Label>
+              <Input type="file" accept=".png,.jpg,.jpeg,.svg" onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleLogoUpload(f);
+              }} />
+              {settings?.logo_url && <p className="text-xs text-primary">✓ Logo uploaded</p>}
             </div>
           </div>
-          <div className="space-y-2">
-            <Label>Secondary Color</Label>
-            <div className="flex items-center gap-2">
-              <Input type="color" value={form.secondary_color} onChange={(e) => setForm((f) => ({ ...f, secondary_color: e.target.value }))} className="w-14 h-10 p-1" />
-              <Input value={form.secondary_color} onChange={(e) => setForm((f) => ({ ...f, secondary_color: e.target.value }))} className="flex-1" />
+
+          <Separator />
+
+          {/* Colors */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Primary Color</Label>
+              <div className="flex items-center gap-2">
+                <Input type="color" value={form.primary_color} onChange={(e) => setForm((f) => ({ ...f, primary_color: e.target.value }))} className="w-14 h-10 p-1 cursor-pointer" />
+                <Input value={form.primary_color} onChange={(e) => setForm((f) => ({ ...f, primary_color: e.target.value }))} className="flex-1 font-mono text-xs" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Secondary Color</Label>
+              <div className="flex items-center gap-2">
+                <Input type="color" value={form.secondary_color} onChange={(e) => setForm((f) => ({ ...f, secondary_color: e.target.value }))} className="w-14 h-10 p-1 cursor-pointer" />
+                <Input value={form.secondary_color} onChange={(e) => setForm((f) => ({ ...f, secondary_color: e.target.value }))} className="flex-1 font-mono text-xs" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Accent Color</Label>
+              <div className="flex items-center gap-2">
+                <Input type="color" value={form.accent_color} onChange={(e) => setForm((f) => ({ ...f, accent_color: e.target.value }))} className="w-14 h-10 p-1 cursor-pointer" />
+                <Input value={form.accent_color} onChange={(e) => setForm((f) => ({ ...f, accent_color: e.target.value }))} className="flex-1 font-mono text-xs" />
+              </div>
             </div>
           </div>
-        </div>
 
-        <Separator />
+          <Separator />
 
-        <div className="space-y-2">
-          <Label>Team Email Format</Label>
-          <Select value={form.email_format} onValueChange={(v) => setForm((f) => ({ ...f, email_format: v }))}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="first.last@domain">first.last@domain</SelectItem>
-              <SelectItem value="first_last@domain">first_last@domain</SelectItem>
-              <SelectItem value="first.last@role.domain">first.last@role.domain</SelectItem>
-              <SelectItem value="first@domain">first@domain</SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">Email subdomain setup will be available in a future update.</p>
-        </div>
+          {/* Font */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Font Family</Label>
+              <Select value={form.font_family} onValueChange={(v) => setForm((f) => ({ ...f, font_family: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FONT_OPTIONS.map((font) => (
+                    <SelectItem key={font} value={font}>
+                      <span style={{ fontFamily: `'${font}', sans-serif` }}>{font}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Team Email Format</Label>
+              <Select value={form.email_format} onValueChange={(v) => setForm((f) => ({ ...f, email_format: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="first.last@domain">first.last@domain</SelectItem>
+                  <SelectItem value="first_last@domain">first_last@domain</SelectItem>
+                  <SelectItem value="first.last@role.domain">first.last@role.domain</SelectItem>
+                  <SelectItem value="first@domain">first@domain</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Email subdomain setup will be available in a future update.</p>
+            </div>
+          </div>
 
-        <Button onClick={handleSave} disabled={saving}>
-          {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-          Save Branding
-        </Button>
-      </CardContent>
-    </Card>
+          <Separator />
+
+          {/* Live Preview */}
+          <div className="space-y-2">
+            <Label>Live Preview</Label>
+            <div
+              className="rounded-lg border p-4 space-y-3"
+              style={{ fontFamily: `'${form.font_family}', sans-serif` }}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="h-9 w-9 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                  style={{ backgroundColor: form.primary_color }}
+                >
+                  {form.brand_name?.charAt(0)?.toUpperCase() || "P"}
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">{form.brand_name || "Your Brand"}</p>
+                  <p className="text-xs text-muted-foreground">Business Suite</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <div className="h-8 px-4 rounded-md flex items-center justify-center text-white text-xs font-medium" style={{ backgroundColor: form.primary_color }}>
+                  Primary Button
+                </div>
+                <div className="h-8 px-4 rounded-md flex items-center justify-center text-white text-xs font-medium" style={{ backgroundColor: form.secondary_color }}>
+                  Secondary
+                </div>
+                <div className="h-8 px-4 rounded-md flex items-center justify-center text-white text-xs font-medium" style={{ backgroundColor: form.accent_color }}>
+                  Accent
+                </div>
+              </div>
+              <p className="text-sm">This is how your dashboard text will appear with <strong>{form.font_family}</strong>.</p>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <Button onClick={handleSave} disabled={saving}>
+              {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Save Branding
+            </Button>
+            <Button variant="outline" onClick={handleReset}>
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset to Default
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

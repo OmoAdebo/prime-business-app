@@ -12,7 +12,9 @@ import { toast } from "@/hooks/use-toast";
 import {
   User, Shield, Users, Mail, Phone, Building2, Loader2, UserPlus,
   Clock, CheckCircle, XCircle, Send, FileText, Palette, Upload,
+  Eye, EyeOff, Check, X, Monitor, Smartphone, ShieldCheck,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

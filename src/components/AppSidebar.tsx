@@ -22,6 +22,7 @@ import {
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBranding } from "@/contexts/BrandingContext";
 import { AppRole } from "@/contexts/AuthContext";
 import {
   Sidebar,
@@ -123,6 +124,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { signOut, profile, roles } = useAuth();
+  const branding = useBranding();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -136,12 +138,16 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-            P
-          </div>
+          {branding.logoUrl ? (
+            <img src={branding.logoUrl} alt={branding.brandName} className="h-9 w-9 shrink-0 rounded-lg object-cover" />
+          ) : (
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
+              {branding.brandName.charAt(0).toUpperCase()}
+            </div>
+          )}
           {!collapsed && (
             <div>
-              <h2 className="text-sm font-semibold text-sidebar-foreground font-display">Prime</h2>
+              <h2 className="text-sm font-semibold text-sidebar-foreground font-display">{branding.brandName}</h2>
               <p className="text-xs text-sidebar-foreground/50">
                 {profile?.company_name || 'Business Suite'}
               </p>

@@ -363,36 +363,45 @@ export type Database = {
       }
       business_settings: {
         Row: {
+          accent_color: string | null
           brand_name: string | null
           business_id: string
           created_at: string
           email_format: string | null
+          font_family: string | null
           id: string
           logo_url: string | null
           primary_color: string | null
           secondary_color: string | null
+          sidebar_style: string | null
           updated_at: string
         }
         Insert: {
+          accent_color?: string | null
           brand_name?: string | null
           business_id: string
           created_at?: string
           email_format?: string | null
+          font_family?: string | null
           id?: string
           logo_url?: string | null
           primary_color?: string | null
           secondary_color?: string | null
+          sidebar_style?: string | null
           updated_at?: string
         }
         Update: {
+          accent_color?: string | null
           brand_name?: string | null
           business_id?: string
           created_at?: string
           email_format?: string | null
+          font_family?: string | null
           id?: string
           logo_url?: string | null
           primary_color?: string | null
           secondary_color?: string | null
+          sidebar_style?: string | null
           updated_at?: string
         }
         Relationships: [

@@ -97,12 +97,25 @@ export function PublicNavbar() {
                 </Link>
               ))}
               <div className="pt-3 flex flex-col gap-2">
-                <Button variant="outline" asChild className="w-full">
-                  <Link to="/login">Log In</Link>
-                </Button>
-                <Button asChild className="w-full">
-                  <Link to="/signup">Get Started</Link>
-                </Button>
+                {user ? (
+                  <>
+                    <Button variant="outline" asChild className="w-full" onClick={() => setMobileOpen(false)}>
+                      <Link to="/dashboard"><LayoutDashboard className="h-4 w-4 mr-2" />Dashboard</Link>
+                    </Button>
+                    <Button className="w-full" onClick={() => { setMobileOpen(false); handleSignOut(); }}>
+                      <LogOut className="h-4 w-4 mr-2" />Log Out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" asChild className="w-full">
+                      <Link to="/login">Log In</Link>
+                    </Button>
+                    <Button asChild className="w-full">
+                      <Link to="/signup">Get Started</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

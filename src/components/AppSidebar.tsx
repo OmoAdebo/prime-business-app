@@ -44,20 +44,21 @@ interface NavItem {
   url: string;
   icon: React.ElementType;
   allowedRoles: AppRole[];
+  hasSubRoutes?: boolean;
 }
 
 const allRoles: AppRole[] = ['super_admin', 'business_owner', 'store_manager', 'accountant', 'employee', 'individual'];
 
 const mainItems: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, allowedRoles: allRoles },
-  { title: "Banking", url: "/banking", icon: Landmark, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },
-  { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },
+  { title: "Banking", url: "/banking", icon: Landmark, allowedRoles: ['super_admin', 'business_owner', 'accountant'], hasSubRoutes: true },
+  { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, allowedRoles: ['super_admin', 'business_owner', 'accountant'], hasSubRoutes: true },
   { title: "Invoicing", url: "/invoicing", icon: FileText, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
 ];
 
 const operationsItems: NavItem[] = [
   { title: "POS", url: "/pos", icon: ShoppingCart, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'employee'] },
-  { title: "Inventory", url: "/inventory", icon: Package, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'employee'] },
+  { title: "Inventory", url: "/inventory", icon: Package, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'employee'], hasSubRoutes: true },
   { title: "Customers", url: "/customers", icon: UserCheck, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
   { title: "Payroll & HR", url: "/payroll", icon: Users, allowedRoles: ['super_admin', 'business_owner', 'employee'] },
   { title: "Debt & Credit", url: "/debt-credit", icon: CreditCard, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },
@@ -104,7 +105,7 @@ function NavGroup({ label, items, collapsed, userRoles }: NavGroupProps) {
               <SidebarMenuButton asChild>
                 <NavLink
                   to={item.url}
-                  end
+                  end={!item.hasSubRoutes}
                   className="flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground/70 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                 >

@@ -57,6 +57,10 @@ export function AppLayout() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground">
+                <Home className="h-4 w-4 mr-1.5" />
+                <span className="hidden sm:inline">Home</span>
+              </Button>
               <NotificationBell />
 
               <DropdownMenu>

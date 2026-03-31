@@ -2,7 +2,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { BrandingProvider } from "@/contexts/BrandingContext";
 import { Outlet, useNavigate } from "react-router-dom";
-import { Search, Settings, LogOut, ChevronDown, Menu } from "lucide-react";
+import { Search, Settings, LogOut, ChevronDown, Menu, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -57,6 +57,10 @@ export function AppLayout() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground">
+                <Home className="h-4 w-4 mr-1.5" />
+                <span className="hidden sm:inline">Home</span>
+              </Button>
               <NotificationBell />
 
               <DropdownMenu>

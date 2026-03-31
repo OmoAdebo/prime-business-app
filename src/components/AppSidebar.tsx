@@ -58,7 +58,7 @@ const mainItems: NavItem[] = [
 
 const operationsItems: NavItem[] = [
   { title: "POS", url: "/pos", icon: ShoppingCart, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'employee'] },
-  { title: "Inventory", url: "/inventory", icon: Package, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'employee'] },
+  { title: "Inventory", url: "/inventory", icon: Package, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'employee'], hasSubRoutes: true },
   { title: "Customers", url: "/customers", icon: UserCheck, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
   { title: "Payroll & HR", url: "/payroll", icon: Users, allowedRoles: ['super_admin', 'business_owner', 'employee'] },
   { title: "Debt & Credit", url: "/debt-credit", icon: CreditCard, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },

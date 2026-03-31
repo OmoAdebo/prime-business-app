@@ -60,10 +60,39 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<RoleDashboard />} />
-              <Route path="/banking" element={<Banking />} />
-              <Route path="/bookkeeping" element={<Bookkeeping />} />
+              <Route path="/banking" element={<BankingLayout />}>
+                <Route index element={<Banking />} />
+                <Route path="accounts" element={<PlaceholderSubPage title="Accounts" description="Manage your bank accounts, wallets, and sub-accounts." />} />
+                <Route path="transactions" element={<PlaceholderSubPage title="Transactions" description="View and manage all banking transactions." />} />
+                <Route path="transfers" element={<PlaceholderSubPage title="Transfers" description="Transfer funds between accounts." />} />
+                <Route path="analytics" element={<PlaceholderSubPage title="Analytics" description="Banking analytics and insights." />} />
+                <Route path="scheduled" element={<PlaceholderSubPage title="Scheduled Payments" description="Manage recurring and scheduled payments." />} />
+                <Route path="beneficiaries" element={<PlaceholderSubPage title="Beneficiaries" description="Manage saved payees for quick transfers." />} />
+                <Route path="admin" element={<PlaceholderSubPage title="Admin" description="Staff wallet management and permissions." />} />
+                <Route path="alerts" element={<PlaceholderSubPage title="Alerts" description="Configure balance and transaction alerts." />} />
+                <Route path="settings" element={<PlaceholderSubPage title="Banking Settings" description="Banking preferences and configuration." />} />
+              </Route>
+              <Route path="/bookkeeping" element={<BookkeepingLayout />}>
+                <Route index element={<Bookkeeping />} />
+                <Route path="general-ledger" element={<PlaceholderSubPage title="General Ledger" description="View all ledger entries with debit and credit columns." />} />
+                <Route path="journal-entries" element={<PlaceholderSubPage title="Journal Entries" description="Create and manage journal entries." />} />
+                <Route path="chart-of-accounts" element={<PlaceholderSubPage title="Chart of Accounts" description="Manage your account tree structure." />} />
+                <Route path="financial-statements" element={<PlaceholderSubPage title="Financial Statements" description="P&L, Balance Sheet, and Cash Flow reports." />} />
+                <Route path="reconciliation" element={<PlaceholderSubPage title="Reconciliation" description="Match bank transactions to journal entries." />} />
+                <Route path="tax" element={<PlaceholderSubPage title="Tax Management" description="VAT tracking and tax filing summaries." />} />
+                <Route path="settings" element={<PlaceholderSubPage title="Bookkeeping Settings" description="Fiscal year, currency, and VAT configuration." />} />
+              </Route>
               <Route path="/invoicing" element={<Invoicing />} />
-              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/inventory" element={<InventoryLayout />}>
+                <Route index element={<Inventory />} />
+                <Route path="products" element={<PlaceholderSubPage title="Products" description="Full product catalog management." />} />
+                <Route path="stock" element={<PlaceholderSubPage title="Stock Management" description="Stock levels, movements, and adjustments." />} />
+                <Route path="purchase-orders" element={<PlaceholderSubPage title="Purchase Orders" description="Create and track purchase orders from suppliers." />} />
+                <Route path="suppliers" element={<PlaceholderSubPage title="Suppliers" description="Manage your supplier directory." />} />
+                <Route path="categories" element={<PlaceholderSubPage title="Categories" description="Product category management." />} />
+                <Route path="reports" element={<PlaceholderSubPage title="Inventory Reports" description="Stock valuation and movement reports." />} />
+                <Route path="settings" element={<PlaceholderSubPage title="Inventory Settings" description="Low stock thresholds and units configuration." />} />
+              </Route>
               <Route path="/payroll" element={<Payroll />} />
               <Route path="/debt-credit" element={<DebtCredit />} />
               <Route path="/pos" element={<POS />} />

@@ -51,8 +51,8 @@ const allRoles: AppRole[] = ['super_admin', 'business_owner', 'store_manager', '
 
 const mainItems: NavItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, allowedRoles: allRoles },
-  { title: "Banking", url: "/banking", icon: Landmark, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },
-  { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },
+  { title: "Banking", url: "/banking", icon: Landmark, allowedRoles: ['super_admin', 'business_owner', 'accountant'], hasSubRoutes: true },
+  { title: "Bookkeeping", url: "/bookkeeping", icon: BookOpen, allowedRoles: ['super_admin', 'business_owner', 'accountant'], hasSubRoutes: true },
   { title: "Invoicing", url: "/invoicing", icon: FileText, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
 ];
 

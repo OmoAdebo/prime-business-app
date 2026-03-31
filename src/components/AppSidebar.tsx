@@ -44,6 +44,7 @@ interface NavItem {
   url: string;
   icon: React.ElementType;
   allowedRoles: AppRole[];
+  hasSubRoutes?: boolean;
 }
 
 const allRoles: AppRole[] = ['super_admin', 'business_owner', 'store_manager', 'accountant', 'employee', 'individual'];

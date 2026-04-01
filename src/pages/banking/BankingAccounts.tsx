@@ -87,12 +87,13 @@ export default function BankingAccounts() {
                 <Label>Account Type</Label>
                 <Select value={accountType} onValueChange={setAccountType}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="current">Current</SelectItem>
-                    <SelectItem value="savings">Savings</SelectItem>
-                    <SelectItem value="domiciliary">Domiciliary</SelectItem>
-                    <SelectItem value="fixed_deposit">Fixed Deposit</SelectItem>
-                  </SelectContent>
+                    <SelectContent>
+                      <SelectItem value="current">Current</SelectItem>
+                      <SelectItem value="savings">Savings</SelectItem>
+                      <SelectItem value="domiciliary">Domiciliary</SelectItem>
+                      <SelectItem value="fixed_deposit">Fixed Deposit</SelectItem>
+                      <SelectItem value="wallet">Staff Wallet</SelectItem>
+                    </SelectContent>
                 </Select>
               </div>
               <Button className="w-full" onClick={() => createAccount.mutate()} disabled={createAccount.isPending || !accountName || !bankName}>

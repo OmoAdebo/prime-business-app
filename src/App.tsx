@@ -70,16 +70,16 @@ const App = () => (
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<RoleDashboard />} />
               <Route path="/banking" element={<BankingLayout />}>
-                <Route index element={<Banking />} />
-                <Route path="accounts" element={<PlaceholderSubPage title="Accounts" description="Manage your bank accounts, wallets, and sub-accounts." />} />
-                <Route path="transactions" element={<PlaceholderSubPage title="Transactions" description="View and manage all banking transactions." />} />
-                <Route path="transfers" element={<PlaceholderSubPage title="Transfers" description="Transfer funds between accounts." />} />
-                <Route path="analytics" element={<PlaceholderSubPage title="Analytics" description="Banking analytics and insights." />} />
-                <Route path="scheduled" element={<PlaceholderSubPage title="Scheduled Payments" description="Manage recurring and scheduled payments." />} />
-                <Route path="beneficiaries" element={<PlaceholderSubPage title="Beneficiaries" description="Manage saved payees for quick transfers." />} />
-                <Route path="admin" element={<PlaceholderSubPage title="Admin" description="Staff wallet management and permissions." />} />
-                <Route path="alerts" element={<PlaceholderSubPage title="Alerts" description="Configure balance and transaction alerts." />} />
-                <Route path="settings" element={<PlaceholderSubPage title="Banking Settings" description="Banking preferences and configuration." />} />
+                <Route index element={<BankingOverview />} />
+                <Route path="accounts" element={<BankingAccounts />} />
+                <Route path="transactions" element={<BankingTransactions />} />
+                <Route path="transfers" element={<BankingTransfers />} />
+                <Route path="analytics" element={<BankingAnalytics />} />
+                <Route path="scheduled" element={<BankingScheduled />} />
+                <Route path="beneficiaries" element={<BankingBeneficiaries />} />
+                <Route path="admin" element={<BankingAdmin />} />
+                <Route path="alerts" element={<BankingAlerts />} />
+                <Route path="settings" element={<BankingSettings />} />
               </Route>
               <Route path="/bookkeeping" element={<BookkeepingLayout />}>
                 <Route index element={<Bookkeeping />} />

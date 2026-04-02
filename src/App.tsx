@@ -25,7 +25,14 @@ import BankingBeneficiaries from "./pages/banking/BankingBeneficiaries";
 import BankingAdmin from "./pages/banking/BankingAdmin";
 import BankingAlerts from "./pages/banking/BankingAlerts";
 import BankingSettings from "./pages/banking/BankingSettings";
-import Bookkeeping from "./pages/Bookkeeping";
+import BookkeepingOverview from "./pages/bookkeeping/BookkeepingOverview";
+import GeneralLedger from "./pages/bookkeeping/GeneralLedger";
+import JournalEntries from "./pages/bookkeeping/JournalEntries";
+import ChartOfAccounts from "./pages/bookkeeping/ChartOfAccounts";
+import FinancialStatements from "./pages/bookkeeping/FinancialStatements";
+import Reconciliation from "./pages/bookkeeping/Reconciliation";
+import Tax from "./pages/bookkeeping/Tax";
+import BookkeepingSettings from "./pages/bookkeeping/BookkeepingSettings";
 import Inventory from "./pages/Inventory";
 import { PlaceholderSubPage } from "./components/PlaceholderSubPage";
 import Payroll from "./pages/Payroll";
@@ -82,14 +89,14 @@ const App = () => (
                 <Route path="settings" element={<BankingSettings />} />
               </Route>
               <Route path="/bookkeeping" element={<BookkeepingLayout />}>
-                <Route index element={<Bookkeeping />} />
-                <Route path="general-ledger" element={<PlaceholderSubPage title="General Ledger" description="View all ledger entries with debit and credit columns." />} />
-                <Route path="journal-entries" element={<PlaceholderSubPage title="Journal Entries" description="Create and manage journal entries." />} />
-                <Route path="chart-of-accounts" element={<PlaceholderSubPage title="Chart of Accounts" description="Manage your account tree structure." />} />
-                <Route path="financial-statements" element={<PlaceholderSubPage title="Financial Statements" description="P&L, Balance Sheet, and Cash Flow reports." />} />
-                <Route path="reconciliation" element={<PlaceholderSubPage title="Reconciliation" description="Match bank transactions to journal entries." />} />
-                <Route path="tax" element={<PlaceholderSubPage title="Tax Management" description="VAT tracking and tax filing summaries." />} />
-                <Route path="settings" element={<PlaceholderSubPage title="Bookkeeping Settings" description="Fiscal year, currency, and VAT configuration." />} />
+                <Route index element={<BookkeepingOverview />} />
+                <Route path="general-ledger" element={<GeneralLedger />} />
+                <Route path="journal-entries" element={<JournalEntries />} />
+                <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
+                <Route path="financial-statements" element={<FinancialStatements />} />
+                <Route path="reconciliation" element={<Reconciliation />} />
+                <Route path="tax" element={<Tax />} />
+                <Route path="settings" element={<BookkeepingSettings />} />
               </Route>
               <Route path="/invoicing" element={<Invoicing />} />
               <Route path="/inventory" element={<InventoryLayout />}>

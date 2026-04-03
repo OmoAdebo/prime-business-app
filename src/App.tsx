@@ -106,14 +106,14 @@ const App = () => (
               </Route>
               <Route path="/invoicing" element={<Invoicing />} />
               <Route path="/inventory" element={<InventoryLayout />}>
-                <Route index element={<Inventory />} />
-                <Route path="products" element={<PlaceholderSubPage title="Products" description="Full product catalog management." />} />
-                <Route path="stock" element={<PlaceholderSubPage title="Stock Management" description="Stock levels, movements, and adjustments." />} />
-                <Route path="purchase-orders" element={<PlaceholderSubPage title="Purchase Orders" description="Create and track purchase orders from suppliers." />} />
-                <Route path="suppliers" element={<PlaceholderSubPage title="Suppliers" description="Manage your supplier directory." />} />
-                <Route path="categories" element={<PlaceholderSubPage title="Categories" description="Product category management." />} />
-                <Route path="reports" element={<PlaceholderSubPage title="Inventory Reports" description="Stock valuation and movement reports." />} />
-                <Route path="settings" element={<PlaceholderSubPage title="Inventory Settings" description="Low stock thresholds and units configuration." />} />
+                <Route index element={<InventoryOverview />} />
+                <Route path="products" element={<InventoryProducts />} />
+                <Route path="stock" element={<InventoryStock />} />
+                <Route path="purchase-orders" element={<InventoryPurchaseOrders />} />
+                <Route path="suppliers" element={<InventorySuppliers />} />
+                <Route path="categories" element={<InventoryCategories />} />
+                <Route path="reports" element={<InventoryReports />} />
+                <Route path="settings" element={<InventorySettings />} />
               </Route>
               <Route path="/payroll" element={<Payroll />} />
               <Route path="/debt-credit" element={<DebtCredit />} />

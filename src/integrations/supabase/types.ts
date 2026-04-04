@@ -2342,6 +2342,76 @@ export type Database = {
           },
         ]
       }
+      staff_wallets: {
+        Row: {
+          balance: number
+          bank_account_id: string | null
+          business_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          employee_id: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          spending_limit: number | null
+          updated_at: string
+          wallet_name: string
+        }
+        Insert: {
+          balance?: number
+          bank_account_id?: string | null
+          business_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          employee_id?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          spending_limit?: number | null
+          updated_at?: string
+          wallet_name: string
+        }
+        Update: {
+          balance?: number
+          bank_account_id?: string | null
+          business_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          employee_id?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          spending_limit?: number | null
+          updated_at?: string
+          wallet_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_wallets_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_wallets_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_wallets_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees_hr"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_levels: {
         Row: {
           id: string

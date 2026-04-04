@@ -60,6 +60,8 @@ import Budgeting from "./pages/Budgeting";
 import StoreManagement from "./pages/StoreManagement";
 import SystemReview from "./pages/SystemReview";
 import VoiceCommand from "./pages/VoiceCommand";
+import Loans from "./pages/Loans";
+import Employees from "./pages/Employees";
 
 const queryClient = new QueryClient();
 

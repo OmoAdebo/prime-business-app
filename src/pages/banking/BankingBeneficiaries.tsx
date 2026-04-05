@@ -6,10 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
-// Local state for now — can be migrated to DB table later
 export default function BankingBeneficiaries() {
   const [open, setOpen] = useState(false);
   const [beneficiaries, setBeneficiaries] = useState<{ id: string; name: string; bank: string; accountNumber: string; }[]>([]);
@@ -37,8 +37,8 @@ export default function BankingBeneficiaries() {
           <p className="text-sm text-muted-foreground">Saved payees for quick transfers</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add Beneficiary</Button></DialogTrigger>
-          <DialogContent>
+          <DialogTrigger asChild><Button size="sm" className="h-10 min-h-[44px]"><Plus className="h-4 w-4 mr-2" />Add Beneficiary</Button></DialogTrigger>
+          <DialogContent className="max-w-[95vw] sm:max-w-md">
             <DialogHeader><DialogTitle>Add Beneficiary</DialogTitle></DialogHeader>
             <div className="space-y-4">
               <div><Label>Full Name</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. John Doe" /></div>
@@ -50,34 +50,56 @@ export default function BankingBeneficiaries() {
         </Dialog>
       </div>
 
-      <Card>
+      {/* Mobile card view */}
+      <div className="sm:hidden space-y-3">
+        {beneficiaries.length === 0 ? (
+          <Card><CardContent className="py-8 text-center text-muted-foreground">No beneficiaries saved yet</CardContent></Card>
+        ) : (
+          beneficiaries.map(b => (
+            <Card key={b.id}>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">{b.name}</p>
+                  <p className="text-xs text-muted-foreground">{b.bank} • {b.accountNumber}</p>
+                </div>
+                <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => remove(b.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <Card className="hidden sm:block">
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Bank</TableHead>
-                <TableHead>Account Number</TableHead>
-                <TableHead className="text-right">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {beneficiaries.length === 0 ? (
-                <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No beneficiaries saved yet</TableCell></TableRow>
-              ) : (
-                beneficiaries.map(b => (
-                  <TableRow key={b.id}>
-                    <TableCell className="font-medium">{b.name}</TableCell>
-                    <TableCell>{b.bank}</TableCell>
-                    <TableCell>{b.accountNumber}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => remove(b.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <ResponsiveTable>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Bank</TableHead>
+                  <TableHead>Account Number</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {beneficiaries.length === 0 ? (
+                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No beneficiaries saved yet</TableCell></TableRow>
+                ) : (
+                  beneficiaries.map(b => (
+                    <TableRow key={b.id}>
+                      <TableCell className="font-medium">{b.name}</TableCell>
+                      <TableCell>{b.bank}</TableCell>
+                      <TableCell>{b.accountNumber}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => remove(b.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </ResponsiveTable>
         </CardContent>
       </Card>
     </motion.div>

@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -252,7 +253,7 @@ export default function Invoicing() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 p-6">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 p-3 sm:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Invoicing</h1>
@@ -262,7 +263,7 @@ export default function Invoicing() {
           <DialogTrigger asChild>
             <Button><Plus className="h-4 w-4 mr-2" />New Invoice</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create Invoice</DialogTitle>
             </DialogHeader>
@@ -337,7 +338,7 @@ export default function Invoicing() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardDescription>Total Invoices</CardDescription></CardHeader>
           <CardContent><p className="text-2xl font-bold">{invoices.length}</p></CardContent>
@@ -357,13 +358,13 @@ export default function Invoicing() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search invoices..." className="pl-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40"><Filter className="h-4 w-4 mr-2" /><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-40"><Filter className="h-4 w-4 mr-2" /><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
@@ -378,62 +379,64 @@ export default function Invoicing() {
       {/* Invoice Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Invoice #</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Paid</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-              ) : filteredInvoices.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No invoices found</TableCell></TableRow>
-              ) : (
-                filteredInvoices.map(inv => (
-                  <TableRow key={inv.id}>
-                    <TableCell className="font-medium">{inv.invoice_number}</TableCell>
-                    <TableCell>{new Date(inv.issue_date).toLocaleDateString()}</TableCell>
-                    <TableCell>{inv.due_date ? new Date(inv.due_date).toLocaleDateString() : "—"}</TableCell>
-                    <TableCell>₦{inv.total_amount.toLocaleString()}</TableCell>
-                    <TableCell>₦{inv.amount_paid.toLocaleString()}</TableCell>
-                    <TableCell><Badge className={statusColors[inv.status] || ""}>{inv.status}</Badge></TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-1 justify-end">
-                        {inv.status === "draft" && (
-                          <Button variant="ghost" size="icon" onClick={() => updateStatus.mutate({ id: inv.id, status: "sent" })} title="Mark as Sent">
-                            <Send className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {["sent", "partial", "overdue"].includes(inv.status) && (
-                          <Button variant="ghost" size="icon" onClick={() => { setSelectedInvoice(inv.id); setPaymentOpen(true); }} title="Record Payment">
-                            <CreditCard className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {inv.status === "draft" && (
-                          <Button variant="ghost" size="icon" onClick={() => deleteInvoice.mutate(inv.id)} title="Delete">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <ResponsiveTable>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Invoice #</TableHead>
+                  <TableHead className="hidden sm:table-cell">Date</TableHead>
+                  <TableHead className="hidden md:table-cell">Due Date</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead className="hidden sm:table-cell">Paid</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                ) : filteredInvoices.length === 0 ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No invoices found</TableCell></TableRow>
+                ) : (
+                  filteredInvoices.map(inv => (
+                    <TableRow key={inv.id}>
+                      <TableCell className="font-medium">{inv.invoice_number}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{new Date(inv.issue_date).toLocaleDateString()}</TableCell>
+                      <TableCell className="hidden md:table-cell">{inv.due_date ? new Date(inv.due_date).toLocaleDateString() : "—"}</TableCell>
+                      <TableCell>₦{inv.total_amount.toLocaleString()}</TableCell>
+                      <TableCell className="hidden sm:table-cell">₦{inv.amount_paid.toLocaleString()}</TableCell>
+                      <TableCell><Badge className={statusColors[inv.status] || ""}>{inv.status}</Badge></TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-1 justify-end">
+                          {inv.status === "draft" && (
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => updateStatus.mutate({ id: inv.id, status: "sent" })} title="Mark as Sent">
+                              <Send className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {["sent", "partial", "overdue"].includes(inv.status) && (
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => { setSelectedInvoice(inv.id); setPaymentOpen(true); }} title="Record Payment">
+                              <CreditCard className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {inv.status === "draft" && (
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => deleteInvoice.mutate(inv.id)} title="Delete">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </ResponsiveTable>
         </CardContent>
       </Card>
 
       {/* Payment Dialog */}
       <Dialog open={paymentOpen} onOpenChange={setPaymentOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader><DialogTitle>Record Payment</DialogTitle></DialogHeader>
           <div className="space-y-4">
             {selectedInvoice && (() => {

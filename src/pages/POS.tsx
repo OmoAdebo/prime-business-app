@@ -392,14 +392,15 @@ export default function POS() {
             <CardHeader><CardTitle className="text-lg">Shift History</CardTitle></CardHeader>
             <CardContent>
               {shifts && shifts.length > 0 ? (
+                <ResponsiveTable>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Register</TableHead>
                       <TableHead>Opened</TableHead>
-                      <TableHead>Closed</TableHead>
-                      <TableHead>Opening</TableHead>
-                      <TableHead>Closing</TableHead>
+                      <TableHead className="hidden sm:table-cell">Closed</TableHead>
+                      <TableHead className="hidden md:table-cell">Opening</TableHead>
+                      <TableHead className="hidden md:table-cell">Closing</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -407,15 +408,16 @@ export default function POS() {
                     {shifts.map((shift: any) => (
                       <TableRow key={shift.id}>
                         <TableCell>{shift.cash_registers?.name || "—"}</TableCell>
-                        <TableCell>{format(new Date(shift.opened_at), "MMM d, HH:mm")}</TableCell>
-                        <TableCell>{shift.closed_at ? format(new Date(shift.closed_at), "MMM d, HH:mm") : "—"}</TableCell>
-                        <TableCell>{fmt(shift.opening_amount)}</TableCell>
-                        <TableCell>{shift.closing_amount != null ? fmt(shift.closing_amount) : "—"}</TableCell>
+                        <TableCell className="whitespace-nowrap">{format(new Date(shift.opened_at), "MMM d, HH:mm")}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{shift.closed_at ? format(new Date(shift.closed_at), "MMM d, HH:mm") : "—"}</TableCell>
+                        <TableCell className="hidden md:table-cell">{fmt(shift.opening_amount)}</TableCell>
+                        <TableCell className="hidden md:table-cell">{shift.closing_amount != null ? fmt(shift.closing_amount) : "—"}</TableCell>
                         <TableCell><Badge variant={shift.status === "open" ? "default" : "secondary"}>{shift.status}</Badge></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
+                </ResponsiveTable>
               ) : (
                 <p className="text-center text-muted-foreground py-8">No shifts recorded yet</p>
               )}

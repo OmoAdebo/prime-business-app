@@ -338,7 +338,7 @@ export default function Invoicing() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardDescription>Total Invoices</CardDescription></CardHeader>
           <CardContent><p className="text-2xl font-bold">{invoices.length}</p></CardContent>

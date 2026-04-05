@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { motion } from "framer-motion";
 
 export default function BankingAdmin() {
@@ -110,7 +111,7 @@ export default function BankingAdmin() {
         <p className="text-sm text-muted-foreground">Manage staff wallets, permissions, and spending controls</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardDescription>Total Wallets</CardDescription></CardHeader>
           <CardContent><p className="text-2xl font-bold">{wallets.length}</p></CardContent>
@@ -119,105 +120,108 @@ export default function BankingAdmin() {
           <CardHeader className="pb-2"><CardDescription>Active Wallets</CardDescription></CardHeader>
           <CardContent><p className="text-2xl font-bold">{activeWallets.length}</p></CardContent>
         </Card>
-        <Card>
+        <Card className="col-span-2 sm:col-span-1">
           <CardHeader className="pb-2"><CardDescription>Total Wallet Balance</CardDescription></CardHeader>
           <CardContent><p className="text-2xl font-bold">₦{totalBalance.toLocaleString()}</p></CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2"><Wallet className="h-5 w-5" />Staff Wallets</CardTitle>
             <CardDescription>Sub-accounts created for employees</CardDescription>
           </div>
-          <Button size="sm" onClick={() => setShowCreate(true)}>
+          <Button size="sm" className="h-10 min-h-[44px]" onClick={() => setShowCreate(true)}>
             <Plus className="h-4 w-4 mr-2" />Create Wallet
           </Button>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Wallet Name</TableHead>
-                <TableHead>Employee</TableHead>
-                <TableHead>Balance</TableHead>
-                <TableHead>Spending Limit</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {wallets.length === 0 ? (
+          <ResponsiveTable>
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No staff wallets yet. Click "Create Wallet" to get started.
-                  </TableCell>
+                  <TableHead>Wallet Name</TableHead>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Balance</TableHead>
+                  <TableHead className="hidden md:table-cell">Spending Limit</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ) : (
-                wallets.map((w: any) => (
-                  <TableRow key={w.id}>
-                    <TableCell className="font-medium">{w.wallet_name}</TableCell>
-                    <TableCell>{w.employees_hr?.full_name || "Unassigned"}</TableCell>
-                    <TableCell>₦{Number(w.balance).toLocaleString()}</TableCell>
-                    <TableCell>{w.spending_limit ? `₦${Number(w.spending_limit).toLocaleString()}` : "No limit"}</TableCell>
-                    <TableCell>
-                      <Badge variant={w.is_active ? "default" : "secondary"}>
-                        {w.is_active ? "Active" : "Frozen"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleWallet.mutate({ id: w.id, is_active: w.is_active })}
-                      >
-                        {w.is_active ? "Freeze" : "Activate"}
-                      </Button>
+              </TableHeader>
+              <TableBody>
+                {wallets.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      No staff wallets yet. Click "Create Wallet" to get started.
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  wallets.map((w: any) => (
+                    <TableRow key={w.id}>
+                      <TableCell className="font-medium">{w.wallet_name}</TableCell>
+                      <TableCell>{w.employees_hr?.full_name || "Unassigned"}</TableCell>
+                      <TableCell>₦{Number(w.balance).toLocaleString()}</TableCell>
+                      <TableCell className="hidden md:table-cell">{w.spending_limit ? `₦${Number(w.spending_limit).toLocaleString()}` : "No limit"}</TableCell>
+                      <TableCell>
+                        <Badge variant={w.is_active ? "default" : "secondary"}>
+                          {w.is_active ? "Active" : "Frozen"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-9 min-h-[44px]"
+                          onClick={() => toggleWallet.mutate({ id: w.id, is_active: w.is_active })}
+                        >
+                          {w.is_active ? "Freeze" : "Activate"}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </ResponsiveTable>
         </CardContent>
       </Card>
 
-      {/* All Bank Accounts overview */}
       <Card>
         <CardHeader>
           <CardTitle>All Bank Accounts</CardTitle>
           <CardDescription>Overview of all business bank accounts</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Account</TableHead>
-                <TableHead>Bank</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Balance</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {bankAccounts.map((a: any) => (
-                <TableRow key={a.id}>
-                  <TableCell className="font-medium">{a.account_name}</TableCell>
-                  <TableCell>{a.bank_name}</TableCell>
-                  <TableCell><Badge variant="outline" className="capitalize">{a.account_type}</Badge></TableCell>
-                  <TableCell>₦{Number(a.current_balance).toLocaleString()}</TableCell>
-                  <TableCell><Badge variant={a.is_active ? "default" : "secondary"}>{a.is_active ? "Active" : "Inactive"}</Badge></TableCell>
+          <ResponsiveTable>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Account</TableHead>
+                  <TableHead>Bank</TableHead>
+                  <TableHead className="hidden sm:table-cell">Type</TableHead>
+                  <TableHead>Balance</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {bankAccounts.map((a: any) => (
+                  <TableRow key={a.id}>
+                    <TableCell className="font-medium">{a.account_name}</TableCell>
+                    <TableCell>{a.bank_name}</TableCell>
+                    <TableCell className="hidden sm:table-cell"><Badge variant="outline" className="capitalize">{a.account_type}</Badge></TableCell>
+                    <TableCell>₦{Number(a.current_balance).toLocaleString()}</TableCell>
+                    <TableCell><Badge variant={a.is_active ? "default" : "secondary"}>{a.is_active ? "Active" : "Inactive"}</Badge></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ResponsiveTable>
         </CardContent>
       </Card>
 
-      {/* Create Wallet Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader><DialogTitle>Create Staff Wallet</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div>

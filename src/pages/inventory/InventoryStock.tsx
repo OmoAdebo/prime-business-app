@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Layers, Plus, ArrowRightLeft, Search } from "lucide-react";
 import { motion } from "framer-motion";
@@ -108,12 +109,12 @@ export default function InventoryStock() {
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Stock Management</h1>
-          <p className="text-muted-foreground mt-1">Track levels, movements, and adjustments.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Stock Management</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Track levels, movements, and adjustments.</p>
         </div>
         <Dialog open={showRecord} onOpenChange={setShowRecord}>
-          <DialogTrigger asChild><Button className="gap-2"><Plus className="h-4 w-4" /> Record Movement</Button></DialogTrigger>
-          <DialogContent>
+          <DialogTrigger asChild><Button className="gap-2 h-10 min-h-[44px]"><Plus className="h-4 w-4" /> Record Movement</Button></DialogTrigger>
+          <DialogContent className="max-w-[95vw] sm:max-w-md">
             <DialogHeader><DialogTitle>Record Stock Movement</DialogTitle></DialogHeader>
             <div className="grid gap-4 py-2">
               <div>
@@ -151,10 +152,10 @@ export default function InventoryStock() {
       </div>
 
       <Tabs defaultValue="levels">
-        <TabsList><TabsTrigger value="levels">Stock Levels</TabsTrigger><TabsTrigger value="movements">Movements History</TabsTrigger></TabsList>
+        <TabsList className="w-full sm:w-auto overflow-x-auto"><TabsTrigger value="levels">Stock Levels</TabsTrigger><TabsTrigger value="movements">Movements History</TabsTrigger></TabsList>
 
         <TabsContent value="levels" className="space-y-4">
-          <div className="relative max-w-sm">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search product..." className="pl-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
@@ -167,22 +168,24 @@ export default function InventoryStock() {
                   <p className="text-sm mt-1">Record a stock movement to start tracking.</p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader><TableRow><TableHead>Product</TableHead><TableHead>Location</TableHead><TableHead className="text-right">Quantity</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {filteredLevels.map((sl: any) => {
-                      const isLow = sl.quantity <= (sl.products?.low_stock_threshold || 10);
-                      return (
-                        <TableRow key={sl.id}>
-                          <TableCell className="font-medium">{sl.products?.name || "—"}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{sl.inventory_locations?.name || "—"}</TableCell>
-                          <TableCell className="text-right font-mono">{sl.quantity} {sl.products?.unit_of_measure || ""}</TableCell>
-                          <TableCell><Badge variant={isLow ? "destructive" : "secondary"}>{isLow ? "Low Stock" : "In Stock"}</Badge></TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                <ResponsiveTable>
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Product</TableHead><TableHead className="hidden sm:table-cell">Location</TableHead><TableHead className="text-right">Quantity</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {filteredLevels.map((sl: any) => {
+                        const isLow = sl.quantity <= (sl.products?.low_stock_threshold || 10);
+                        return (
+                          <TableRow key={sl.id}>
+                            <TableCell className="font-medium">{sl.products?.name || "—"}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground hidden sm:table-cell">{sl.inventory_locations?.name || "—"}</TableCell>
+                            <TableCell className="text-right font-mono">{sl.quantity} {sl.products?.unit_of_measure || ""}</TableCell>
+                            <TableCell><Badge variant={isLow ? "destructive" : "secondary"}>{isLow ? "Low Stock" : "In Stock"}</Badge></TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </ResponsiveTable>
               )}
             </CardContent>
           </Card>
@@ -197,20 +200,22 @@ export default function InventoryStock() {
                   <p className="font-medium">No movements yet</p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Product</TableHead><TableHead>Type</TableHead><TableHead className="text-right">Qty</TableHead><TableHead>Notes</TableHead></TableRow></TableHeader>
-                  <TableBody>
-                    {movements.map((m: any) => (
-                      <TableRow key={m.id}>
-                        <TableCell className="text-sm">{new Date(m.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell className="font-medium">{m.products?.name || "—"}</TableCell>
-                        <TableCell><Badge variant="outline" className={m.movement_type === "receipt" ? "text-emerald-600 border-emerald-200" : m.movement_type === "sale" ? "text-red-500 border-red-200" : ""}>{m.movement_type}</Badge></TableCell>
-                        <TableCell className="text-right font-medium">{m.quantity}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">{m.notes || "—"}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <ResponsiveTable>
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Product</TableHead><TableHead>Type</TableHead><TableHead className="text-right">Qty</TableHead><TableHead className="hidden sm:table-cell">Notes</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {movements.map((m: any) => (
+                        <TableRow key={m.id}>
+                          <TableCell className="text-sm whitespace-nowrap">{new Date(m.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell className="font-medium">{m.products?.name || "—"}</TableCell>
+                          <TableCell><Badge variant="outline" className={m.movement_type === "receipt" ? "text-emerald-600 border-emerald-200" : m.movement_type === "sale" ? "text-red-500 border-red-200" : ""}>{m.movement_type}</Badge></TableCell>
+                          <TableCell className="text-right font-medium">{m.quantity}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate hidden sm:table-cell">{m.notes || "—"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ResponsiveTable>
               )}
             </CardContent>
           </Card>

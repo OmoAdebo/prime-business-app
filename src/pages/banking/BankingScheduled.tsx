@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -81,8 +82,8 @@ export default function BankingScheduled() {
           <p className="text-sm text-muted-foreground">Manage upcoming and recurring payments</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Schedule Payment</Button></DialogTrigger>
-          <DialogContent>
+          <DialogTrigger asChild><Button size="sm" className="h-10 min-h-[44px]"><Plus className="h-4 w-4 mr-2" />Schedule Payment</Button></DialogTrigger>
+          <DialogContent className="max-w-[95vw] sm:max-w-md">
             <DialogHeader><DialogTitle>Schedule a Payment</DialogTitle></DialogHeader>
             <div className="space-y-4">
               <div><Label>Amount (₦)</Label><Input type="number" value={amount} onChange={e => setAmount(e.target.value)} /></div>
@@ -98,36 +99,38 @@ export default function BankingScheduled() {
 
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Notes</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-              ) : schedules.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No scheduled payments</TableCell></TableRow>
-              ) : (
-                schedules.map(s => (
-                  <TableRow key={s.id}>
-                    <TableCell>{new Date(s.scheduled_date).toLocaleDateString()}</TableCell>
-                    <TableCell className="font-medium">₦{s.amount.toLocaleString()}</TableCell>
-                    <TableCell>{s.notes || "—"}</TableCell>
-                    <TableCell><Badge variant={s.is_paid ? "default" : "outline"}>{s.is_paid ? "Paid" : "Upcoming"}</Badge></TableCell>
-                    <TableCell className="text-right">
-                      {!s.is_paid && <Button variant="outline" size="sm" onClick={() => markPaid.mutate(s.id)}>Mark Paid</Button>}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <ResponsiveTable>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead className="hidden sm:table-cell">Notes</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                ) : schedules.length === 0 ? (
+                  <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No scheduled payments</TableCell></TableRow>
+                ) : (
+                  schedules.map(s => (
+                    <TableRow key={s.id}>
+                      <TableCell className="whitespace-nowrap">{new Date(s.scheduled_date).toLocaleDateString()}</TableCell>
+                      <TableCell className="font-medium">₦{s.amount.toLocaleString()}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{s.notes || "—"}</TableCell>
+                      <TableCell><Badge variant={s.is_paid ? "default" : "outline"}>{s.is_paid ? "Paid" : "Upcoming"}</Badge></TableCell>
+                      <TableCell className="text-right">
+                        {!s.is_paid && <Button variant="outline" size="sm" className="h-9 min-h-[44px]" onClick={() => markPaid.mutate(s.id)}>Mark Paid</Button>}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </ResponsiveTable>
         </CardContent>
       </Card>
     </motion.div>

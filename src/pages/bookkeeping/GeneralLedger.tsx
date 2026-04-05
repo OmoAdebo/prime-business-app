@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Search, Filter, BookMarked } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
@@ -50,7 +51,6 @@ export default function GeneralLedger() {
     enabled: !!businessId,
   });
 
-  // Combine transactions as ledger entries
   const ledgerEntries = transactions
     .filter(t => {
       const matchSearch = !searchTerm || t.description?.toLowerCase().includes(searchTerm.toLowerCase()) || t.category?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -72,8 +72,8 @@ export default function GeneralLedger() {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-display text-foreground">General Ledger</h1>
-        <p className="text-muted-foreground mt-1">Complete record of all financial transactions with debit and credit entries.</p>
+        <h1 className="text-xl sm:text-2xl font-bold font-display text-foreground">General Ledger</h1>
+        <p className="text-muted-foreground mt-1 text-sm">Complete record of all financial transactions.</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -82,7 +82,7 @@ export default function GeneralLedger() {
           <Input placeholder="Search entries..." className="pl-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-[140px]"><Filter className="h-4 w-4 mr-2" /><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[140px]"><Filter className="h-4 w-4 mr-2" /><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="income">Income</SelectItem>
@@ -102,58 +102,59 @@ export default function GeneralLedger() {
               <p className="text-sm mt-1">Record transactions in the Overview to populate the ledger.</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Reference</TableHead>
-                  <TableHead className="text-right">Debit (₦)</TableHead>
-                  <TableHead className="text-right">Credit (₦)</TableHead>
-                  <TableHead className="text-right">Balance (₦)</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {ledgerEntries.map(entry => {
-                  runningBalance += entry.credit - entry.debit;
-                  return (
-                    <TableRow key={entry.id}>
-                      <TableCell className="text-sm">{format(new Date(entry.date), "dd MMM yyyy")}</TableCell>
-                      <TableCell className="font-medium">{entry.description}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{entry.reference}</TableCell>
-                      <TableCell className="text-right font-mono text-sm">{entry.debit > 0 ? formatNaira(entry.debit) : "—"}</TableCell>
-                      <TableCell className="text-right font-mono text-sm">{entry.credit > 0 ? formatNaira(entry.credit) : "—"}</TableCell>
-                      <TableCell className={`text-right font-mono text-sm font-semibold ${runningBalance >= 0 ? "text-emerald-600" : "text-red-500"}`}>
-                        {formatNaira(Math.abs(runningBalance))}
-                        {runningBalance < 0 ? " DR" : " CR"}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <ResponsiveTable>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="hidden sm:table-cell">Reference</TableHead>
+                    <TableHead className="text-right">Debit (₦)</TableHead>
+                    <TableHead className="text-right">Credit (₦)</TableHead>
+                    <TableHead className="text-right hidden sm:table-cell">Balance (₦)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {ledgerEntries.map(entry => {
+                    runningBalance += entry.credit - entry.debit;
+                    return (
+                      <TableRow key={entry.id}>
+                        <TableCell className="text-sm whitespace-nowrap">{format(new Date(entry.date), "dd MMM yyyy")}</TableCell>
+                        <TableCell className="font-medium">{entry.description}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground hidden sm:table-cell">{entry.reference}</TableCell>
+                        <TableCell className="text-right font-mono text-sm">{entry.debit > 0 ? formatNaira(entry.debit) : "—"}</TableCell>
+                        <TableCell className="text-right font-mono text-sm">{entry.credit > 0 ? formatNaira(entry.credit) : "—"}</TableCell>
+                        <TableCell className={`text-right font-mono text-sm font-semibold hidden sm:table-cell ${runningBalance >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                          {formatNaira(Math.abs(runningBalance))}
+                          {runningBalance < 0 ? " DR" : " CR"}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </ResponsiveTable>
           )}
         </CardContent>
       </Card>
 
-      {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <Card>
-          <CardContent className="p-5">
-            <p className="text-sm text-muted-foreground">Total Debits</p>
-            <p className="text-xl font-bold mt-1 text-red-500">{formatNaira(ledgerEntries.reduce((s, e) => s + e.debit, 0))}</p>
+          <CardContent className="p-4 sm:p-5">
+            <p className="text-xs sm:text-sm text-muted-foreground">Total Debits</p>
+            <p className="text-lg sm:text-xl font-bold mt-1 text-red-500">{formatNaira(ledgerEntries.reduce((s, e) => s + e.debit, 0))}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-5">
-            <p className="text-sm text-muted-foreground">Total Credits</p>
-            <p className="text-xl font-bold mt-1 text-emerald-600">{formatNaira(ledgerEntries.reduce((s, e) => s + e.credit, 0))}</p>
+          <CardContent className="p-4 sm:p-5">
+            <p className="text-xs sm:text-sm text-muted-foreground">Total Credits</p>
+            <p className="text-lg sm:text-xl font-bold mt-1 text-emerald-600">{formatNaira(ledgerEntries.reduce((s, e) => s + e.credit, 0))}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-5">
-            <p className="text-sm text-muted-foreground">Net Balance</p>
-            <p className={`text-xl font-bold mt-1 ${runningBalance >= 0 ? "text-emerald-600" : "text-red-500"}`}>{formatNaira(Math.abs(runningBalance))}</p>
+        <Card className="col-span-2 sm:col-span-1">
+          <CardContent className="p-4 sm:p-5">
+            <p className="text-xs sm:text-sm text-muted-foreground">Net Balance</p>
+            <p className={`text-lg sm:text-xl font-bold mt-1 ${runningBalance >= 0 ? "text-emerald-600" : "text-red-500"}`}>{formatNaira(Math.abs(runningBalance))}</p>
           </CardContent>
         </Card>
       </div>

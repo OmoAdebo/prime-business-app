@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Package, Plus, Search, Edit, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -63,15 +64,10 @@ export default function InventoryProducts() {
     mutationFn: async () => {
       const payload = {
         business_id: businessId!,
-        name: form.name,
-        sku: form.sku || null,
-        category: form.category || null,
-        description: form.description || null,
-        unit_price: parseFloat(form.unit_price) || 0,
-        cost_price: parseFloat(form.cost_price) || 0,
-        unit_of_measure: form.unit_of_measure,
-        low_stock_threshold: parseInt(form.low_stock_threshold) || 10,
-        barcode: form.barcode || null,
+        name: form.name, sku: form.sku || null, category: form.category || null,
+        description: form.description || null, unit_price: parseFloat(form.unit_price) || 0,
+        cost_price: parseFloat(form.cost_price) || 0, unit_of_measure: form.unit_of_measure,
+        low_stock_threshold: parseInt(form.low_stock_threshold) || 10, barcode: form.barcode || null,
       };
       if (editId) {
         const { error } = await supabase.from("products").update(payload).eq("id", editId);
@@ -83,9 +79,7 @@ export default function InventoryProducts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      setShowAdd(false);
-      setEditId(null);
-      setForm(emptyForm);
+      setShowAdd(false); setEditId(null); setForm(emptyForm);
       toast({ title: editId ? "Product updated" : "Product added" });
     },
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
@@ -114,7 +108,6 @@ export default function InventoryProducts() {
   };
 
   const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-
   const filtered = products.filter(p => {
     const matchSearch = !searchTerm || p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchCat = categoryFilter === "all" || p.category === categoryFilter;
@@ -125,19 +118,19 @@ export default function InventoryProducts() {
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Products</h1>
-          <p className="text-muted-foreground mt-1">Manage your product catalog.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Products</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Manage your product catalog.</p>
         </div>
         <Dialog open={showAdd} onOpenChange={(o) => { setShowAdd(o); if (!o) { setEditId(null); setForm(emptyForm); } }}>
-          <DialogTrigger asChild><Button className="gap-2"><Plus className="h-4 w-4" /> Add Product</Button></DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+          <DialogTrigger asChild><Button className="gap-2 h-10 min-h-[44px]"><Plus className="h-4 w-4" /> Add Product</Button></DialogTrigger>
+          <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editId ? "Edit Product" : "Add Product"}</DialogTitle><DialogDescription>Fill in product details.</DialogDescription></DialogHeader>
             <div className="grid gap-4 py-2">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Product Name *</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} /></div>
                 <div><Label>SKU</Label><Input value={form.sku} onChange={e => setForm(p => ({ ...p, sku: e.target.value }))} placeholder="e.g. PRD-001" /></div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Category</Label>
                   <Select value={form.category} onValueChange={v => setForm(p => ({ ...p, category: v }))}>
@@ -145,13 +138,13 @@ export default function InventoryProducts() {
                     <SelectContent>{PRODUCT_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                <div><Label>Barcode</Label><Input value={form.barcode} onChange={e => setForm(p => ({ ...p, barcode: e.target.value }))} placeholder="e.g. 1234567890" /></div>
+                <div><Label>Barcode</Label><Input value={form.barcode} onChange={e => setForm(p => ({ ...p, barcode: e.target.value }))} /></div>
               </div>
               <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} /></div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div><Label>Selling Price (₦)</Label><Input type="number" value={form.unit_price} onChange={e => setForm(p => ({ ...p, unit_price: e.target.value }))} /></div>
                 <div><Label>Cost Price (₦)</Label><Input type="number" value={form.cost_price} onChange={e => setForm(p => ({ ...p, cost_price: e.target.value }))} /></div>
-                <div><Label>Low Stock Alert</Label><Input type="number" value={form.low_stock_threshold} onChange={e => setForm(p => ({ ...p, low_stock_threshold: e.target.value }))} /></div>
+                <div className="col-span-2 sm:col-span-1"><Label>Low Stock Alert</Label><Input type="number" value={form.low_stock_threshold} onChange={e => setForm(p => ({ ...p, low_stock_threshold: e.target.value }))} /></div>
               </div>
               <div>
                 <Label>Unit of Measure</Label>
@@ -170,12 +163,12 @@ export default function InventoryProducts() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search by name or SKU..." className="pl-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="All Categories" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-44"><SelectValue placeholder="All Categories" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
             {categories.map(c => <SelectItem key={c!} value={c!}>{c}</SelectItem>)}
@@ -194,45 +187,45 @@ export default function InventoryProducts() {
               <p className="text-sm mt-1">{searchTerm || categoryFilter !== "all" ? "Try adjusting your filters." : "Add your first product."}</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-right">Cost</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="text-right">Stock</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((p: any) => {
-                  const qty = stockLevels.filter((sl: any) => sl.product_id === p.id).reduce((q: number, sl: any) => q + sl.quantity, 0);
-                  const isLow = qty <= (p.low_stock_threshold || 10);
-                  return (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-medium">{p.name}</TableCell>
-                      <TableCell className="font-mono text-sm text-muted-foreground">{p.sku || "—"}</TableCell>
-                      <TableCell><Badge variant="outline" className="text-xs">{p.category || "—"}</Badge></TableCell>
-                      <TableCell className="text-right text-sm">{formatNaira(Number(p.cost_price))}</TableCell>
-                      <TableCell className="text-right text-sm font-medium">{formatNaira(Number(p.unit_price))}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant={isLow ? "destructive" : "secondary"}>
-                          {qty} {p.unit_of_measure}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(p)}><Edit className="h-3.5 w-3.5" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(p.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <ResponsiveTable>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead className="hidden sm:table-cell">SKU</TableHead>
+                    <TableHead className="hidden md:table-cell">Category</TableHead>
+                    <TableHead className="hidden md:table-cell text-right">Cost</TableHead>
+                    <TableHead className="text-right">Price</TableHead>
+                    <TableHead className="text-right">Stock</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((p: any) => {
+                    const qty = stockLevels.filter((sl: any) => sl.product_id === p.id).reduce((q: number, sl: any) => q + sl.quantity, 0);
+                    const isLow = qty <= (p.low_stock_threshold || 10);
+                    return (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-medium">{p.name}</TableCell>
+                        <TableCell className="font-mono text-sm text-muted-foreground hidden sm:table-cell">{p.sku || "—"}</TableCell>
+                        <TableCell className="hidden md:table-cell"><Badge variant="outline" className="text-xs">{p.category || "—"}</Badge></TableCell>
+                        <TableCell className="text-right text-sm hidden md:table-cell">{formatNaira(Number(p.cost_price))}</TableCell>
+                        <TableCell className="text-right text-sm font-medium">{formatNaira(Number(p.unit_price))}</TableCell>
+                        <TableCell className="text-right">
+                          <Badge variant={isLow ? "destructive" : "secondary"}>{qty} {p.unit_of_measure}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => openEdit(p)}><Edit className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px] text-destructive" onClick={() => deleteMutation.mutate(p.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </ResponsiveTable>
           )}
         </CardContent>
       </Card>

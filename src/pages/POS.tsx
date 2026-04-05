@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -355,11 +356,12 @@ export default function POS() {
           <Card>
             <CardHeader><CardTitle className="text-lg">Recent Sales</CardTitle></CardHeader>
             <CardContent>
+              <ResponsiveTable>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Sale #</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead className="hidden sm:table-cell">Date</TableHead>
                     <TableHead>Payment</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Total</TableHead>
@@ -369,7 +371,7 @@ export default function POS() {
                   {sales?.map((sale) => (
                     <TableRow key={sale.id}>
                       <TableCell className="font-mono text-sm">{sale.sale_number}</TableCell>
-                      <TableCell>{format(new Date(sale.created_at), "MMM d, yyyy HH:mm")}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{format(new Date(sale.created_at), "MMM d, yyyy HH:mm")}</TableCell>
                       <TableCell><Badge variant="outline">{sale.payment_method}</Badge></TableCell>
                       <TableCell><Badge variant={sale.status === "completed" ? "default" : "secondary"}>{sale.status}</Badge></TableCell>
                       <TableCell className="text-right font-semibold">{fmt(sale.total_amount)}</TableCell>
@@ -380,6 +382,7 @@ export default function POS() {
                   )}
                 </TableBody>
               </Table>
+              </ResponsiveTable>
             </CardContent>
           </Card>
         </TabsContent>
@@ -389,14 +392,15 @@ export default function POS() {
             <CardHeader><CardTitle className="text-lg">Shift History</CardTitle></CardHeader>
             <CardContent>
               {shifts && shifts.length > 0 ? (
+                <ResponsiveTable>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Register</TableHead>
                       <TableHead>Opened</TableHead>
-                      <TableHead>Closed</TableHead>
-                      <TableHead>Opening</TableHead>
-                      <TableHead>Closing</TableHead>
+                      <TableHead className="hidden sm:table-cell">Closed</TableHead>
+                      <TableHead className="hidden md:table-cell">Opening</TableHead>
+                      <TableHead className="hidden md:table-cell">Closing</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -404,15 +408,16 @@ export default function POS() {
                     {shifts.map((shift: any) => (
                       <TableRow key={shift.id}>
                         <TableCell>{shift.cash_registers?.name || "—"}</TableCell>
-                        <TableCell>{format(new Date(shift.opened_at), "MMM d, HH:mm")}</TableCell>
-                        <TableCell>{shift.closed_at ? format(new Date(shift.closed_at), "MMM d, HH:mm") : "—"}</TableCell>
-                        <TableCell>{fmt(shift.opening_amount)}</TableCell>
-                        <TableCell>{shift.closing_amount != null ? fmt(shift.closing_amount) : "—"}</TableCell>
+                        <TableCell className="whitespace-nowrap">{format(new Date(shift.opened_at), "MMM d, HH:mm")}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{shift.closed_at ? format(new Date(shift.closed_at), "MMM d, HH:mm") : "—"}</TableCell>
+                        <TableCell className="hidden md:table-cell">{fmt(shift.opening_amount)}</TableCell>
+                        <TableCell className="hidden md:table-cell">{shift.closing_amount != null ? fmt(shift.closing_amount) : "—"}</TableCell>
                         <TableCell><Badge variant={shift.status === "open" ? "default" : "secondary"}>{shift.status}</Badge></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
+                </ResponsiveTable>
               ) : (
                 <p className="text-center text-muted-foreground py-8">No shifts recorded yet</p>
               )}
@@ -423,7 +428,7 @@ export default function POS() {
 
       {/* Checkout Dialog */}
       <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader><DialogTitle>Complete Sale</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="text-center p-4 bg-muted rounded-lg">

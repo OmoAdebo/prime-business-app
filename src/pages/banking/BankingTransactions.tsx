@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -111,8 +112,8 @@ export default function BankingTransactions() {
           <p className="text-sm text-muted-foreground">{filtered.length} transaction(s)</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Record Transaction</Button></DialogTrigger>
-          <DialogContent>
+          <DialogTrigger asChild><Button size="sm" className="h-10 min-h-[44px]"><Plus className="h-4 w-4 mr-2" />Record Transaction</Button></DialogTrigger>
+          <DialogContent className="max-w-[95vw] sm:max-w-md">
             <DialogHeader><DialogTitle>Record Transaction</DialogTitle></DialogHeader>
             <div className="space-y-4">
               <div>
@@ -146,12 +147,12 @@ export default function BankingTransactions() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative flex-1 min-w-[180px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search description or reference..." className="pl-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+          <Input placeholder="Search..." className="pl-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[120px] sm:w-[140px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="credit">Credit</SelectItem>
@@ -159,7 +160,7 @@ export default function BankingTransactions() {
           </SelectContent>
         </Select>
         <Select value={filterReconciled} onValueChange={setFilterReconciled}>
-          <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[120px] sm:w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="reconciled">Reconciled</SelectItem>
@@ -168,57 +169,94 @@ export default function BankingTransactions() {
         </Select>
       </div>
 
-      <Card>
+      {/* Mobile card view */}
+      <div className="sm:hidden space-y-3">
+        {isLoading ? (
+          <p className="text-center py-8 text-muted-foreground">Loading...</p>
+        ) : filtered.length === 0 ? (
+          <p className="text-center py-8 text-muted-foreground">No transactions found</p>
+        ) : (
+          filtered.map(t => (
+            <Card key={t.id}>
+              <CardContent className="p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {t.type === "credit" ? <ArrowDownRight className="h-4 w-4 text-green-600" /> : <ArrowUpRight className="h-4 w-4 text-destructive" />}
+                    <span className="font-medium text-sm">{t.description || "Transaction"}</span>
+                  </div>
+                  <span className={`font-semibold text-sm ${t.type === "credit" ? "text-green-600" : "text-destructive"}`}>
+                    {t.type === "credit" ? "+" : "-"}₦{t.amount.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{new Date(t.transaction_date).toLocaleDateString()}</span>
+                  <Badge variant={t.is_reconciled ? "default" : "outline"} className="text-[10px]">{t.is_reconciled ? "Reconciled" : "Pending"}</Badge>
+                </div>
+                {!t.is_reconciled && (
+                  <Button variant="outline" size="sm" className="w-full h-10 min-h-[44px]" onClick={() => reconcile.mutate(t.id)}>
+                    <CheckCircle2 className="h-4 w-4 mr-2" />Reconcile
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <Card className="hidden sm:block">
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Account</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-              ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No transactions found</TableCell></TableRow>
-              ) : (
-                filtered.map(t => (
-                  <TableRow key={t.id}>
-                    <TableCell>{new Date(t.transaction_date).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-sm">{(t as any).bank_accounts?.account_name}</TableCell>
-                    <TableCell>{t.description || "—"}</TableCell>
-                    <TableCell><Badge variant="outline" className="text-xs">{t.category || "—"}</Badge></TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {t.type === "credit" ? <ArrowDownRight className="h-4 w-4 text-green-600" /> : <ArrowUpRight className="h-4 w-4 text-destructive" />}
-                        <span className="capitalize">{t.type}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className={t.type === "credit" ? "text-green-600 font-medium" : "text-destructive font-medium"}>
-                      {t.type === "credit" ? "+" : "-"}₦{t.amount.toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={t.is_reconciled ? "default" : "outline"}>{t.is_reconciled ? "Reconciled" : "Pending"}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {!t.is_reconciled && (
-                        <Button variant="ghost" size="icon" onClick={() => reconcile.mutate(t.id)} title="Reconcile">
-                          <CheckCircle2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <ResponsiveTable>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Account</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="hidden md:table-cell">Category</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                ) : filtered.length === 0 ? (
+                  <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No transactions found</TableCell></TableRow>
+                ) : (
+                  filtered.map(t => (
+                    <TableRow key={t.id}>
+                      <TableCell className="text-sm whitespace-nowrap">{new Date(t.transaction_date).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-sm">{(t as any).bank_accounts?.account_name}</TableCell>
+                      <TableCell>{t.description || "—"}</TableCell>
+                      <TableCell className="hidden md:table-cell"><Badge variant="outline" className="text-xs">{t.category || "—"}</Badge></TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {t.type === "credit" ? <ArrowDownRight className="h-4 w-4 text-green-600" /> : <ArrowUpRight className="h-4 w-4 text-destructive" />}
+                          <span className="capitalize">{t.type}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className={t.type === "credit" ? "text-green-600 font-medium" : "text-destructive font-medium"}>
+                        {t.type === "credit" ? "+" : "-"}₦{t.amount.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={t.is_reconciled ? "default" : "outline"}>{t.is_reconciled ? "Reconciled" : "Pending"}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {!t.is_reconciled && (
+                          <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => reconcile.mutate(t.id)} title="Reconcile">
+                            <CheckCircle2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </ResponsiveTable>
         </CardContent>
       </Card>
     </motion.div>

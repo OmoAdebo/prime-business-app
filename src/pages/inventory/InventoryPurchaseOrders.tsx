@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { ClipboardList, Plus, Search } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -98,12 +99,12 @@ export default function InventoryPurchaseOrders() {
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Purchase Orders</h1>
-          <p className="text-muted-foreground mt-1">Create and track orders from suppliers.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Purchase Orders</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Create and track orders from suppliers.</p>
         </div>
         <Dialog open={showAdd} onOpenChange={setShowAdd}>
-          <DialogTrigger asChild><Button className="gap-2"><Plus className="h-4 w-4" /> New Purchase Order</Button></DialogTrigger>
-          <DialogContent>
+          <DialogTrigger asChild><Button className="gap-2 h-10 min-h-[44px]"><Plus className="h-4 w-4" /> New Purchase Order</Button></DialogTrigger>
+          <DialogContent className="max-w-[95vw] sm:max-w-md">
             <DialogHeader><DialogTitle>Create Purchase Order</DialogTitle></DialogHeader>
             <div className="grid gap-4 py-2">
               <div>
@@ -123,12 +124,12 @@ export default function InventoryPurchaseOrders() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search orders..." className="pl-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-40"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             {["pending","ordered","received","cancelled","draft"].map(s => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}
@@ -145,32 +146,42 @@ export default function InventoryPurchaseOrders() {
               <p className="text-sm mt-1">Create your first purchase order.</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader><TableRow><TableHead>Order #</TableHead><TableHead>Supplier</TableHead><TableHead>Date</TableHead><TableHead>Delivery</TableHead><TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
-              <TableBody>
-                {filtered.map((po: any) => (
-                  <TableRow key={po.id}>
-                    <TableCell className="font-mono text-sm">{po.order_number || po.id.slice(0, 8)}</TableCell>
-                    <TableCell className="font-medium">{po.suppliers?.name || "—"}</TableCell>
-                    <TableCell className="text-sm">{new Date(po.order_date).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{po.expected_delivery ? new Date(po.expected_delivery).toLocaleDateString() : "—"}</TableCell>
-                    <TableCell className="text-right font-medium">{formatNaira(Number(po.total_amount))}</TableCell>
-                    <TableCell><Badge variant="outline" className={statusColors[po.status] || ""}>{po.status}</Badge></TableCell>
-                    <TableCell>
-                      {po.status === "pending" && (
-                        <div className="flex gap-1">
-                          <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => updateStatusMutation.mutate({ id: po.id, status: "ordered" })}>Mark Ordered</Button>
-                          <Button size="sm" variant="ghost" className="text-xs h-7 text-destructive" onClick={() => updateStatusMutation.mutate({ id: po.id, status: "cancelled" })}>Cancel</Button>
-                        </div>
-                      )}
-                      {po.status === "ordered" && (
-                        <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => updateStatusMutation.mutate({ id: po.id, status: "received" })}>Mark Received</Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ResponsiveTable>
+              <Table>
+                <TableHeader><TableRow>
+                  <TableHead>Order #</TableHead>
+                  <TableHead>Supplier</TableHead>
+                  <TableHead className="hidden sm:table-cell">Date</TableHead>
+                  <TableHead className="hidden md:table-cell">Delivery</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {filtered.map((po: any) => (
+                    <TableRow key={po.id}>
+                      <TableCell className="font-mono text-sm">{po.order_number || po.id.slice(0, 8)}</TableCell>
+                      <TableCell className="font-medium">{po.suppliers?.name || "—"}</TableCell>
+                      <TableCell className="text-sm hidden sm:table-cell">{new Date(po.order_date).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground hidden md:table-cell">{po.expected_delivery ? new Date(po.expected_delivery).toLocaleDateString() : "—"}</TableCell>
+                      <TableCell className="text-right font-medium">{formatNaira(Number(po.total_amount))}</TableCell>
+                      <TableCell><Badge variant="outline" className={statusColors[po.status] || ""}>{po.status}</Badge></TableCell>
+                      <TableCell>
+                        {po.status === "pending" && (
+                          <div className="flex gap-1 flex-wrap">
+                            <Button size="sm" variant="outline" className="text-xs h-9 min-h-[44px]" onClick={() => updateStatusMutation.mutate({ id: po.id, status: "ordered" })}>Ordered</Button>
+                            <Button size="sm" variant="ghost" className="text-xs h-9 min-h-[44px] text-destructive" onClick={() => updateStatusMutation.mutate({ id: po.id, status: "cancelled" })}>Cancel</Button>
+                          </div>
+                        )}
+                        {po.status === "ordered" && (
+                          <Button size="sm" variant="outline" className="text-xs h-9 min-h-[44px]" onClick={() => updateStatusMutation.mutate({ id: po.id, status: "received" })}>Received</Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ResponsiveTable>
           )}
         </CardContent>
       </Card>

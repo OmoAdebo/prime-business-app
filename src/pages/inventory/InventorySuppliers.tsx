@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Truck, Plus, Search, Edit, Trash2, Mail, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -93,17 +94,17 @@ export default function InventorySuppliers() {
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Suppliers</h1>
-          <p className="text-muted-foreground mt-1">Manage your supplier directory.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Suppliers</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Manage your supplier directory.</p>
         </div>
         <Dialog open={showAdd} onOpenChange={(o) => { setShowAdd(o); if (!o) { setEditId(null); setForm(emptyForm); } }}>
-          <DialogTrigger asChild><Button className="gap-2"><Plus className="h-4 w-4" /> Add Supplier</Button></DialogTrigger>
-          <DialogContent>
+          <DialogTrigger asChild><Button className="gap-2 h-10 min-h-[44px]"><Plus className="h-4 w-4" /> Add Supplier</Button></DialogTrigger>
+          <DialogContent className="max-w-[95vw] sm:max-w-md">
             <DialogHeader><DialogTitle>{editId ? "Edit Supplier" : "Add Supplier"}</DialogTitle></DialogHeader>
             <div className="grid gap-4 py-2">
               <div><Label>Company Name *</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} /></div>
               <div><Label>Contact Person</Label><Input value={form.contact_person} onChange={e => setForm(p => ({ ...p, contact_person: e.target.value }))} /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} /></div>
                 <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} /></div>
               </div>
@@ -114,7 +115,7 @@ export default function InventorySuppliers() {
         </Dialog>
       </div>
 
-      <div className="relative max-w-sm">
+      <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input placeholder="Search suppliers..." className="pl-9" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
       </div>
@@ -128,37 +129,45 @@ export default function InventorySuppliers() {
               <p className="text-sm mt-1">Add suppliers to manage your supply chain.</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader><TableRow><TableHead>Supplier</TableHead><TableHead>Contact</TableHead><TableHead>Email / Phone</TableHead><TableHead className="text-right">Orders</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
-              <TableBody>
-                {filtered.map((s: any) => {
-                  const orderCount = purchaseOrders.filter(po => po.supplier_id === s.id).length;
-                  return (
-                    <TableRow key={s.id}>
-                      <TableCell>
-                        <div className="font-medium">{s.name}</div>
-                        {s.address && <div className="text-xs text-muted-foreground mt-0.5">{s.address}</div>}
-                      </TableCell>
-                      <TableCell className="text-sm">{s.contact_person || "—"}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-0.5 text-sm text-muted-foreground">
-                          {s.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{s.email}</span>}
-                          {s.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{s.phone}</span>}
-                          {!s.email && !s.phone && "—"}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right"><Badge variant="outline">{orderCount} POs</Badge></TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(s)}><Edit className="h-3.5 w-3.5" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(s.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <ResponsiveTable>
+              <Table>
+                <TableHeader><TableRow>
+                  <TableHead>Supplier</TableHead>
+                  <TableHead className="hidden sm:table-cell">Contact</TableHead>
+                  <TableHead className="hidden md:table-cell">Email / Phone</TableHead>
+                  <TableHead className="text-right">Orders</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {filtered.map((s: any) => {
+                    const orderCount = purchaseOrders.filter(po => po.supplier_id === s.id).length;
+                    return (
+                      <TableRow key={s.id}>
+                        <TableCell>
+                          <div className="font-medium">{s.name}</div>
+                          {s.address && <div className="text-xs text-muted-foreground mt-0.5 hidden sm:block">{s.address}</div>}
+                        </TableCell>
+                        <TableCell className="text-sm hidden sm:table-cell">{s.contact_person || "—"}</TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <div className="flex flex-col gap-0.5 text-sm text-muted-foreground">
+                            {s.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{s.email}</span>}
+                            {s.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{s.phone}</span>}
+                            {!s.email && !s.phone && "—"}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right"><Badge variant="outline">{orderCount} POs</Badge></TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => openEdit(s)}><Edit className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px] text-destructive" onClick={() => deleteMutation.mutate(s.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </ResponsiveTable>
           )}
         </CardContent>
       </Card>

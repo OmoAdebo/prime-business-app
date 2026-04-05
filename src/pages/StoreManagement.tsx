@@ -452,7 +452,7 @@ export default function StoreManagement() {
 
       {/* Add/Edit Store Dialog */}
       <Dialog open={storeDialogOpen} onOpenChange={setStoreDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingStore ? "Edit Store" : "Add New Store / Branch"}</DialogTitle>
           </DialogHeader>

@@ -47,23 +47,42 @@ export function AppLayout() {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center justify-between border-b bg-card px-4 gap-4">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="text-muted-foreground" />
-              <div className="relative hidden sm:block">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search anything..."
-                  className="w-64 pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1"
-                />
+          <header className="h-14 flex items-center justify-between border-b bg-card px-2 sm:px-4 gap-2 sm:gap-4">
+            {mobileSearchOpen ? (
+              <div className="flex items-center gap-2 flex-1 sm:hidden">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search..."
+                    className="w-full pl-9 h-10 bg-muted/50 border-0 focus-visible:ring-1"
+                    autoFocus
+                  />
+                </div>
+                <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => setMobileSearchOpen(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground">
-                <Home className="h-4 w-4 mr-1.5" />
-                <span className="hidden sm:inline">Home</span>
-              </Button>
-              <NotificationBell />
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <SidebarTrigger className="text-muted-foreground h-10 w-10 min-h-[44px] min-w-[44px]" />
+                  <Button variant="ghost" size="icon" className="sm:hidden h-10 w-10" onClick={() => setMobileSearchOpen(true)}>
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                  <div className="relative hidden sm:block">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search anything..."
+                      className="w-64 pl-9 h-9 bg-muted/50 border-0 focus-visible:ring-1"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 sm:gap-3">
+                  <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground h-10 min-h-[44px] px-2 sm:px-3">
+                    <Home className="h-4 w-4 sm:mr-1.5" />
+                    <span className="hidden sm:inline">Home</span>
+                  </Button>
+                  <NotificationBell />
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

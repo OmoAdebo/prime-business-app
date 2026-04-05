@@ -399,14 +399,15 @@ export default function StoreManagement() {
             </CardHeader>
             <CardContent>
               {storeStaff && storeStaff.length > 0 ? (
+                <ResponsiveTable>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Employee</TableHead>
-                      <TableHead>Position</TableHead>
+                      <TableHead className="hidden sm:table-cell">Position</TableHead>
                       <TableHead>Store</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Assigned</TableHead>
+                      <TableHead className="hidden md:table-cell">Role</TableHead>
+                      <TableHead className="hidden md:table-cell">Assigned</TableHead>
                       <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -414,28 +415,29 @@ export default function StoreManagement() {
                     {storeStaff.map((assignment: any) => (
                       <TableRow key={assignment.id}>
                         <TableCell className="font-medium">{assignment.employees_hr?.full_name || "—"}</TableCell>
-                        <TableCell className="text-muted-foreground">{assignment.employees_hr?.position || "—"}</TableCell>
+                        <TableCell className="text-muted-foreground hidden sm:table-cell">{assignment.employees_hr?.position || "—"}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{assignment.inventory_locations?.name || "—"}</Badge>
                         </TableCell>
-                        <TableCell className="capitalize">{assignment.role}</TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
+                        <TableCell className="capitalize hidden md:table-cell">{assignment.role}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
                           {format(new Date(assignment.assigned_at), "MMM d, yyyy")}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
                             variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:text-destructive"
+                            size="icon"
+                            className="h-10 w-10 min-h-[44px] text-destructive hover:text-destructive"
                             onClick={() => removeStaff.mutate(assignment.id)}
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
+                </ResponsiveTable>
               ) : (
                 <div className="py-12 text-center text-muted-foreground">
                   <Users className="h-10 w-10 mx-auto mb-2 opacity-30" />

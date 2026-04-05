@@ -428,7 +428,7 @@ export default function POS() {
 
       {/* Checkout Dialog */}
       <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader><DialogTitle>Complete Sale</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="text-center p-4 bg-muted rounded-lg">

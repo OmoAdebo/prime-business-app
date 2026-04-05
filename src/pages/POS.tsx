@@ -356,11 +356,12 @@ export default function POS() {
           <Card>
             <CardHeader><CardTitle className="text-lg">Recent Sales</CardTitle></CardHeader>
             <CardContent>
+              <ResponsiveTable>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Sale #</TableHead>
-                    <TableHead>Date</TableHead>
+                    <TableHead className="hidden sm:table-cell">Date</TableHead>
                     <TableHead>Payment</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Total</TableHead>
@@ -370,7 +371,7 @@ export default function POS() {
                   {sales?.map((sale) => (
                     <TableRow key={sale.id}>
                       <TableCell className="font-mono text-sm">{sale.sale_number}</TableCell>
-                      <TableCell>{format(new Date(sale.created_at), "MMM d, yyyy HH:mm")}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{format(new Date(sale.created_at), "MMM d, yyyy HH:mm")}</TableCell>
                       <TableCell><Badge variant="outline">{sale.payment_method}</Badge></TableCell>
                       <TableCell><Badge variant={sale.status === "completed" ? "default" : "secondary"}>{sale.status}</Badge></TableCell>
                       <TableCell className="text-right font-semibold">{fmt(sale.total_amount)}</TableCell>
@@ -381,6 +382,7 @@ export default function POS() {
                   )}
                 </TableBody>
               </Table>
+              </ResponsiveTable>
             </CardContent>
           </Card>
         </TabsContent>

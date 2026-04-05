@@ -379,56 +379,58 @@ export default function Invoicing() {
       {/* Invoice Table */}
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Invoice #</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Paid</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-              ) : filteredInvoices.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No invoices found</TableCell></TableRow>
-              ) : (
-                filteredInvoices.map(inv => (
-                  <TableRow key={inv.id}>
-                    <TableCell className="font-medium">{inv.invoice_number}</TableCell>
-                    <TableCell>{new Date(inv.issue_date).toLocaleDateString()}</TableCell>
-                    <TableCell>{inv.due_date ? new Date(inv.due_date).toLocaleDateString() : "—"}</TableCell>
-                    <TableCell>₦{inv.total_amount.toLocaleString()}</TableCell>
-                    <TableCell>₦{inv.amount_paid.toLocaleString()}</TableCell>
-                    <TableCell><Badge className={statusColors[inv.status] || ""}>{inv.status}</Badge></TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-1 justify-end">
-                        {inv.status === "draft" && (
-                          <Button variant="ghost" size="icon" onClick={() => updateStatus.mutate({ id: inv.id, status: "sent" })} title="Mark as Sent">
-                            <Send className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {["sent", "partial", "overdue"].includes(inv.status) && (
-                          <Button variant="ghost" size="icon" onClick={() => { setSelectedInvoice(inv.id); setPaymentOpen(true); }} title="Record Payment">
-                            <CreditCard className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {inv.status === "draft" && (
-                          <Button variant="ghost" size="icon" onClick={() => deleteInvoice.mutate(inv.id)} title="Delete">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <ResponsiveTable>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Invoice #</TableHead>
+                  <TableHead className="hidden sm:table-cell">Date</TableHead>
+                  <TableHead className="hidden md:table-cell">Due Date</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead className="hidden sm:table-cell">Paid</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+                ) : filteredInvoices.length === 0 ? (
+                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No invoices found</TableCell></TableRow>
+                ) : (
+                  filteredInvoices.map(inv => (
+                    <TableRow key={inv.id}>
+                      <TableCell className="font-medium">{inv.invoice_number}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{new Date(inv.issue_date).toLocaleDateString()}</TableCell>
+                      <TableCell className="hidden md:table-cell">{inv.due_date ? new Date(inv.due_date).toLocaleDateString() : "—"}</TableCell>
+                      <TableCell>₦{inv.total_amount.toLocaleString()}</TableCell>
+                      <TableCell className="hidden sm:table-cell">₦{inv.amount_paid.toLocaleString()}</TableCell>
+                      <TableCell><Badge className={statusColors[inv.status] || ""}>{inv.status}</Badge></TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-1 justify-end">
+                          {inv.status === "draft" && (
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => updateStatus.mutate({ id: inv.id, status: "sent" })} title="Mark as Sent">
+                              <Send className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {["sent", "partial", "overdue"].includes(inv.status) && (
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => { setSelectedInvoice(inv.id); setPaymentOpen(true); }} title="Record Payment">
+                              <CreditCard className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {inv.status === "draft" && (
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => deleteInvoice.mutate(inv.id)} title="Delete">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </ResponsiveTable>
         </CardContent>
       </Card>
 

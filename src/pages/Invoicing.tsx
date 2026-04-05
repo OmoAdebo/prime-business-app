@@ -436,7 +436,7 @@ export default function Invoicing() {
 
       {/* Payment Dialog */}
       <Dialog open={paymentOpen} onOpenChange={setPaymentOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader><DialogTitle>Record Payment</DialogTitle></DialogHeader>
           <div className="space-y-4">
             {selectedInvoice && (() => {

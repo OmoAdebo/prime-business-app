@@ -34,6 +34,7 @@ export function AppLayout() {
   const navigate = useNavigate();
   const primaryRole = roles[0] || "employee";
   const initials = getInitials(profile?.full_name);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();

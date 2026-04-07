@@ -255,13 +255,15 @@ export default function Payroll() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="employees"><Users className="h-4 w-4 mr-1" />Employees</TabsTrigger>
-          <TabsTrigger value="departments"><Building2 className="h-4 w-4 mr-1" />Departments</TabsTrigger>
-          <TabsTrigger value="payroll"><DollarSign className="h-4 w-4 mr-1" />Payroll</TabsTrigger>
-          <TabsTrigger value="attendance"><Clock className="h-4 w-4 mr-1" />Attendance</TabsTrigger>
-          <TabsTrigger value="leave"><Calendar className="h-4 w-4 mr-1" />Leave</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-thin">
+          <TabsList className="w-max sm:w-auto">
+            <TabsTrigger value="employees" className="min-h-[44px]"><Users className="h-4 w-4 mr-1" />Employees</TabsTrigger>
+            <TabsTrigger value="departments" className="min-h-[44px]"><Building2 className="h-4 w-4 mr-1" />Depts</TabsTrigger>
+            <TabsTrigger value="payroll" className="min-h-[44px]"><DollarSign className="h-4 w-4 mr-1" />Payroll</TabsTrigger>
+            <TabsTrigger value="attendance" className="min-h-[44px]"><Clock className="h-4 w-4 mr-1" />Attendance</TabsTrigger>
+            <TabsTrigger value="leave" className="min-h-[44px]"><Calendar className="h-4 w-4 mr-1" />Leave</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Employees Tab */}
         <TabsContent value="employees" className="mt-4">

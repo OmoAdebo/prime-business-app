@@ -45,7 +45,7 @@ export default function BankingOverview() {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card className="bg-primary/5 border-primary/20">
           <CardHeader className="pb-2"><CardDescription>Total Balance</CardDescription></CardHeader>
           <CardContent>

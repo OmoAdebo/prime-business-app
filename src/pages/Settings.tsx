@@ -153,7 +153,7 @@ function SecurityTab() {
           </CardTitle>
           <CardDescription>Use a strong password to protect your account.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-5 max-w-md">
+        <CardContent className="space-y-5 max-w-md w-full">
           {/* Current Password */}
           <div className="space-y-2">
             <Label htmlFor="current-password">Current Password</Label>
@@ -941,38 +941,65 @@ function TeamTab() {
           ) : invitations.length === 0 ? (
             <p className="py-8 text-center text-muted-foreground text-sm">No invitations sent yet.</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Sent</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Mobile card view */}
+              <div className="sm:hidden space-y-3">
                 {invitations.map((inv) => (
-                  <TableRow key={inv.id}>
-                    <TableCell className="font-medium">{inv.email}</TableCell>
-                    <TableCell>
+                  <div key={inv.id} className="p-3 rounded-lg border bg-card space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-sm truncate">{inv.email}</span>
+                      <div className="flex items-center gap-1.5 capitalize text-xs">{statusIcon(inv.status)}{inv.status}</div>
+                    </div>
+                    <div className="flex items-center justify-between">
                       <Badge variant="secondary" className="capitalize text-xs">{(inv.role as string).replace("_", " ")}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 capitalize text-sm">{statusIcon(inv.status)}{inv.status}</div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{new Date(inv.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">
-                      {inv.status === "pending" && (
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => revokeMutation.mutate(inv.id)} disabled={revokeMutation.isPending}>
-                          Revoke
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">{new Date(inv.created_at).toLocaleDateString()}</span>
+                        {inv.status === "pending" && (
+                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive h-8" onClick={() => revokeMutation.mutate(inv.id)} disabled={revokeMutation.isPending}>
+                            Revoke
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+              {/* Desktop table */}
+              <div className="hidden sm:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Sent</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {invitations.map((inv) => (
+                      <TableRow key={inv.id}>
+                        <TableCell className="font-medium">{inv.email}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="capitalize text-xs">{(inv.role as string).replace("_", " ")}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5 capitalize text-sm">{statusIcon(inv.status)}{inv.status}</div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{new Date(inv.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right">
+                          {inv.status === "pending" && (
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => revokeMutation.mutate(inv.id)} disabled={revokeMutation.isPending}>
+                              Revoke
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
@@ -996,29 +1023,31 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="flex-wrap">
-          <TabsTrigger value="profile" className="flex items-center gap-1.5">
-            <User className="h-3.5 w-3.5" /> Profile
-          </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-1.5">
-            <Shield className="h-3.5 w-3.5" /> Security
-          </TabsTrigger>
-          {showBusinessTabs && (
-            <TabsTrigger value="business" className="flex items-center gap-1.5">
-              <FileText className="h-3.5 w-3.5" /> Business
+        <div className="overflow-x-auto scrollbar-thin -mx-1 px-1">
+          <TabsList className="flex-nowrap w-max sm:w-auto">
+            <TabsTrigger value="profile" className="flex items-center gap-1.5 min-h-[44px]">
+              <User className="h-3.5 w-3.5" /> Profile
             </TabsTrigger>
-          )}
-          {showBusinessTabs && (
-            <TabsTrigger value="branding" className="flex items-center gap-1.5">
-              <Palette className="h-3.5 w-3.5" /> Branding
+            <TabsTrigger value="security" className="flex items-center gap-1.5 min-h-[44px]">
+              <Shield className="h-3.5 w-3.5" /> Security
             </TabsTrigger>
-          )}
-          {showTeamTab && (
-            <TabsTrigger value="team" className="flex items-center gap-1.5">
-              <Users className="h-3.5 w-3.5" /> Team
-            </TabsTrigger>
-          )}
-        </TabsList>
+            {showBusinessTabs && (
+              <TabsTrigger value="business" className="flex items-center gap-1.5 min-h-[44px]">
+                <FileText className="h-3.5 w-3.5" /> Business
+              </TabsTrigger>
+            )}
+            {showBusinessTabs && (
+              <TabsTrigger value="branding" className="flex items-center gap-1.5 min-h-[44px]">
+                <Palette className="h-3.5 w-3.5" /> Branding
+              </TabsTrigger>
+            )}
+            {showTeamTab && (
+              <TabsTrigger value="team" className="flex items-center gap-1.5 min-h-[44px]">
+                <Users className="h-3.5 w-3.5" /> Team
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
 
         <TabsContent value="profile"><ProfileTab /></TabsContent>
         <TabsContent value="security"><SecurityTab /></TabsContent>

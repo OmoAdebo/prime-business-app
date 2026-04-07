@@ -71,7 +71,7 @@ export function PublicNavbar() {
         </div>
 
         {/* Mobile toggle */}
-        <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
+        <button className="md:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center" onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
@@ -91,7 +91,7 @@ export function PublicNavbar() {
                   key={link.href}
                   to={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block py-2 text-sm font-medium text-foreground hover:text-primary"
+                  className="block py-3 text-sm font-medium text-foreground hover:text-primary min-h-[44px]"
                 >
                   {link.label}
                 </Link>

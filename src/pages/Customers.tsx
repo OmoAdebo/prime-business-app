@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -194,7 +195,7 @@ export default function Customers() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card><CardHeader className="pb-2"><CardDescription>Total Customers</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold">{totalCustomers}</p></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardDescription>Active</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{activeCustomers}</p></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardDescription>Outstanding Balance</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold text-yellow-600">₦{totalOutstanding.toLocaleString()}</p></CardContent></Card>
@@ -202,11 +203,13 @@ export default function Customers() {
       </div>
 
       <Tabs defaultValue="customers">
-        <TabsList>
-          <TabsTrigger value="customers">Customers</TabsTrigger>
-          <TabsTrigger value="segments">Segments</TabsTrigger>
-          {selectedCustomer && <TabsTrigger value="interactions">Interactions</TabsTrigger>}
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-thin">
+          <TabsList className="w-max sm:w-auto">
+            <TabsTrigger value="customers" className="min-h-[44px]">Customers</TabsTrigger>
+            <TabsTrigger value="segments" className="min-h-[44px]">Segments</TabsTrigger>
+            {selectedCustomer && <TabsTrigger value="interactions" className="min-h-[44px]">Interactions</TabsTrigger>}
+          </TabsList>
+        </div>
 
         <TabsContent value="customers" className="space-y-4">
           <div className="relative max-w-sm">
@@ -215,15 +218,16 @@ export default function Customers() {
           </div>
           <Card>
             <CardContent className="p-0">
+              <ResponsiveTable>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Credit Limit</TableHead>
+                    <TableHead className="hidden sm:table-cell">Contact</TableHead>
+                    <TableHead className="hidden md:table-cell">Type</TableHead>
+                    <TableHead className="hidden md:table-cell">Credit Limit</TableHead>
                     <TableHead>Outstanding</TableHead>
-                    <TableHead>Loyalty</TableHead>
+                    <TableHead className="hidden sm:table-cell">Loyalty</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -241,16 +245,16 @@ export default function Customers() {
                             {c.company_name && <p className="text-xs text-muted-foreground">{c.company_name}</p>}
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           <div className="space-y-0.5">
                             {c.email && <div className="flex items-center gap-1 text-xs"><Mail className="h-3 w-3" />{c.email}</div>}
                             {c.phone && <div className="flex items-center gap-1 text-xs"><Phone className="h-3 w-3" />{c.phone}</div>}
                           </div>
                         </TableCell>
-                        <TableCell><Badge variant="outline" className="capitalize">{c.customer_type}</Badge></TableCell>
-                        <TableCell>₦{(c.credit_limit || 0).toLocaleString()}</TableCell>
+                        <TableCell className="hidden md:table-cell"><Badge variant="outline" className="capitalize">{c.customer_type}</Badge></TableCell>
+                        <TableCell className="hidden md:table-cell">₦{(c.credit_limit || 0).toLocaleString()}</TableCell>
                         <TableCell className={c.outstanding_balance && c.outstanding_balance > 0 ? "text-yellow-600" : ""}>₦{(c.outstanding_balance || 0).toLocaleString()}</TableCell>
-                        <TableCell>{c.loyalty_points || 0} pts</TableCell>
+                        <TableCell className="hidden sm:table-cell">{c.loyalty_points || 0} pts</TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" onClick={() => { setSelectedCustomer(c.id); setInteractionOpen(true); }} title="Log Interaction">
                             <MessageSquare className="h-4 w-4" />
@@ -261,6 +265,7 @@ export default function Customers() {
                   )}
                 </TableBody>
               </Table>
+              </ResponsiveTable>
             </CardContent>
           </Card>
         </TabsContent>

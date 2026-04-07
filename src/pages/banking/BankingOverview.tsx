@@ -115,46 +115,48 @@ export default function BankingOverview() {
           <CardTitle className="text-lg">Recent Transactions</CardTitle>
           <Button variant="outline" size="sm" onClick={() => navigate("/banking/transactions")}>View All</Button>
         </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Account</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No transactions yet</TableCell></TableRow>
-              ) : (
-                transactions.map(t => (
-                  <TableRow key={t.id}>
-                    <TableCell>{new Date(t.transaction_date).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-sm">{(t as any).bank_accounts?.account_name}</TableCell>
-                    <TableCell>{t.description || "—"}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {t.type === "credit" ? <ArrowDownRight className="h-4 w-4 text-green-600" /> : <ArrowUpRight className="h-4 w-4 text-destructive" />}
-                        <span className="capitalize">{t.type}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className={t.type === "credit" ? "text-green-600 font-medium" : "text-destructive font-medium"}>
-                      {t.type === "credit" ? "+" : "-"}₦{t.amount.toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={t.is_reconciled ? "default" : "outline"}>
-                        {t.is_reconciled ? "Reconciled" : "Pending"}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+        <CardContent className="p-0 sm:p-0">
+          <ResponsiveTable>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="hidden sm:table-cell">Account</TableHead>
+                  <TableHead className="hidden md:table-cell">Description</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead className="hidden sm:table-cell">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactions.length === 0 ? (
+                  <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No transactions yet</TableCell></TableRow>
+                ) : (
+                  transactions.map(t => (
+                    <TableRow key={t.id}>
+                      <TableCell className="whitespace-nowrap">{new Date(t.transaction_date).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-sm hidden sm:table-cell">{(t as any).bank_accounts?.account_name}</TableCell>
+                      <TableCell className="hidden md:table-cell">{t.description || "—"}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {t.type === "credit" ? <ArrowDownRight className="h-4 w-4 text-green-600" /> : <ArrowUpRight className="h-4 w-4 text-destructive" />}
+                          <span className="capitalize">{t.type}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className={t.type === "credit" ? "text-green-600 font-medium" : "text-destructive font-medium"}>
+                        {t.type === "credit" ? "+" : "-"}₦{t.amount.toLocaleString()}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <Badge variant={t.is_reconciled ? "default" : "outline"}>
+                          {t.is_reconciled ? "Reconciled" : "Pending"}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </ResponsiveTable>
         </CardContent>
       </Card>
     </motion.div>

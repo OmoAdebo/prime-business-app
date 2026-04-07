@@ -91,7 +91,7 @@ export function PublicNavbar() {
                   key={link.href}
                   to={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block py-2 text-sm font-medium text-foreground hover:text-primary"
+                  className="block py-3 text-sm font-medium text-foreground hover:text-primary min-h-[44px]"
                 >
                   {link.label}
                 </Link>

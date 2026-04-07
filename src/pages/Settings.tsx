@@ -941,38 +941,63 @@ function TeamTab() {
           ) : invitations.length === 0 ? (
             <p className="py-8 text-center text-muted-foreground text-sm">No invitations sent yet.</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Sent</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invitations.map((inv) => (
-                  <TableRow key={inv.id}>
-                    <TableCell className="font-medium">{inv.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="capitalize text-xs">{(inv.role as string).replace("_", " ")}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 capitalize text-sm">{statusIcon(inv.status)}{inv.status}</div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{new Date(inv.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">
+            {/* Mobile card view */}
+            <div className="sm:hidden space-y-3">
+              {invitations.map((inv) => (
+                <div key={inv.id} className="p-3 rounded-lg border bg-card space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-sm truncate">{inv.email}</span>
+                    <div className="flex items-center gap-1.5 capitalize text-xs">{statusIcon(inv.status)}{inv.status}</div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="secondary" className="capitalize text-xs">{(inv.role as string).replace("_", " ")}</Badge>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">{new Date(inv.created_at).toLocaleDateString()}</span>
                       {inv.status === "pending" && (
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => revokeMutation.mutate(inv.id)} disabled={revokeMutation.isPending}>
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive h-8" onClick={() => revokeMutation.mutate(inv.id)} disabled={revokeMutation.isPending}>
                           Revoke
                         </Button>
                       )}
-                    </TableCell>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Desktop table */}
+            <div className="hidden sm:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Sent</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {invitations.map((inv) => (
+                    <TableRow key={inv.id}>
+                      <TableCell className="font-medium">{inv.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="capitalize text-xs">{(inv.role as string).replace("_", " ")}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 capitalize text-sm">{statusIcon(inv.status)}{inv.status}</div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{new Date(inv.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">
+                        {inv.status === "pending" && (
+                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => revokeMutation.mutate(inv.id)} disabled={revokeMutation.isPending}>
+                            Revoke
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

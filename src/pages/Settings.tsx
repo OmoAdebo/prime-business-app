@@ -996,29 +996,31 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="flex-wrap">
-          <TabsTrigger value="profile" className="flex items-center gap-1.5">
-            <User className="h-3.5 w-3.5" /> Profile
-          </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-1.5">
-            <Shield className="h-3.5 w-3.5" /> Security
-          </TabsTrigger>
-          {showBusinessTabs && (
-            <TabsTrigger value="business" className="flex items-center gap-1.5">
-              <FileText className="h-3.5 w-3.5" /> Business
+        <div className="overflow-x-auto scrollbar-thin -mx-1 px-1">
+          <TabsList className="flex-nowrap w-max sm:w-auto">
+            <TabsTrigger value="profile" className="flex items-center gap-1.5 min-h-[44px]">
+              <User className="h-3.5 w-3.5" /> Profile
             </TabsTrigger>
-          )}
-          {showBusinessTabs && (
-            <TabsTrigger value="branding" className="flex items-center gap-1.5">
-              <Palette className="h-3.5 w-3.5" /> Branding
+            <TabsTrigger value="security" className="flex items-center gap-1.5 min-h-[44px]">
+              <Shield className="h-3.5 w-3.5" /> Security
             </TabsTrigger>
-          )}
-          {showTeamTab && (
-            <TabsTrigger value="team" className="flex items-center gap-1.5">
-              <Users className="h-3.5 w-3.5" /> Team
-            </TabsTrigger>
-          )}
-        </TabsList>
+            {showBusinessTabs && (
+              <TabsTrigger value="business" className="flex items-center gap-1.5 min-h-[44px]">
+                <FileText className="h-3.5 w-3.5" /> Business
+              </TabsTrigger>
+            )}
+            {showBusinessTabs && (
+              <TabsTrigger value="branding" className="flex items-center gap-1.5 min-h-[44px]">
+                <Palette className="h-3.5 w-3.5" /> Branding
+              </TabsTrigger>
+            )}
+            {showTeamTab && (
+              <TabsTrigger value="team" className="flex items-center gap-1.5 min-h-[44px]">
+                <Users className="h-3.5 w-3.5" /> Team
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
 
         <TabsContent value="profile"><ProfileTab /></TabsContent>
         <TabsContent value="security"><SecurityTab /></TabsContent>

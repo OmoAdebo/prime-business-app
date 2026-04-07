@@ -203,10 +203,13 @@ export default function Customers() {
       </div>
 
       <Tabs defaultValue="customers">
-        <TabsList>
-          <TabsTrigger value="customers">Customers</TabsTrigger>
-          <TabsTrigger value="segments">Segments</TabsTrigger>
-          {selectedCustomer && <TabsTrigger value="interactions">Interactions</TabsTrigger>}
+        <div className="overflow-x-auto scrollbar-thin">
+          <TabsList className="w-max sm:w-auto">
+            <TabsTrigger value="customers" className="min-h-[44px]">Customers</TabsTrigger>
+            <TabsTrigger value="segments" className="min-h-[44px]">Segments</TabsTrigger>
+            {selectedCustomer && <TabsTrigger value="interactions" className="min-h-[44px]">Interactions</TabsTrigger>}
+          </TabsList>
+        </div>
         </TabsList>
 
         <TabsContent value="customers" className="space-y-4">

@@ -229,11 +229,13 @@ export default function OnlineStore() {
         </Card>
       ) : (
         <Tabs defaultValue="products">
-          <TabsList>
-            <TabsTrigger value="products"><Package className="h-4 w-4 mr-1" />Products</TabsTrigger>
-            <TabsTrigger value="orders"><ShoppingCart className="h-4 w-4 mr-1" />Orders ({orders.length})</TabsTrigger>
-            <TabsTrigger value="settings"><Store className="h-4 w-4 mr-1" />Store Settings</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto scrollbar-thin">
+            <TabsList className="w-max sm:w-auto">
+              <TabsTrigger value="products" className="min-h-[44px]"><Package className="h-4 w-4 mr-1" />Products</TabsTrigger>
+              <TabsTrigger value="orders" className="min-h-[44px]"><ShoppingCart className="h-4 w-4 mr-1" />Orders ({orders.length})</TabsTrigger>
+              <TabsTrigger value="settings" className="min-h-[44px]"><Store className="h-4 w-4 mr-1" />Settings</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Products Tab */}
           <TabsContent value="products" className="space-y-4">

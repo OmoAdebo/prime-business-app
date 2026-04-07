@@ -200,12 +200,14 @@ export default function DebtCredit() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="receivables"><ArrowDownRight className="h-4 w-4 mr-1" />Receivables</TabsTrigger>
-          <TabsTrigger value="payables"><ArrowUpRight className="h-4 w-4 mr-1" />Payables</TabsTrigger>
-          <TabsTrigger value="schedules"><Calendar className="h-4 w-4 mr-1" />Schedules</TabsTrigger>
-          <TabsTrigger value="aging"><Clock className="h-4 w-4 mr-1" />Aging Report</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-thin">
+          <TabsList className="w-max sm:w-auto">
+            <TabsTrigger value="receivables" className="min-h-[44px]"><ArrowDownRight className="h-4 w-4 mr-1" />Receivables</TabsTrigger>
+            <TabsTrigger value="payables" className="min-h-[44px]"><ArrowUpRight className="h-4 w-4 mr-1" />Payables</TabsTrigger>
+            <TabsTrigger value="schedules" className="min-h-[44px]"><Calendar className="h-4 w-4 mr-1" />Schedules</TabsTrigger>
+            <TabsTrigger value="aging" className="min-h-[44px]"><Clock className="h-4 w-4 mr-1" />Aging</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Receivables */}
         <TabsContent value="receivables" className="mt-4">

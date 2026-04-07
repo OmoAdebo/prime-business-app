@@ -195,7 +195,7 @@ export default function Customers() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card><CardHeader className="pb-2"><CardDescription>Total Customers</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold">{totalCustomers}</p></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardDescription>Active</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{activeCustomers}</p></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardDescription>Outstanding Balance</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold text-yellow-600">₦{totalOutstanding.toLocaleString()}</p></CardContent></Card>

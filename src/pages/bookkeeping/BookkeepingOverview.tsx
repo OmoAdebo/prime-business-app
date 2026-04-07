@@ -106,7 +106,7 @@ export default function BookkeepingOverview() {
           <DialogTrigger asChild>
             <Button className="gap-2"><Plus className="h-4 w-4" /> Record Transaction</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="max-w-[95vw] sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Record Transaction</DialogTitle>
               <DialogDescription>Add a new income or expense entry.</DialogDescription>

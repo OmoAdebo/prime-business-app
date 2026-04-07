@@ -275,13 +275,14 @@ export default function Payroll() {
             </CardHeader>
             <CardContent>
               {empLoading ? <Skeleton className="h-32" /> : (
+                <ResponsiveTable>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Position</TableHead>
-                      <TableHead>Department</TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead className="hidden sm:table-cell">Position</TableHead>
+                      <TableHead className="hidden md:table-cell">Department</TableHead>
+                      <TableHead className="hidden sm:table-cell">Type</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Salary</TableHead>
                     </TableRow>
@@ -290,9 +291,9 @@ export default function Payroll() {
                     {employees?.map((emp: any) => (
                       <TableRow key={emp.id}>
                         <TableCell><div><p className="font-medium">{emp.full_name}</p><p className="text-xs text-muted-foreground">{emp.email}</p></div></TableCell>
-                        <TableCell>{emp.position || "—"}</TableCell>
-                        <TableCell>{emp.departments?.name || "—"}</TableCell>
-                        <TableCell><Badge variant="outline">{emp.employment_type.replace("_", " ")}</Badge></TableCell>
+                        <TableCell className="hidden sm:table-cell">{emp.position || "—"}</TableCell>
+                        <TableCell className="hidden md:table-cell">{emp.departments?.name || "—"}</TableCell>
+                        <TableCell className="hidden sm:table-cell"><Badge variant="outline">{emp.employment_type.replace("_", " ")}</Badge></TableCell>
                         <TableCell><Badge variant={emp.status === "active" ? "default" : "secondary"}>{emp.status}</Badge></TableCell>
                         <TableCell className="text-right font-semibold">{fmt(emp.basic_salary)}</TableCell>
                       </TableRow>
@@ -300,6 +301,7 @@ export default function Payroll() {
                     {(!employees || employees.length === 0) && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No employees added yet</TableCell></TableRow>}
                   </TableBody>
                 </Table>
+                </ResponsiveTable>
               )}
             </CardContent>
           </Card>

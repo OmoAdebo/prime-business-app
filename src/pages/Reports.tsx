@@ -228,12 +228,14 @@ export default function Reports() {
       </div>
 
       <Tabs defaultValue="financial">
-        <TabsList className="flex-wrap">
-          <TabsTrigger value="financial"><DollarSign className="h-4 w-4 mr-1" />Financial</TabsTrigger>
-          <TabsTrigger value="sales"><BarChart3 className="h-4 w-4 mr-1" />Sales</TabsTrigger>
-          <TabsTrigger value="inventory"><Package className="h-4 w-4 mr-1" />Inventory</TabsTrigger>
-          <TabsTrigger value="employees"><Users className="h-4 w-4 mr-1" />Employees</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-thin">
+          <TabsList className="flex-nowrap w-max sm:w-auto">
+            <TabsTrigger value="financial" className="min-h-[44px]"><DollarSign className="h-4 w-4 mr-1" />Financial</TabsTrigger>
+            <TabsTrigger value="sales" className="min-h-[44px]"><BarChart3 className="h-4 w-4 mr-1" />Sales</TabsTrigger>
+            <TabsTrigger value="inventory" className="min-h-[44px]"><Package className="h-4 w-4 mr-1" />Inventory</TabsTrigger>
+            <TabsTrigger value="employees" className="min-h-[44px]"><Users className="h-4 w-4 mr-1" />Employees</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Financial Reports */}
         <TabsContent value="financial" className="space-y-4">

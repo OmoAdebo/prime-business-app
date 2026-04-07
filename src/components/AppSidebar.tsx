@@ -106,7 +106,7 @@ function NavGroup({ label, items, collapsed, userRoles }: NavGroupProps) {
                 <NavLink
                   to={item.url}
                   end={!item.hasSubRoutes}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground/70 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 min-h-[44px] text-sidebar-foreground/70 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
                 >
                   <item.icon className="h-4 w-4 shrink-0" />

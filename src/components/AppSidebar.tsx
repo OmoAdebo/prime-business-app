@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   LayoutDashboard,
   Landmark,
@@ -20,7 +21,7 @@ import {
   Mic,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBranding } from "@/contexts/BrandingContext";
 import { AppRole } from "@/contexts/AuthContext";
@@ -122,11 +123,17 @@ function NavGroup({ label, items, collapsed, userRoles }: NavGroupProps) {
 }
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, setOpenMobile, isMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const { signOut, profile, roles } = useAuth();
   const branding = useBranding();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Auto-close mobile sidebar on route change
+  React.useEffect(() => {
+    if (isMobile) setOpenMobile(false);
+  }, [location.pathname, isMobile, setOpenMobile]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -174,7 +181,7 @@ export function AppSidebar() {
               <SidebarMenuButton asChild>
                 <NavLink
                   to={item.url}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground/50 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 min-h-[44px] text-sidebar-foreground/50 transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   activeClassName="text-sidebar-primary"
                 >
                   <item.icon className="h-4 w-4 shrink-0" />
@@ -186,7 +193,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={handleSignOut}
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground/50 transition-all hover:bg-destructive/10 hover:text-destructive cursor-pointer"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 min-h-[44px] text-sidebar-foreground/50 transition-all hover:bg-destructive/10 hover:text-destructive cursor-pointer"
             >
               <LogOut className="h-4 w-4 shrink-0" />
               {!collapsed && <span className="text-sm">Sign Out</span>}

@@ -214,7 +214,7 @@ export default function Capital() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-3">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
@@ -251,10 +251,12 @@ export default function Capital() {
       </div>
 
       <Tabs defaultValue="applications">
-        <TabsList>
-          <TabsTrigger value="applications">Applications ({applications.length})</TabsTrigger>
-          <TabsTrigger value="loans">Active Loans ({activeLoans.length})</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-thin">
+          <TabsList className="w-max sm:w-auto">
+            <TabsTrigger value="applications" className="min-h-[44px]">Applications ({applications.length})</TabsTrigger>
+            <TabsTrigger value="loans" className="min-h-[44px]">Active Loans ({activeLoans.length})</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="applications" className="space-y-4">
           {applications.map((app: any) => (

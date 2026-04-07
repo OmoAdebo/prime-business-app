@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -255,13 +256,15 @@ export default function Payroll() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="employees"><Users className="h-4 w-4 mr-1" />Employees</TabsTrigger>
-          <TabsTrigger value="departments"><Building2 className="h-4 w-4 mr-1" />Departments</TabsTrigger>
-          <TabsTrigger value="payroll"><DollarSign className="h-4 w-4 mr-1" />Payroll</TabsTrigger>
-          <TabsTrigger value="attendance"><Clock className="h-4 w-4 mr-1" />Attendance</TabsTrigger>
-          <TabsTrigger value="leave"><Calendar className="h-4 w-4 mr-1" />Leave</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-thin">
+          <TabsList className="w-max sm:w-auto">
+            <TabsTrigger value="employees" className="min-h-[44px]"><Users className="h-4 w-4 mr-1" />Employees</TabsTrigger>
+            <TabsTrigger value="departments" className="min-h-[44px]"><Building2 className="h-4 w-4 mr-1" />Depts</TabsTrigger>
+            <TabsTrigger value="payroll" className="min-h-[44px]"><DollarSign className="h-4 w-4 mr-1" />Payroll</TabsTrigger>
+            <TabsTrigger value="attendance" className="min-h-[44px]"><Clock className="h-4 w-4 mr-1" />Attendance</TabsTrigger>
+            <TabsTrigger value="leave" className="min-h-[44px]"><Calendar className="h-4 w-4 mr-1" />Leave</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Employees Tab */}
         <TabsContent value="employees" className="mt-4">
@@ -272,13 +275,14 @@ export default function Payroll() {
             </CardHeader>
             <CardContent>
               {empLoading ? <Skeleton className="h-32" /> : (
+                <ResponsiveTable>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Position</TableHead>
-                      <TableHead>Department</TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead className="hidden sm:table-cell">Position</TableHead>
+                      <TableHead className="hidden md:table-cell">Department</TableHead>
+                      <TableHead className="hidden sm:table-cell">Type</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Salary</TableHead>
                     </TableRow>
@@ -287,9 +291,9 @@ export default function Payroll() {
                     {employees?.map((emp: any) => (
                       <TableRow key={emp.id}>
                         <TableCell><div><p className="font-medium">{emp.full_name}</p><p className="text-xs text-muted-foreground">{emp.email}</p></div></TableCell>
-                        <TableCell>{emp.position || "—"}</TableCell>
-                        <TableCell>{emp.departments?.name || "—"}</TableCell>
-                        <TableCell><Badge variant="outline">{emp.employment_type.replace("_", " ")}</Badge></TableCell>
+                        <TableCell className="hidden sm:table-cell">{emp.position || "—"}</TableCell>
+                        <TableCell className="hidden md:table-cell">{emp.departments?.name || "—"}</TableCell>
+                        <TableCell className="hidden sm:table-cell"><Badge variant="outline">{emp.employment_type.replace("_", " ")}</Badge></TableCell>
                         <TableCell><Badge variant={emp.status === "active" ? "default" : "secondary"}>{emp.status}</Badge></TableCell>
                         <TableCell className="text-right font-semibold">{fmt(emp.basic_salary)}</TableCell>
                       </TableRow>
@@ -297,6 +301,7 @@ export default function Payroll() {
                     {(!employees || employees.length === 0) && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No employees added yet</TableCell></TableRow>}
                   </TableBody>
                 </Table>
+                </ResponsiveTable>
               )}
             </CardContent>
           </Card>

@@ -127,7 +127,7 @@ export default function Budgeting() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="pb-2"><CardDescription>Active Budgets</CardDescription></CardHeader>
           <CardContent><p className="text-2xl font-bold">{activeBudgets.length}</p></CardContent>

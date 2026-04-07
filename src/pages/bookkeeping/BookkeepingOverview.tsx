@@ -106,7 +106,7 @@ export default function BookkeepingOverview() {
           <DialogTrigger asChild>
             <Button className="gap-2"><Plus className="h-4 w-4" /> Record Transaction</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="max-w-[95vw] sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Record Transaction</DialogTitle>
               <DialogDescription>Add a new income or expense entry.</DialogDescription>
@@ -156,7 +156,7 @@ export default function BookkeepingOverview() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { title: "Total Income", value: totalIncome, icon: ArrowUpRight, color: "text-emerald-600" },
           { title: "Total Expenses", value: totalExpenses, icon: ArrowDownRight, color: "text-red-500" },

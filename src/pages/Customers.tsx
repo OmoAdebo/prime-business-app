@@ -264,6 +264,7 @@ export default function Customers() {
                     ))
                   )}
                 </TableBody>
+              </Table>
               </ResponsiveTable>
             </CardContent>
           </Card>

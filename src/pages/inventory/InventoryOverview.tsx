@@ -112,7 +112,7 @@ export default function InventoryOverview() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { title: "Total Products", value: totalProducts.toString(), icon: Package, sub: `${locations.length} locations`, color: "text-primary" },
           { title: "Stock Value (Cost)", value: formatNaira(totalStockValue), icon: TrendingDown, sub: `Retail: ${formatNaira(retailValue)}`, color: "text-primary" },

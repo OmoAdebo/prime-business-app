@@ -1,169 +1,76 @@
 
 
-# Mobile & Tablet Responsiveness — Comprehensive Plan
+# Mobile & Tablet UX Polish — Auto-Close Sidebar + Flow Fixes
 
-This plan covers a full responsive audit and fix across the entire application, organized into implementation batches.
+## Problem
 
----
+From the screenshot and code review, the primary issues are:
 
-## Current State
-
-The app has a reasonable desktop layout but several areas need mobile/tablet fixes:
-- **Tables** throughout banking, bookkeeping, inventory, invoicing, and POS use `<Table>` without horizontal scroll wrappers — they overflow on small screens
-- **Settings page** (1031 lines) has dense tab lists and form layouts that don't adapt well to narrow viewports
-- **POS page** uses a `lg:grid-cols-5` split that stacks on mobile but the cart loses sticky behavior and product grid tap targets are tight
-- **Dialog forms** across banking, inventory, and store management use fixed widths that clip on mobile
-- **ModuleLayout** mobile tabs work but lack scroll indicators and active-tab auto-scroll
-- **AppLayout header** search bar is hidden on mobile with no alternative
-- **Footer** grid collapses awkwardly on small screens
-- **KPI cards / charts** in banking analytics, bookkeeping, and dashboard need consistent 1-col → 2-col → 4-col breakpoints
+1. **Sidebar doesn't auto-close on mobile after nav click** — On mobile, the sidebar is a Sheet overlay. When a user taps a nav item, the page navigates but the sidebar stays open, blocking the content.
+2. **No route-change listener on mobile sidebar** — The Sheet's `openMobile` state is only toggled by `SidebarTrigger`, not by navigation events.
+3. **ModuleLayout sub-nav tabs don't close sidebar either** — If sidebar is open and user somehow navigates via sub-tabs, same issue.
+4. **Sign Out button doesn't close sidebar before navigating**.
+5. **Touch targets and spacing inconsistencies** in sidebar footer items on short mobile screens.
 
 ---
 
-## Batch 1: Global Foundation & Utilities
+## Plan
 
-**Files**: `src/index.css`, `src/lib/utils.ts`, `src/components/ModuleLayout.tsx`, `src/components/AppLayout.tsx`
+### 1. Auto-close mobile sidebar on route change
 
-Changes:
-- Add a reusable `ResponsiveTable` wrapper component (`src/components/ui/responsive-table.tsx`) that wraps `<Table>` in a horizontal `overflow-x-auto` container with fade-edge indicators
-- Update `ModuleLayout.tsx`: add auto-scroll-into-view for the active tab on mobile; add subtle gradient fade on scroll edges
-- Update `AppLayout.tsx` header: add a mobile search icon that expands into a full-width search overlay; reduce header gap on small screens
-- Add safe-area padding for notched devices in `index.css` (`env(safe-area-inset-*)`)
+**File: `src/components/AppSidebar.tsx`**
 
----
+- Import `useLocation` from react-router-dom and `useSidebar` (already imported)
+- Access `setOpenMobile` and `isMobile` from `useSidebar()`
+- Add a `useEffect` that watches `location.pathname` — when it changes and `isMobile` is true, call `setOpenMobile(false)`
+- This single change fixes ALL nav item clicks, sign out, and any programmatic navigation
 
-## Batch 2: Tables & Data-Heavy Pages
+### 2. Ensure sidebar nav links have proper touch sizing
 
-**Files**: All pages with `<Table>` — approximately 15 files across banking, bookkeeping, inventory, invoicing, POS, store management, employees
+**File: `src/components/AppSidebar.tsx`**
 
-For each table in the app:
-- Wrap in `ResponsiveTable` (horizontal scroll on overflow)
-- Hide low-priority columns on mobile using `hidden sm:table-cell` or `hidden md:table-cell` (e.g., reference numbers, dates, categories become hidden on small screens)
-- Add a card-based alternative view for mobile on key pages (transactions, invoices, sales history) — show a stacked card layout below `sm:` breakpoint instead of the table
-- Ensure `Badge`, status indicators, and action buttons remain visible and tappable (min 44px touch targets)
+- Footer nav items already have `py-2` but should match the `min-h-[44px]` pattern used in main nav items
+- Add `min-h-[44px]` to footer `NavLink` and `SidebarMenuButton` (Sign Out)
 
-Key files:
-- `src/pages/banking/BankingTransactions.tsx` — hide ref/category columns on mobile
-- `src/pages/banking/BankingBeneficiaries.tsx`, `BankingScheduled.tsx`, `BankingAdmin.tsx`
-- `src/pages/bookkeeping/GeneralLedger.tsx`, `JournalEntries.tsx`, `Reconciliation.tsx`
-- `src/pages/inventory/InventoryProducts.tsx`, `InventoryStock.tsx`, `InventoryPurchaseOrders.tsx`, `InventorySuppliers.tsx`
-- `src/pages/Invoicing.tsx` — responsive invoice table + create dialog
-- `src/pages/StoreManagement.tsx` — staff table and store cards
-- `src/pages/POS.tsx` — sales history and shifts tables
+### 3. Add `overflow-y-auto` to sidebar footer for short screens
 
----
+**File: `src/components/AppSidebar.tsx`**
 
-## Batch 3: POS Mobile-First Redesign
+- On very short mobile screens (e.g. landscape phone), the footer items (Settings, Help, Sign Out) can get cut off
+- Wrap `SidebarFooter` content or ensure the overall sidebar has proper scroll behavior (the `SidebarContent` already has `overflow-y-auto`, but the footer is outside it)
+- Add `max-h-[30vh] overflow-y-auto` to the footer's `SidebarMenu` as a safety net
 
-**File**: `src/pages/POS.tsx`
+### 4. Improve header touch area and mobile spacing
 
-The POS is the most touch-critical interface:
-- Change layout to mobile-first: product grid full-width with a slide-up cart drawer (sheet) on mobile instead of side-by-side
-- Increase product card tap targets to min 48px height
-- Make checkout dialog full-screen on mobile (`DialogContent` with `sm:max-w-lg` and mobile `w-full h-full` override)
-- Add floating cart badge/FAB button on mobile showing item count, tapping opens the cart sheet
-- Ensure receipt dialog is scrollable and fits mobile screens
-- Tab triggers (`POS / Sales History / Shifts`) should be full-width and horizontally scrollable on narrow screens
+**File: `src/components/AppLayout.tsx`**
 
----
+- The `SidebarTrigger` already has `min-h-[44px]` — verify it's consistent
+- Ensure the mobile search close button and Home button all have `min-h-[44px]` (already done in Batch 1 — verify no regression)
 
-## Batch 4: Settings Page Responsive Overhaul
+### 5. Smooth sheet transition
 
-**File**: `src/pages/Settings.tsx`
+**File: `src/components/ui/sidebar.tsx`**
 
-- Make `TabsList` horizontally scrollable on mobile (wrap in `overflow-x-auto` with `flex-nowrap`)
-- Profile tab: stack form fields vertically on mobile (already `grid-cols-1 md:grid-cols-2` — verify)
-- Security tab: ensure password strength meter and criteria list fit narrow screens
-- Business Verification tab: state/LGA selects should be full-width on mobile
-- Branding tab: color pickers and font selector stack vertically on mobile
-- Team Management tab: member table → card layout on mobile
-- All dialogs (invite, etc.): responsive width with `max-w-full sm:max-w-md`
-
----
-
-## Batch 5: Dashboard & KPI Cards
-
-**Files**: `src/pages/Dashboard.tsx`, `src/pages/banking/BankingOverview.tsx`, `src/pages/bookkeeping/BookkeepingOverview.tsx`, `src/pages/inventory/InventoryOverview.tsx`
-
-- Standardize KPI grid: `grid-cols-2` on mobile, `sm:grid-cols-2`, `lg:grid-cols-4`
-- Ensure chart containers have `min-h-[200px]` on mobile and responsive `ResponsiveContainer` widths
-- Empty state illustrations should scale down on mobile
-- Card headers: allow text wrapping, reduce font size on mobile for long titles
-
----
-
-## Batch 6: Public Pages & Auth Pages
-
-**Files**: `src/pages/Index.tsx`, `src/pages/Login.tsx`, `src/pages/Signup.tsx`, `src/pages/Pricing.tsx`, `src/pages/About.tsx`, `src/pages/Contact.tsx`, `src/components/PublicNavbar.tsx`
-
-- Landing page hero: reduce heading size on mobile (`text-3xl` instead of `text-4xl sm:text-5xl lg:text-6xl` — verify)
-- Feature cards: ensure single column on mobile, 2-col on tablet
-- Footer: 1-col stack on mobile, 2-col on tablet, 4-col on desktop
-- Login/Signup cards: add `max-w-sm w-full mx-auto` with proper padding; ensure they center on all viewports
-- PublicNavbar mobile menu: add close-on-route-change (already present) and smooth transition
-
----
-
-## Batch 7: Dialogs, Modals & Forms
-
-**Cross-cutting across all pages with `<Dialog>`**
-
-- Set all `DialogContent` to `max-w-[95vw] sm:max-w-md md:max-w-lg` to prevent clipping
-- Add `max-h-[85vh] overflow-y-auto` to dialog bodies for scrollability on short screens
-- Form inputs inside dialogs: full-width on mobile, remove any fixed widths
-- Select dropdowns: ensure `SelectContent` doesn't overflow viewport (Radix handles this but verify z-index)
-
----
-
-## Batch 8: Sidebar & Navigation Polish
-
-**Files**: `src/components/AppSidebar.tsx`, `src/components/ui/sidebar.tsx`
-
-- Verify sidebar collapses to offcanvas on mobile (< 768px) and icon-strip on tablet
-- Ensure `SidebarTrigger` remains visible and tappable at all breakpoints
-- Add swipe-to-open gesture support on mobile (CSS-based or touch event)
-- Sidebar footer items (Settings, Help, Sign Out): ensure they don't get cut off on short screens — add scroll if needed
-
----
-
-## Batch 9: Remaining Module Pages
-
-**Files**: `src/pages/Customers.tsx`, `src/pages/Payroll.tsx`, `src/pages/Budgeting.tsx`, `src/pages/Capital.tsx`, `src/pages/Reports.tsx`, `src/pages/OnlineStore.tsx`, `src/pages/Loans.tsx`, `src/pages/DebtCredit.tsx`
-
-- Apply same table responsiveness pattern (ResponsiveTable wrapper)
-- Verify card grids use responsive breakpoints
-- Ensure tab interfaces are scrollable on mobile
-- Loans "Coming Soon" overlay: ensure blur and content centers on all screen sizes
+- The Sheet already handles animations via Radix. No changes needed unless we want to customize duration — skip for now as Radix defaults are good.
 
 ---
 
 ## Technical Details
 
-**Breakpoint strategy** (consistent with Tailwind defaults):
-- Mobile: < 640px (`sm:`)
-- Tablet: 640px–1023px (`md:`)
-- Desktop: >= 1024px (`lg:`)
+The core fix is a single `useEffect` in `AppSidebar.tsx`:
 
-**Touch targets**: All interactive elements (buttons, links, table rows with actions) minimum 44x44px on mobile
-
-**New component**: `src/components/ui/responsive-table.tsx` — thin wrapper:
 ```text
-<div className="overflow-x-auto -mx-3 sm:mx-0">
-  <div className="min-w-[600px] sm:min-w-0">
-    {children}
-  </div>
-</div>
+const location = useLocation();
+const { setOpenMobile, isMobile } = useSidebar();
+
+useEffect(() => {
+  if (isMobile) setOpenMobile(false);
+}, [location.pathname]);
 ```
 
-**Estimated scope**: ~25-30 files modified, 1 new component created. No database changes needed.
+This pattern is the standard approach for Sheet-based mobile sidebars — close on navigation.
 
----
+**Files modified**: `src/components/AppSidebar.tsx` (primary), minor touch-up to footer sizing.
 
-## Implementation Order
-
-1. Batch 1 (foundation) — must come first
-2. Batch 3 (POS) — highest user-facing impact
-3. Batch 2 (tables) — widest coverage
-4. Batch 4 (settings) — complex single file
-5. Batches 5-9 in any order
+**No database changes. No new files.**
 

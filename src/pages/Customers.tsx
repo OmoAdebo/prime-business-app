@@ -223,11 +223,11 @@ export default function Customers() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Credit Limit</TableHead>
+                    <TableHead className="hidden sm:table-cell">Contact</TableHead>
+                    <TableHead className="hidden md:table-cell">Type</TableHead>
+                    <TableHead className="hidden md:table-cell">Credit Limit</TableHead>
                     <TableHead>Outstanding</TableHead>
-                    <TableHead>Loyalty</TableHead>
+                    <TableHead className="hidden sm:table-cell">Loyalty</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>

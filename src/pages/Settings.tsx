@@ -153,7 +153,7 @@ function SecurityTab() {
           </CardTitle>
           <CardDescription>Use a strong password to protect your account.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-5 max-w-md">
+        <CardContent className="space-y-5 max-w-md w-full">
           {/* Current Password */}
           <div className="space-y-2">
             <Label htmlFor="current-password">Current Password</Label>

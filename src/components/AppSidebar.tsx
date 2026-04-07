@@ -122,11 +122,17 @@ function NavGroup({ label, items, collapsed, userRoles }: NavGroupProps) {
 }
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, setOpenMobile, isMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const { signOut, profile, roles } = useAuth();
   const branding = useBranding();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Auto-close mobile sidebar on route change
+  React.useEffect(() => {
+    if (isMobile) setOpenMobile(false);
+  }, [location.pathname, isMobile, setOpenMobile]);
 
   const handleSignOut = async () => {
     await signOut();

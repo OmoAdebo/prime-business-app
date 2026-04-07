@@ -219,6 +219,7 @@ export default function Customers() {
           <Card>
             <CardContent className="p-0">
               <ResponsiveTable>
+              <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>

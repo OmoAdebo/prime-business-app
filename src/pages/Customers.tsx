@@ -219,7 +219,7 @@ export default function Customers() {
           </div>
           <Card>
             <CardContent className="p-0">
-              <Table>
+              <ResponsiveTable>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>

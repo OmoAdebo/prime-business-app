@@ -159,7 +159,7 @@ export function AppSidebar() {
 
       <Separator className="bg-sidebar-border" />
 
-      <SidebarContent className="px-2 py-2">
+      <SidebarContent className="px-2 py-2 overflow-y-auto scrollbar-thin">
         <NavGroup label="Overview" items={mainItems} collapsed={collapsed} userRoles={roles} />
         <NavGroup label="Operations" items={operationsItems} collapsed={collapsed} userRoles={roles} />
         <NavGroup label="Insights" items={insightItems} collapsed={collapsed} userRoles={roles} />

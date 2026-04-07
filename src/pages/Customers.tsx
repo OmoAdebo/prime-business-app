@@ -210,7 +210,6 @@ export default function Customers() {
             {selectedCustomer && <TabsTrigger value="interactions" className="min-h-[44px]">Interactions</TabsTrigger>}
           </TabsList>
         </div>
-        </TabsList>
 
         <TabsContent value="customers" className="space-y-4">
           <div className="relative max-w-sm">

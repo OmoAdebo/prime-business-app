@@ -134,6 +134,7 @@ export function AppLayout() {
           </main>
         </div>
       </div>
+      <FloatingVoiceButton />
     </SidebarProvider>
     </BrandingProvider>
   );

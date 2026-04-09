@@ -146,7 +146,7 @@ export function FloatingVoiceButton() {
         aria-label="Voice command"
       >
         <Mic className="h-6 w-6 group-hover:scale-110 transition-transform" />
-        <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-green-500 border-2 border-background animate-pulse" />
+        <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-primary/80 border-2 border-background animate-pulse" />
       </button>
 
       {/* Voice Command Sheet */}

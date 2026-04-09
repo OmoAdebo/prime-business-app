@@ -444,7 +444,10 @@ function BusinessVerificationTab() {
       return;
     }
     const { data: urlData } = supabase.storage.from("business-documents").getPublicUrl(path);
-    await supabase.from("businesses").update({ [field]: urlData.publicUrl }).eq("id", business.id);
+    const updateData = field === "cac_document_url"
+      ? { cac_document_url: urlData.publicUrl }
+      : { utility_bill_url: urlData.publicUrl };
+    await supabase.from("businesses").update(updateData).eq("id", business.id);
     toast({ title: "Document uploaded" });
   };
 

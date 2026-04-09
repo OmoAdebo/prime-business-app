@@ -54,6 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    let initialised = false;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         setSession(newSession);
@@ -66,7 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile(null);
           setRoles([]);
         }
-        setLoading(false);
+        // Only set loading false from here after initial getSession has resolved
+        if (initialised) setLoading(false);
       }
     );
 
@@ -76,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (s?.user) {
         fetchUserData(s.user.id);
       }
+      initialised = true;
       setLoading(false);
     });
 

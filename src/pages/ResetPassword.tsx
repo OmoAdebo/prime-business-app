@@ -6,24 +6,46 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Listen for PASSWORD_RECOVERY event instead of fragile hash check
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setReady(true);
+      }
+    });
+
+    // Also check if the hash already contains recovery token (page refresh case)
     const hash = window.location.hash;
-    if (!hash.includes('type=recovery')) {
-      toast.error('Invalid reset link');
-      navigate('/login');
+    if (hash.includes('type=recovery')) {
+      setReady(true);
     }
-  }, [navigate]);
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // If no recovery token detected after 3 seconds, redirect
+    const timeout = setTimeout(() => {
+      if (!ready) {
+        toast.error('Invalid or expired reset link');
+        navigate('/login');
+      }
+    }, 3000);
+    return () => clearTimeout(timeout);
+  }, [ready, navigate]);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters');
       return;
     }
     setLoading(true);
@@ -35,6 +57,17 @@ export default function ResetPassword() {
     }
     setLoading(false);
   };
+
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <p className="text-sm">Verifying reset link…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -51,7 +84,7 @@ export default function ResetPassword() {
                 <Input
                   id="newPassword"
                   type="password"
-                  placeholder="Min. 6 characters"
+                  placeholder="Min. 8 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required

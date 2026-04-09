@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import {
   BookOpen, Package, FileText, Users, Store, BarChart3,
-  ArrowRight, CheckCircle, Star,
+  ArrowRight, CheckCircle, Star, Mic,
 } from "lucide-react";
 
 const features = [
@@ -15,6 +15,7 @@ const features = [
   { icon: Users, title: "Payroll & HR", desc: "Process payroll, manage attendance, and handle leave requests." },
   { icon: Store, title: "Online Store", desc: "Launch your storefront and sell online with integrated checkout." },
   { icon: BarChart3, title: "Reports", desc: "AI-powered insights and analytics to grow your business." },
+  { icon: Mic, title: "Voice Commands", desc: "Navigate your dashboard hands-free — just say what you need and Prime takes you there." },
 ];
 
 const testimonials = [
@@ -54,7 +55,7 @@ export default function Index() {
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               From bookkeeping to payroll, inventory to invoicing — Prime is the all-in-one
-              platform that helps SMEs operate efficiently and grow confidently.
+              platform that helps SMEs operate efficiently and grow confidently. Navigate your dashboard hands-free with built-in voice commands.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button size="lg" asChild className="text-base px-8">
@@ -82,7 +83,7 @@ export default function Index() {
               Everything You Need to Succeed
             </h2>
             <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              Six powerful modules working together to streamline every aspect of your business.
+              Seven powerful modules — including voice commands — working together to streamline every aspect of your business.
             </p>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

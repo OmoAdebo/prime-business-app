@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { BrandingProvider } from "@/contexts/BrandingContext";
+import { FloatingVoiceButton } from "@/components/FloatingVoiceButton";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Search, Settings, LogOut, ChevronDown, Menu, Home, X } from "lucide-react";
 import { useState } from "react";
@@ -134,6 +135,7 @@ export function AppLayout() {
           </main>
         </div>
       </div>
+      <FloatingVoiceButton />
     </SidebarProvider>
     </BrandingProvider>
   );

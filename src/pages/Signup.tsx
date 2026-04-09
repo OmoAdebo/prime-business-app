@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -8,10 +8,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Eye, EyeOff, UserPlus, Building2, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 type AccountType = 'business_owner' | 'individual';
 
 export default function Signup() {
+  const { user, loading: authLoading } = useAuth();
   const [accountType, setAccountType] = useState<AccountType>('business_owner');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -21,10 +23,16 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters');
       return;
     }
     setLoading(true);

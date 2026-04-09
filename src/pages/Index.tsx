@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import {
   BookOpen, Package, FileText, Users, Store, BarChart3,
-  ArrowRight, CheckCircle, Star,
+  ArrowRight, CheckCircle, Star, Mic,
 } from "lucide-react";
 
 const features = [
@@ -15,6 +15,7 @@ const features = [
   { icon: Users, title: "Payroll & HR", desc: "Process payroll, manage attendance, and handle leave requests." },
   { icon: Store, title: "Online Store", desc: "Launch your storefront and sell online with integrated checkout." },
   { icon: BarChart3, title: "Reports", desc: "AI-powered insights and analytics to grow your business." },
+  { icon: Mic, title: "Voice Commands", desc: "Navigate your dashboard hands-free — just say what you need and Prime takes you there." },
 ];
 
 const testimonials = [

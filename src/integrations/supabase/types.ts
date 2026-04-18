@@ -2938,6 +2938,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_activity: {
+        Args: {
+          _action: string
+          _business_id: string
+          _details?: Json
+          _entity_id?: string
+          _entity_type: string
+        }
+        Returns: string
+      }
       user_belongs_to_business: {
         Args: { _business_id: string; _user_id: string }
         Returns: boolean

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useBusiness } from "@/hooks/use-business";
 import { toast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,9 +27,15 @@ function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 }
 
-const emptyForm = { name: "", sku: "", category: "", description: "", unit_price: "", cost_price: "", unit_of_measure: "pcs", low_stock_threshold: "10", barcode: "" };
+const emptyForm = {
+  name: "", sku: "", category: "", description: "",
+  unit_price: "", cost_price: "", unit_of_measure: "pcs",
+  low_stock_threshold: "10", barcode: "",
+  initial_quantity: "0", location_id: "",
+};
 
 export default function InventoryProducts() {
+  const { user } = useAuth();
   const { data: business } = useBusiness();
   const queryClient = useQueryClient();
   const businessId = business?.id;
@@ -42,6 +49,16 @@ export default function InventoryProducts() {
     queryKey: ["products", businessId],
     queryFn: async () => {
       const { data, error } = await supabase.from("products").select("*").eq("business_id", businessId!).order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!businessId,
+  });
+
+  const { data: locations = [] } = useQuery({
+    queryKey: ["inventory_locations", businessId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("inventory_locations").select("id, name").eq("business_id", businessId!).eq("is_active", true).order("name");
       if (error) throw error;
       return data;
     },
@@ -69,16 +86,46 @@ export default function InventoryProducts() {
         cost_price: parseFloat(form.cost_price) || 0, unit_of_measure: form.unit_of_measure,
         low_stock_threshold: parseInt(form.low_stock_threshold) || 10, barcode: form.barcode || null,
       };
+
       if (editId) {
         const { error } = await supabase.from("products").update(payload).eq("id", editId);
         if (error) throw error;
+        // For edits, do an adjustment if quantity is non-zero
+        const adjQty = parseInt(form.initial_quantity);
+        if (adjQty && form.location_id) {
+          await supabase.from("stock_movements").insert({
+            business_id: businessId!, product_id: editId,
+            to_location_id: form.location_id, quantity: Math.abs(adjQty),
+            movement_type: "adjustment", notes: "Adjustment from product edit", created_by: user!.id,
+          });
+          const { data: existing } = await supabase.from("stock_levels").select("*").eq("product_id", editId).eq("location_id", form.location_id).maybeSingle();
+          if (existing) {
+            await supabase.from("stock_levels").update({ quantity: existing.quantity + adjQty }).eq("id", existing.id);
+          } else {
+            await supabase.from("stock_levels").insert({ product_id: editId, location_id: form.location_id, quantity: Math.max(0, adjQty) });
+          }
+        }
       } else {
-        const { error } = await supabase.from("products").insert(payload);
+        const { data: created, error } = await supabase.from("products").insert(payload).select().single();
         if (error) throw error;
+        // Initial stock receipt
+        const initQty = parseInt(form.initial_quantity);
+        if (initQty > 0 && form.location_id && created) {
+          await supabase.from("stock_movements").insert({
+            business_id: businessId!, product_id: created.id,
+            to_location_id: form.location_id, quantity: initQty,
+            movement_type: "receipt", notes: "Initial stock", created_by: user!.id,
+          });
+          await supabase.from("stock_levels").insert({
+            product_id: created.id, location_id: form.location_id, quantity: initQty,
+          });
+        }
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["stock_levels"] });
+      queryClient.invalidateQueries({ queryKey: ["stock_movements"] });
       setShowAdd(false); setEditId(null); setForm(emptyForm);
       toast({ title: editId ? "Product updated" : "Product added" });
     },
@@ -103,7 +150,14 @@ export default function InventoryProducts() {
       description: p.description || "", unit_price: String(p.unit_price),
       cost_price: String(p.cost_price), unit_of_measure: p.unit_of_measure || "pcs",
       low_stock_threshold: String(p.low_stock_threshold || 10), barcode: p.barcode || "",
+      initial_quantity: "0", location_id: locations[0]?.id || "",
     });
+    setShowAdd(true);
+  };
+
+  const openAdd = () => {
+    setEditId(null);
+    setForm({ ...emptyForm, location_id: locations[0]?.id || "" });
     setShowAdd(true);
   };
 
@@ -114,17 +168,24 @@ export default function InventoryProducts() {
     return matchSearch && matchCat;
   });
 
+  const currentStockForEdit = editId
+    ? stockLevels.filter((sl: any) => sl.product_id === editId).reduce((q: number, sl: any) => q + sl.quantity, 0)
+    : 0;
+
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Products</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Manage your product catalog.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Manage your product catalog and stock in one place.</p>
         </div>
-        <Dialog open={showAdd} onOpenChange={(o) => { setShowAdd(o); if (!o) { setEditId(null); setForm(emptyForm); } }}>
-          <DialogTrigger asChild><Button className="gap-2 h-10 min-h-[44px]"><Plus className="h-4 w-4" /> Add Product</Button></DialogTrigger>
+        <Dialog open={showAdd} onOpenChange={(o) => { if (!o) { setShowAdd(false); setEditId(null); setForm(emptyForm); } }}>
+          <Button className="gap-2 h-10 min-h-[44px]" onClick={openAdd}><Plus className="h-4 w-4" /> Add Product</Button>
           <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>{editId ? "Edit Product" : "Add Product"}</DialogTitle><DialogDescription>Fill in product details.</DialogDescription></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>{editId ? "Edit Product" : "Add Product"}</DialogTitle>
+              <DialogDescription>{editId ? "Update product details and adjust stock." : "Add a product with its initial stock quantity."}</DialogDescription>
+            </DialogHeader>
             <div className="grid gap-4 py-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Product Name *</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} /></div>
@@ -152,6 +213,37 @@ export default function InventoryProducts() {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{["pcs","kg","litres","meters","boxes","packs","cartons","dozen"].map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
                 </Select>
+              </div>
+
+              {/* Stock Section */}
+              <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">Stock</h4>
+                  {editId && (
+                    <Badge variant="secondary" className="text-xs">Current: {currentStockForEdit} {form.unit_of_measure}</Badge>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">{editId ? "Adjust quantity (+/-)" : "Initial quantity"}</Label>
+                    <Input
+                      type="number"
+                      value={form.initial_quantity}
+                      onChange={e => setForm(p => ({ ...p, initial_quantity: e.target.value }))}
+                      placeholder={editId ? "e.g. 10 to add, -5 to remove" : "e.g. 50"}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Location</Label>
+                    <Select value={form.location_id} onValueChange={v => setForm(p => ({ ...p, location_id: v }))}>
+                      <SelectTrigger><SelectValue placeholder={locations.length ? "Choose location" : "No locations — set up in Stock"} /></SelectTrigger>
+                      <SelectContent>{locations.map((l: any) => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                {!locations.length && (
+                  <p className="text-xs text-muted-foreground">Add a location on the Stock page to track quantities per warehouse.</p>
+                )}
               </div>
             </div>
             <DialogFooter>

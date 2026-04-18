@@ -110,7 +110,7 @@ export default function InventoryStock() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Stock Management</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Track levels, movements, and adjustments.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Track levels, movements, and adjustments. <span className="text-primary">Tip: New products can be added with initial stock from the Products page.</span></p>
         </div>
         <Dialog open={showRecord} onOpenChange={setShowRecord}>
           <DialogTrigger asChild><Button className="gap-2 h-10 min-h-[44px]"><Plus className="h-4 w-4" /> Record Movement</Button></DialogTrigger>

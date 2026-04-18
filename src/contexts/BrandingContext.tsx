@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -21,6 +22,14 @@ const DEFAULTS: BrandingValues = {
   fontFamily: 'DM Sans',
   sidebarStyle: 'default',
 };
+
+// Routes that should ALWAYS use Prime's official branding (no per-business override)
+const PUBLIC_ROUTE_PREFIXES = [
+  '/about', '/pricing', '/contact', '/login', '/signup',
+  '/reset-password', '/admin-register', '/accept-invite',
+];
+const isPublicRoute = (pathname: string) =>
+  pathname === '/' || PUBLIC_ROUTE_PREFIXES.some((p) => pathname.startsWith(p));
 
 const BrandingContext = createContext<BrandingValues>(DEFAULTS);
 
@@ -71,62 +80,42 @@ const FONT_IMPORTS: Record<string, string> = {
 
 export function BrandingProvider({ children }: { children: ReactNode }) {
   const { user, roles } = useAuth();
+  const location = useLocation();
   const [branding, setBranding] = useState<BrandingValues>(DEFAULTS);
+  const [businessBranding, setBusinessBranding] = useState<BrandingValues | null>(null);
 
+  // Fetch business branding once per user/role change
   useEffect(() => {
     if (!user) {
-      // Reset to defaults on logout
-      applyTheme(DEFAULTS);
-      setBranding(DEFAULTS);
+      setBusinessBranding(null);
       return;
     }
 
     const fetchBranding = async () => {
       let businessId: string | null = null;
-
-      // Check if user is a business owner
       const { data: ownBiz } = await supabase
-        .from('businesses')
-        .select('id')
-        .eq('owner_id', user.id)
-        .maybeSingle();
+        .from('businesses').select('id').eq('owner_id', user.id).maybeSingle();
 
       if (ownBiz) {
         businessId = ownBiz.id;
       } else {
-        // Check if invited by a business owner
         const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('invited_by')
-          .eq('user_id', user.id)
-          .not('invited_by', 'is', null)
-          .limit(1)
-          .maybeSingle();
-
+          .from('user_roles').select('invited_by').eq('user_id', user.id)
+          .not('invited_by', 'is', null).limit(1).maybeSingle();
         if (roleData?.invited_by) {
           const { data: ownerBiz } = await supabase
-            .from('businesses')
-            .select('id')
-            .eq('owner_id', roleData.invited_by)
-            .maybeSingle();
+            .from('businesses').select('id').eq('owner_id', roleData.invited_by).maybeSingle();
           if (ownerBiz) businessId = ownerBiz.id;
         }
       }
 
-      if (!businessId) {
-        applyTheme(DEFAULTS);
-        setBranding(DEFAULTS);
-        return;
-      }
+      if (!businessId) { setBusinessBranding(null); return; }
 
       const { data: settings } = await supabase
-        .from('business_settings')
-        .select('*')
-        .eq('business_id', businessId)
-        .maybeSingle();
+        .from('business_settings').select('*').eq('business_id', businessId).maybeSingle();
 
       if (settings) {
-        const values: BrandingValues = {
+        setBusinessBranding({
           brandName: settings.brand_name || DEFAULTS.brandName,
           logoUrl: settings.logo_url,
           primaryColor: settings.primary_color || DEFAULTS.primaryColor,
@@ -134,17 +123,22 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
           accentColor: (settings as any).accent_color || settings.secondary_color || DEFAULTS.accentColor,
           fontFamily: (settings as any).font_family || DEFAULTS.fontFamily,
           sidebarStyle: (settings as any).sidebar_style || DEFAULTS.sidebarStyle,
-        };
-        applyTheme(values);
-        setBranding(values);
+        });
       } else {
-        applyTheme(DEFAULTS);
-        setBranding(DEFAULTS);
+        setBusinessBranding(null);
       }
     };
 
     fetchBranding();
   }, [user, roles]);
+
+  // Apply theme based on current route — public routes always use Prime defaults
+  useEffect(() => {
+    const onPublic = isPublicRoute(location.pathname);
+    const target = onPublic || !businessBranding ? DEFAULTS : businessBranding;
+    applyTheme(target);
+    setBranding(target);
+  }, [location.pathname, businessBranding]);
 
   return (
     <BrandingContext.Provider value={branding}>
@@ -156,30 +150,19 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
 function applyTheme(values: BrandingValues) {
   const root = document.documentElement;
   const primaryHsl = hexToHsl(values.primaryColor);
-  const accentHsl = hexToHsl(values.accentColor);
 
-  // Primary
   root.style.setProperty('--primary', primaryHsl);
   root.style.setProperty('--ring', primaryHsl);
-
-  // Accent derived from primary
   root.style.setProperty('--accent', lightenHsl(primaryHsl, 45));
   root.style.setProperty('--accent-foreground', `${primaryHsl.split(' ')[0]} 71% 30%`);
-
-  // Sidebar
   root.style.setProperty('--sidebar-primary', primaryHsl);
   root.style.setProperty('--sidebar-accent', lightenHsl(primaryHsl, 48));
   root.style.setProperty('--sidebar-accent-foreground', `${primaryHsl.split(' ')[0]} 71% 30%`);
   root.style.setProperty('--sidebar-ring', primaryHsl);
-
-  // Success token mirrors primary
   root.style.setProperty('--success', primaryHsl);
-
-  // Font
   root.style.setProperty('--font-body', `'${values.fontFamily}', sans-serif`);
   root.style.fontFamily = `'${values.fontFamily}', sans-serif`;
 
-  // Load font if needed
   const fontUrl = FONT_IMPORTS[values.fontFamily];
   if (fontUrl) {
     const id = `branding-font-${values.fontFamily.replace(/\s/g, '-')}`;

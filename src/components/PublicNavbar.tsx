@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LayoutDashboard, LogOut } from "lucide-react";
@@ -22,6 +22,18 @@ export function PublicNavbar() {
     await signOut();
     navigate("/");
   };
+
+  // Scroll to hash anchor when navigating to /#section from another page
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.slice(1);
+      // Wait for DOM render
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 80);
+    }
+  }, [location.pathname, location.hash]);
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b">

@@ -7,6 +7,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { AdminUserManagement } from '@/components/AdminUserManagement';
+import { ActivityFeed } from '@/components/ActivityFeed';
 
 interface QuickAction {
   title: string;
@@ -104,6 +105,9 @@ export default function RoleDashboard() {
 
       {/* Show full dashboard for admin/owner roles */}
       {(primaryRole === 'super_admin' || primaryRole === 'business_owner') && <Dashboard />}
+
+      {/* Activity feed — visible to business owners */}
+      {primaryRole === 'business_owner' && <ActivityFeed />}
     </div>
   );
 }

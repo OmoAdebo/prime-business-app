@@ -49,7 +49,13 @@ import Capital from "./pages/Capital";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import Help from "./pages/Help";
-import AdminRegister from "./pages/AdminRegister";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminOverview from "./pages/admin/AdminOverview";
+import AdminManagement from "./pages/admin/AdminManagement";
+import AdminBusinesses from "./pages/admin/AdminBusinesses";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminActivity from "./pages/admin/AdminActivity";
+import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
 import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
@@ -77,11 +83,21 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/admin-register" element={<AdminRegister />} />
+            
             <Route path="/accept-invite/:token" element={<AcceptInvite />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin', 'support_admin']} />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminOverview />} />
+                <Route path="businesses" element={<AdminBusinesses />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="admins" element={<AdminManagement />} />
+                <Route path="activity" element={<AdminActivity />} />
+                <Route path="announcements" element={<AdminAnnouncements />} />
+              </Route>
+            </Route>
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<RoleDashboard />} />
               <Route path="/banking" element={<BankingLayout />}>

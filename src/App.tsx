@@ -88,6 +88,16 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin', 'support_admin']} />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminOverview />} />
+                <Route path="businesses" element={<AdminBusinesses />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="admins" element={<AdminManagement />} />
+                <Route path="activity" element={<AdminActivity />} />
+                <Route path="announcements" element={<AdminAnnouncements />} />
+              </Route>
+            </Route>
             <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<RoleDashboard />} />
               <Route path="/banking" element={<BankingLayout />}>

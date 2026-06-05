@@ -18,10 +18,19 @@ interface QuickAction {
 
 const roleQuickActions: Record<AppRole, QuickAction[]> = {
   super_admin: [
-    { title: 'User Management', icon: Users, path: '/settings', color: 'bg-primary/10 text-primary' },
-    { title: 'All Reports', icon: BarChart3, path: '/reports', color: 'bg-accent text-accent-foreground' },
-    { title: 'Banking', icon: Landmark, path: '/banking', color: 'bg-secondary/20 text-secondary-foreground' },
+    { title: 'Admin Console', icon: Settings, path: '/admin', color: 'bg-primary/10 text-primary' },
+    { title: 'User Management', icon: Users, path: '/admin/users', color: 'bg-accent text-accent-foreground' },
+    { title: 'All Reports', icon: BarChart3, path: '/reports', color: 'bg-secondary/20 text-secondary-foreground' },
     { title: 'System Settings', icon: Settings, path: '/settings', color: 'bg-muted text-muted-foreground' },
+  ],
+  admin: [
+    { title: 'Admin Console', icon: Settings, path: '/admin', color: 'bg-primary/10 text-primary' },
+    { title: 'Businesses', icon: Store, path: '/admin/businesses', color: 'bg-accent text-accent-foreground' },
+    { title: 'Activity', icon: BarChart3, path: '/admin/activity', color: 'bg-secondary/20 text-secondary-foreground' },
+  ],
+  support_admin: [
+    { title: 'Admin Console', icon: Settings, path: '/admin', color: 'bg-primary/10 text-primary' },
+    { title: 'Users', icon: Users, path: '/admin/users', color: 'bg-accent text-accent-foreground' },
   ],
   business_owner: [
     { title: 'Bookkeeping', icon: BookOpen, path: '/bookkeeping', color: 'bg-primary/10 text-primary' },
@@ -54,6 +63,8 @@ const roleQuickActions: Record<AppRole, QuickAction[]> = {
 
 const roleGreetings: Record<AppRole, string> = {
   super_admin: 'System overview — full control at your fingertips.',
+  admin: 'Platform admin overview — manage businesses and users.',
+  support_admin: 'Support overview — assist users and review activity.',
   business_owner: 'Your business at a glance — finances, sales & operations.',
   store_manager: 'Store operations overview — inventory, sales & orders.',
   accountant: 'Financial overview — books, reports & reconciliation.',

@@ -49,7 +49,7 @@ export default function AdminManagement() {
   const removeAdmin = async (userId: string, role: string) => {
     if (userId === user?.id) return toast.error("You can't remove yourself");
     if (!confirm('Revoke admin access for this user?')) return;
-    const { error } = await supabase.from('user_roles').delete().eq('user_id', userId).eq('role', role);
+    const { error } = await supabase.from('user_roles').delete().eq('user_id', userId).eq('role', role as AdminRole);
     if (error) return toast.error(error.message);
     toast.success('Admin access revoked');
     load();

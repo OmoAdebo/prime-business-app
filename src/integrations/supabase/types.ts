@@ -109,6 +109,48 @@ export type Database = {
           },
         ]
       }
+      announcements: {
+        Row: {
+          active: boolean
+          audience: string
+          body: string
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          severity: string
+          starts_at: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          audience?: string
+          body: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          severity?: string
+          starts_at?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          audience?: string
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          severity?: string
+          starts_at?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       attendance: {
         Row: {
           business_id: string
@@ -1896,6 +1938,8 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean
+          onboarding_completed: boolean
+          onboarding_step: number
           phone: string | null
           updated_at: string
         }
@@ -1906,6 +1950,8 @@ export type Database = {
           full_name?: string | null
           id: string
           is_active?: boolean
+          onboarding_completed?: boolean
+          onboarding_step?: number
           phone?: string | null
           updated_at?: string
         }
@@ -1916,6 +1962,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
+          onboarding_completed?: boolean
+          onboarding_step?: number
           phone?: string | null
           updated_at?: string
         }
@@ -2961,6 +3009,8 @@ export type Database = {
         | "accountant"
         | "employee"
         | "individual"
+        | "admin"
+        | "support_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3095,6 +3145,8 @@ export const Constants = {
         "accountant",
         "employee",
         "individual",
+        "admin",
+        "support_admin",
       ],
     },
   },

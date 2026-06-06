@@ -181,8 +181,7 @@ export default function BankingTransfers() {
         <p className="text-sm text-muted-foreground">Move money between your accounts or send to other banks</p>
       </div>
 
-      <TransfersTabs amountSetters={{ intra: setAmount, same: setSbAmount, inter: setIbAmount }} recipientSetters={{ same: setSbToAccountName, inter: setIbAccountName }}>
-      <Tabs defaultValue="intra" className="max-w-2xl" id="transfers-tabs">
+      <Tabs value={transferTab} onValueChange={setTransferTab} className="max-w-2xl">
         <TabsList className="grid grid-cols-3 w-full">
           <TabsTrigger value="intra" className="gap-1.5"><ArrowLeftRight className="h-4 w-4" /><span className="hidden sm:inline">Intra-Account</span><span className="sm:hidden">Own</span></TabsTrigger>
           <TabsTrigger value="same" className="gap-1.5"><Building2 className="h-4 w-4" /><span className="hidden sm:inline">Same Bank</span><span className="sm:hidden">Same</span></TabsTrigger>

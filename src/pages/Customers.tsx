@@ -40,6 +40,15 @@ export default function Customers() {
   const [custType, setCustType] = useState("individual");
   const [custCreditLimit, setCustCreditLimit] = useState("");
 
+  useEffect(() => {
+    return onAction("open-add-customer", (p) => {
+      if (p?.name) setCustName(p.name);
+      if (p?.email) setCustEmail(p.email);
+      if (p?.phone) setCustPhone(p.phone);
+      setCustomerOpen(true);
+    });
+  }, []);
+
   // Interaction form
   const [intType, setIntType] = useState("note");
   const [intSubject, setIntSubject] = useState("");

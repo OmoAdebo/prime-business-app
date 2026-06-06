@@ -9,8 +9,21 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, UserPlus, Building2, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { Progress } from '@/components/ui/progress';
 
 type AccountType = 'business_owner' | 'individual';
+
+function scorePassword(p: string) {
+  const checks = {
+    length: p.length >= 8,
+    upper: /[A-Z]/.test(p),
+    lower: /[a-z]/.test(p),
+    number: /\d/.test(p),
+    special: /[^A-Za-z0-9]/.test(p),
+  };
+  const passed = Object.values(checks).filter(Boolean).length;
+  return { checks, score: (passed / 5) * 100, passed };
+}
 
 export default function Signup() {
   const { user, loading: authLoading } = useAuth();

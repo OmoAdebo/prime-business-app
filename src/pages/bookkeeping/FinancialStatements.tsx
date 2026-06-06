@@ -38,6 +38,7 @@ function periodStart(p: Period): Date | null {
 export default function FinancialStatements() {
   const { data: business } = useBusiness();
   const businessId = business?.id;
+  const [period, setPeriod] = useState<Period>("ytd");
 
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["transactions", businessId],
@@ -59,29 +60,46 @@ export default function FinancialStatements() {
     enabled: !!businessId,
   });
 
-  const totalIncome = transactions.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
-  const totalExpenses = transactions.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
+  const filteredTx = useMemo(() => {
+    const start = periodStart(period);
+    if (!start) return transactions;
+    return transactions.filter((t: any) => t.transaction_date && new Date(t.transaction_date) >= start);
+  }, [transactions, period]);
+
+  const totalIncome = filteredTx.filter((t: any) => t.type === "income").reduce((s: number, t: any) => s + Number(t.amount), 0);
+  const totalExpenses = filteredTx.filter((t: any) => t.type === "expense").reduce((s: number, t: any) => s + Number(t.amount), 0);
   const grossProfit = totalIncome - totalExpenses;
-  const totalVat = transactions.reduce((s, t) => s + Number(t.vat_amount || 0), 0);
+  const totalVat = filteredTx.reduce((s: number, t: any) => s + Number(t.vat_amount || 0), 0);
   const netProfit = grossProfit - totalVat;
 
-  // Group expenses by category
-  const expensesByCategory = transactions.filter(t => t.type === "expense").reduce<Record<string, number>>((acc, t) => {
+  const expensesByCategory = filteredTx.filter((t: any) => t.type === "expense").reduce<Record<string, number>>((acc, t: any) => {
     const cat = t.category || "Uncategorized";
     acc[cat] = (acc[cat] || 0) + Number(t.amount);
     return acc;
   }, {});
 
-  const incomeByCategory = transactions.filter(t => t.type === "income").reduce<Record<string, number>>((acc, t) => {
+  const incomeByCategory = filteredTx.filter((t: any) => t.type === "income").reduce<Record<string, number>>((acc, t: any) => {
     const cat = t.category || "Uncategorized";
     acc[cat] = (acc[cat] || 0) + Number(t.amount);
     return acc;
   }, {});
 
-  // Simple balance sheet from accounts
-  const assetAccounts = accounts.filter(a => a.type === "asset");
-  const liabilityAccounts = accounts.filter(a => a.type === "liability");
-  const equityAccounts = accounts.filter(a => a.type === "equity");
+  const assetAccounts = accounts.filter((a: any) => a.type === "asset");
+  const liabilityAccounts = accounts.filter((a: any) => a.type === "liability");
+  const equityAccounts = accounts.filter((a: any) => a.type === "equity");
+
+  const exportData: FinancialData = {
+    businessName: business?.name || "Business",
+    period: periodLabel(period),
+    totalIncome, totalExpenses, totalVat, grossProfit, netProfit,
+    incomeByCategory, expensesByCategory,
+    assetAccounts, liabilityAccounts, equityAccounts,
+  };
+
+  const handleDownload = (fn: (d: FinancialData) => void, label: string) => {
+    try { fn(exportData); toast.success(`${label} downloaded`); }
+    catch (e: any) { toast.error(`Download failed: ${e.message}`); }
+  };
 
   if (isLoading) return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-96 w-full" /></div>;
 

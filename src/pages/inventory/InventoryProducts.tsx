@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Package, Plus, Search, Edit, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { ImportExportButtons } from "@/components/ImportExportButtons";
 
 const PRODUCT_CATEGORIES = [
   "Electronics", "Food & Beverages", "Clothing", "Health & Beauty",
@@ -193,8 +194,37 @@ export default function InventoryProducts() {
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Products</h1>
           <p className="text-muted-foreground mt-1 text-sm">Manage your product catalog and stock in one place.</p>
         </div>
-        <Dialog open={showAdd} onOpenChange={(o) => { if (!o) { setShowAdd(false); setEditId(null); setForm(emptyForm); } }}>
-          <Button className="gap-2 h-10 min-h-[44px]" onClick={openAdd}><Plus className="h-4 w-4" /> Add Product</Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <ImportExportButtons
+            filename="products"
+            rows={products.map((p: any) => ({
+              name: p.name, sku: p.sku || "", category: p.category || "",
+              unit_price: p.unit_price, cost_price: p.cost_price,
+              unit_of_measure: p.unit_of_measure, low_stock_threshold: p.low_stock_threshold,
+              barcode: p.barcode || "",
+            }))}
+            onImport={async (rows) => {
+              if (!businessId) return;
+              const payload = rows.filter(r => r.name).map(r => ({
+                business_id: businessId,
+                name: r.name,
+                sku: r.sku || null,
+                category: r.category || null,
+                unit_price: parseFloat(r.unit_price || "0") || 0,
+                cost_price: parseFloat(r.cost_price || "0") || 0,
+                unit_of_measure: r.unit_of_measure || "pcs",
+                low_stock_threshold: parseInt(r.low_stock_threshold || "10") || 10,
+                barcode: r.barcode || null,
+              }));
+              if (!payload.length) { toast({ title: "No valid rows", variant: "destructive" }); return; }
+              const { error } = await supabase.from("products").insert(payload);
+              if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+              toast({ title: `Imported ${payload.length} products` });
+              queryClient.invalidateQueries({ queryKey: ["products"] });
+            }}
+          />
+          <Dialog open={showAdd} onOpenChange={(o) => { if (!o) { setShowAdd(false); setEditId(null); setForm(emptyForm); } }}>
+            <Button className="gap-2 h-10 min-h-[44px]" onClick={openAdd}><Plus className="h-4 w-4" /> Add Product</Button>
           <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editId ? "Edit Product" : "Add Product"}</DialogTitle>
@@ -265,7 +295,8 @@ export default function InventoryProducts() {
               <Button onClick={() => saveMutation.mutate()} disabled={!form.name || saveMutation.isPending}>{saveMutation.isPending ? "Saving..." : editId ? "Update" : "Add Product"}</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">

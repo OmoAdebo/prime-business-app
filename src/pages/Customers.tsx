@@ -198,9 +198,9 @@ export default function Customers() {
                   customer_type: r.type || "individual",
                   credit_limit: parseFloat(r.credit_limit || "0") || 0,
                 }));
-              if (!payload.length) return toast.error("No valid rows");
+              if (!payload.length) { toast.error("No valid rows"); return; }
               const { error } = await supabase.from("customers").insert(payload);
-              if (error) return toast.error(error.message);
+              if (error) { toast.error(error.message); return; }
               toast.success(`Imported ${payload.length} customers`);
               queryClient.invalidateQueries({ queryKey: ["customers"] });
             }}

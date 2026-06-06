@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { onAction } from "@/lib/action-bus";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -44,6 +45,19 @@ export default function InventoryProducts() {
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  useEffect(() => {
+    return onAction("open-add-product", (p) => {
+      setEditId(null);
+      setForm({
+        ...emptyForm,
+        name: p?.name || "",
+        sku: p?.sku || "",
+        unit_price: p?.price ? String(p.price) : "",
+      });
+      setShowAdd(true);
+    });
+  }, []);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", businessId],

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { onAction } from "@/lib/action-bus";
 import { Users, Plus, MessageSquare, Search, Tag, Mail, Phone } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +39,15 @@ export default function Customers() {
   const [custCompany, setCustCompany] = useState("");
   const [custType, setCustType] = useState("individual");
   const [custCreditLimit, setCustCreditLimit] = useState("");
+
+  useEffect(() => {
+    return onAction("open-add-customer", (p) => {
+      if (p?.name) setCustName(p.name);
+      if (p?.email) setCustEmail(p.email);
+      if (p?.phone) setCustPhone(p.phone);
+      setCustomerOpen(true);
+    });
+  }, []);
 
   // Interaction form
   const [intType, setIntType] = useState("note");

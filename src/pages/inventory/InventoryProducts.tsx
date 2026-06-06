@@ -46,6 +46,19 @@ export default function InventoryProducts() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
 
+  useEffect(() => {
+    return onAction("open-add-product", (p) => {
+      setEditId(null);
+      setForm({
+        ...emptyForm,
+        name: p?.name || "",
+        sku: p?.sku || "",
+        unit_price: p?.price ? String(p.price) : "",
+      });
+      setShowAdd(true);
+    });
+  }, []);
+
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", businessId],
     queryFn: async () => {

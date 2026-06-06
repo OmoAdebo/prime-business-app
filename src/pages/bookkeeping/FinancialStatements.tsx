@@ -1,14 +1,38 @@
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/use-business";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileBarChart, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TrendingUp, TrendingDown, DollarSign, Download, FileText, FileSpreadsheet } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
+import {
+  downloadPnLPdf, downloadBalanceSheetPdf, downloadCashFlowPdf, downloadAllPdf,
+  downloadPnLCsv, downloadBalanceSheetCsv, downloadCashFlowCsv,
+  type FinancialData,
+} from "@/lib/financial-export";
 
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
+}
+
+type Period = "30d" | "90d" | "ytd" | "all";
+
+function periodLabel(p: Period) {
+  return { "30d": "Last 30 days", "90d": "Last 90 days", ytd: "Year to date", all: "All time" }[p];
+}
+
+function periodStart(p: Period): Date | null {
+  const now = new Date();
+  if (p === "30d") return new Date(now.getTime() - 30 * 86400000);
+  if (p === "90d") return new Date(now.getTime() - 90 * 86400000);
+  if (p === "ytd") return new Date(now.getFullYear(), 0, 1);
+  return null;
 }
 
 export default function FinancialStatements() {

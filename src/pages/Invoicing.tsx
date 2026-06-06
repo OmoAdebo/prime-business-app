@@ -362,7 +362,8 @@ export default function Invoicing() {
               </Button>
             </div>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       {/* Summary Cards */}

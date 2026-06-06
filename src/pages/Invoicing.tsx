@@ -54,6 +54,18 @@ export default function Invoicing() {
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [paymentRef, setPaymentRef] = useState("");
 
+  // Voice agent: open & prefill create dialog
+  useEffect(() => {
+    return onAction("open-create-invoice", (p) => {
+      if (p?.customer_name) setCustomerName(p.customer_name);
+      if (p?.due_date) setDueDate(p.due_date);
+      if (p?.description || p?.amount) {
+        setItems([{ description: p.description || "", quantity: 1, unit_price: p.amount || 0 }]);
+      }
+      setCreateOpen(true);
+    });
+  }, []);
+
   const businessId = business?.id;
 
   // Fetch invoices

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { onAction } from "@/lib/action-bus";
 import { ArrowLeftRight, Building2, Send } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,15 @@ export default function BankingTransfers() {
   const { data: business } = useBusiness();
   const queryClient = useQueryClient();
   const businessId = business?.id;
+  const [transferTab, setTransferTab] = useState("intra");
+
+  useEffect(() => {
+    return onAction("open-new-transfer", (p) => {
+      setTransferTab("inter");
+      if (p?.amount) setIbAmount(String(p.amount));
+      if (p?.recipient) setIbAccountName(p.recipient);
+    });
+  }, []);
 
   // Intra-account
   const [fromAccount, setFromAccount] = useState("");
@@ -180,7 +190,7 @@ export default function BankingTransfers() {
         <p className="text-sm text-muted-foreground">Move money between your accounts or send to other banks</p>
       </div>
 
-      <Tabs defaultValue="intra" className="max-w-2xl">
+      <Tabs value={transferTab} onValueChange={setTransferTab} className="max-w-2xl">
         <TabsList className="grid grid-cols-3 w-full">
           <TabsTrigger value="intra" className="gap-1.5"><ArrowLeftRight className="h-4 w-4" /><span className="hidden sm:inline">Intra-Account</span><span className="sm:hidden">Own</span></TabsTrigger>
           <TabsTrigger value="same" className="gap-1.5"><Building2 className="h-4 w-4" /><span className="hidden sm:inline">Same Bank</span><span className="sm:hidden">Same</span></TabsTrigger>

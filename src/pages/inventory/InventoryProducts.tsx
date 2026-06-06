@@ -295,7 +295,8 @@ export default function InventoryProducts() {
               <Button onClick={() => saveMutation.mutate()} disabled={!form.name || saveMutation.isPending}>{saveMutation.isPending ? "Saving..." : editId ? "Update" : "Add Product"}</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">

@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Truck, Plus, Search, Edit, Trash2, Mail, Phone } from "lucide-react";
 import { motion } from "framer-motion";
+import { ImportExportButtons } from "@/components/ImportExportButtons";
 
 const emptyForm = { name: "", email: "", phone: "", address: "", contact_person: "" };
 
@@ -97,22 +98,47 @@ export default function InventorySuppliers() {
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Suppliers</h1>
           <p className="text-muted-foreground mt-1 text-sm">Manage your supplier directory.</p>
         </div>
-        <Dialog open={showAdd} onOpenChange={(o) => { setShowAdd(o); if (!o) { setEditId(null); setForm(emptyForm); } }}>
-          <DialogTrigger asChild><Button className="gap-2 h-10 min-h-[44px]"><Plus className="h-4 w-4" /> Add Supplier</Button></DialogTrigger>
-          <DialogContent className="max-w-[95vw] sm:max-w-md">
-            <DialogHeader><DialogTitle>{editId ? "Edit Supplier" : "Add Supplier"}</DialogTitle></DialogHeader>
-            <div className="grid gap-4 py-2">
-              <div><Label>Company Name *</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} /></div>
-              <div><Label>Contact Person</Label><Input value={form.contact_person} onChange={e => setForm(p => ({ ...p, contact_person: e.target.value }))} /></div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} /></div>
-                <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} /></div>
+        <div className="flex flex-wrap items-center gap-2">
+          <ImportExportButtons
+            filename="suppliers"
+            rows={suppliers.map((s: any) => ({
+              name: s.name, contact_person: s.contact_person || "",
+              email: s.email || "", phone: s.phone || "", address: s.address || "",
+            }))}
+            onImport={async (rows) => {
+              if (!businessId) return;
+              const payload = rows.filter(r => r.name).map(r => ({
+                business_id: businessId,
+                name: r.name,
+                contact_person: r.contact_person || null,
+                email: r.email || null,
+                phone: r.phone || null,
+                address: r.address || null,
+              }));
+              if (!payload.length) { toast({ title: "No valid rows", variant: "destructive" }); return; }
+              const { error } = await supabase.from("suppliers").insert(payload);
+              if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+              toast({ title: `Imported ${payload.length} suppliers` });
+              queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+            }}
+          />
+          <Dialog open={showAdd} onOpenChange={(o) => { setShowAdd(o); if (!o) { setEditId(null); setForm(emptyForm); } }}>
+            <DialogTrigger asChild><Button className="gap-2 h-10 min-h-[44px]"><Plus className="h-4 w-4" /> Add Supplier</Button></DialogTrigger>
+            <DialogContent className="max-w-[95vw] sm:max-w-md">
+              <DialogHeader><DialogTitle>{editId ? "Edit Supplier" : "Add Supplier"}</DialogTitle></DialogHeader>
+              <div className="grid gap-4 py-2">
+                <div><Label>Company Name *</Label><Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} /></div>
+                <div><Label>Contact Person</Label><Input value={form.contact_person} onChange={e => setForm(p => ({ ...p, contact_person: e.target.value }))} /></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} /></div>
+                  <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} /></div>
+                </div>
+                <div><Label>Address</Label><Input value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} /></div>
               </div>
-              <div><Label>Address</Label><Input value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} /></div>
-            </div>
-            <DialogFooter><Button onClick={() => saveMutation.mutate()} disabled={!form.name || saveMutation.isPending}>{saveMutation.isPending ? "Saving..." : editId ? "Update" : "Add Supplier"}</Button></DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter><Button onClick={() => saveMutation.mutate()} disabled={!form.name || saveMutation.isPending}>{saveMutation.isPending ? "Saving..." : editId ? "Update" : "Add Supplier"}</Button></DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="relative">

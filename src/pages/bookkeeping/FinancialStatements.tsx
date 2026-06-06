@@ -89,7 +89,7 @@ export default function FinancialStatements() {
   const equityAccounts = accounts.filter((a: any) => a.type === "equity");
 
   const exportData: FinancialData = {
-    businessName: business?.name || "Business",
+    businessName: business?.company_name || "Business",
     period: periodLabel(period),
     totalIncome, totalExpenses, totalVat, grossProfit, netProfit,
     incomeByCategory, expensesByCategory,

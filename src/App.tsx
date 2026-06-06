@@ -57,6 +57,8 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminActivity from "./pages/admin/AdminActivity";
 import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
 import AcceptInvite from "./pages/AcceptInvite";
+import Onboarding from "./pages/Onboarding";
+import { OnboardingGuard } from "./components/OnboardingGuard";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -98,7 +100,8 @@ const App = () => (
                 <Route path="announcements" element={<AdminAnnouncements />} />
               </Route>
             </Route>
-            <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+            <Route element={<ProtectedRoute><OnboardingGuard><AppLayout /></OnboardingGuard></ProtectedRoute>}>
               <Route path="/dashboard" element={<RoleDashboard />} />
               <Route path="/banking" element={<BankingLayout />}>
                 <Route index element={<BankingOverview />} />

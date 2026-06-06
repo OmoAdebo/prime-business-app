@@ -43,6 +43,20 @@ export default function JournalEntries() {
     { account_id: "", debit: "", credit: "", description: "" },
   ]);
 
+  useEffect(() => {
+    return onAction("open-record-expense", (p) => {
+      setEntryForm((f) => ({ ...f, description: p?.description || p?.category || "" }));
+      if (p?.amount) {
+        setLines([
+          { account_id: "", debit: String(p.amount), credit: "", description: p?.description || "" },
+          { account_id: "", debit: "", credit: String(p.amount), description: "" },
+        ]);
+      }
+      setShowAdd(true);
+    });
+  }, []);
+
+
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["journal_entries", businessId],
     queryFn: async () => {

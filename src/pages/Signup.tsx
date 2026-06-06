@@ -42,10 +42,12 @@ export default function Signup() {
     }
   }, [user, authLoading, navigate]);
 
+  const pwStrength = scorePassword(password);
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 8) {
-      toast.error('Password must be at least 8 characters');
+    if (pwStrength.passed < 5) {
+      toast.error('Password must be 8+ chars with upper, lower, number and special character');
       return;
     }
     setLoading(true);

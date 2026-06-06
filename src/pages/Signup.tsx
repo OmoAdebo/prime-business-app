@@ -9,8 +9,21 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, UserPlus, Building2, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { Progress } from '@/components/ui/progress';
 
 type AccountType = 'business_owner' | 'individual';
+
+function scorePassword(p: string) {
+  const checks = {
+    length: p.length >= 8,
+    upper: /[A-Z]/.test(p),
+    lower: /[a-z]/.test(p),
+    number: /\d/.test(p),
+    special: /[^A-Za-z0-9]/.test(p),
+  };
+  const passed = Object.values(checks).filter(Boolean).length;
+  return { checks, score: (passed / 5) * 100, passed };
+}
 
 export default function Signup() {
   const { user, loading: authLoading } = useAuth();
@@ -29,10 +42,12 @@ export default function Signup() {
     }
   }, [user, authLoading, navigate]);
 
+  const pwStrength = scorePassword(password);
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 8) {
-      toast.error('Password must be at least 8 characters');
+    if (pwStrength.passed < 5) {
+      toast.error('Password must be 8+ chars with upper, lower, number and special character');
       return;
     }
     setLoading(true);
@@ -171,7 +186,20 @@ export default function Signup() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {password && (
+                  <div className="space-y-1.5 pt-1">
+                    <Progress value={pwStrength.score} className={`h-1.5 ${pwStrength.score < 60 ? '[&>div]:bg-destructive' : pwStrength.score < 100 ? '[&>div]:bg-amber-500' : '[&>div]:bg-emerald-500'}`} />
+                    <div className="grid grid-cols-2 gap-1 text-[11px] text-muted-foreground">
+                      <span className={pwStrength.checks.length ? 'text-emerald-600' : ''}>• 8+ characters</span>
+                      <span className={pwStrength.checks.upper ? 'text-emerald-600' : ''}>• Uppercase</span>
+                      <span className={pwStrength.checks.lower ? 'text-emerald-600' : ''}>• Lowercase</span>
+                      <span className={pwStrength.checks.number ? 'text-emerald-600' : ''}>• Number</span>
+                      <span className={pwStrength.checks.special ? 'text-emerald-600' : ''}>• Special char</span>
+                    </div>
+                  </div>
+                )}
               </div>
+
 
               <p className="text-xs text-muted-foreground">
                 {accountType === 'business_owner' ? (

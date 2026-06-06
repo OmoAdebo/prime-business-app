@@ -1,19 +1,44 @@
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/use-business";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileBarChart, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TrendingUp, TrendingDown, DollarSign, Download, FileText, FileSpreadsheet } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
+import {
+  downloadPnLPdf, downloadBalanceSheetPdf, downloadCashFlowPdf, downloadAllPdf,
+  downloadPnLCsv, downloadBalanceSheetCsv, downloadCashFlowCsv,
+  type FinancialData,
+} from "@/lib/financial-export";
 
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 }
 
+type Period = "30d" | "90d" | "ytd" | "all";
+
+function periodLabel(p: Period) {
+  return { "30d": "Last 30 days", "90d": "Last 90 days", ytd: "Year to date", all: "All time" }[p];
+}
+
+function periodStart(p: Period): Date | null {
+  const now = new Date();
+  if (p === "30d") return new Date(now.getTime() - 30 * 86400000);
+  if (p === "90d") return new Date(now.getTime() - 90 * 86400000);
+  if (p === "ytd") return new Date(now.getFullYear(), 0, 1);
+  return null;
+}
+
 export default function FinancialStatements() {
   const { data: business } = useBusiness();
   const businessId = business?.id;
+  const [period, setPeriod] = useState<Period>("ytd");
 
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ["transactions", businessId],
@@ -35,38 +60,89 @@ export default function FinancialStatements() {
     enabled: !!businessId,
   });
 
-  const totalIncome = transactions.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
-  const totalExpenses = transactions.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
+  const filteredTx = useMemo(() => {
+    const start = periodStart(period);
+    if (!start) return transactions;
+    return transactions.filter((t: any) => t.transaction_date && new Date(t.transaction_date) >= start);
+  }, [transactions, period]);
+
+  const totalIncome = filteredTx.filter((t: any) => t.type === "income").reduce((s: number, t: any) => s + Number(t.amount), 0);
+  const totalExpenses = filteredTx.filter((t: any) => t.type === "expense").reduce((s: number, t: any) => s + Number(t.amount), 0);
   const grossProfit = totalIncome - totalExpenses;
-  const totalVat = transactions.reduce((s, t) => s + Number(t.vat_amount || 0), 0);
+  const totalVat = filteredTx.reduce((s: number, t: any) => s + Number(t.vat_amount || 0), 0);
   const netProfit = grossProfit - totalVat;
 
-  // Group expenses by category
-  const expensesByCategory = transactions.filter(t => t.type === "expense").reduce<Record<string, number>>((acc, t) => {
+  const expensesByCategory = filteredTx.filter((t: any) => t.type === "expense").reduce<Record<string, number>>((acc, t: any) => {
     const cat = t.category || "Uncategorized";
     acc[cat] = (acc[cat] || 0) + Number(t.amount);
     return acc;
   }, {});
 
-  const incomeByCategory = transactions.filter(t => t.type === "income").reduce<Record<string, number>>((acc, t) => {
+  const incomeByCategory = filteredTx.filter((t: any) => t.type === "income").reduce<Record<string, number>>((acc, t: any) => {
     const cat = t.category || "Uncategorized";
     acc[cat] = (acc[cat] || 0) + Number(t.amount);
     return acc;
   }, {});
 
-  // Simple balance sheet from accounts
-  const assetAccounts = accounts.filter(a => a.type === "asset");
-  const liabilityAccounts = accounts.filter(a => a.type === "liability");
-  const equityAccounts = accounts.filter(a => a.type === "equity");
+  const assetAccounts = accounts.filter((a: any) => a.type === "asset");
+  const liabilityAccounts = accounts.filter((a: any) => a.type === "liability");
+  const equityAccounts = accounts.filter((a: any) => a.type === "equity");
+
+  const exportData: FinancialData = {
+    businessName: business?.company_name || "Business",
+    period: periodLabel(period),
+    totalIncome, totalExpenses, totalVat, grossProfit, netProfit,
+    incomeByCategory, expensesByCategory,
+    assetAccounts, liabilityAccounts, equityAccounts,
+  };
+
+  const handleDownload = (fn: (d: FinancialData) => void, label: string) => {
+    try { fn(exportData); toast.success(`${label} downloaded`); }
+    catch (e: any) { toast.error(`Download failed: ${e.message}`); }
+  };
 
   if (isLoading) return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-96 w-full" /></div>;
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold font-display text-foreground">Financial Statements</h1>
-        <p className="text-muted-foreground mt-1">Profit & Loss, Balance Sheet, and Cash Flow reports.</p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold font-display text-foreground">Financial Statements</h1>
+          <p className="text-muted-foreground mt-1">Profit & Loss, Balance Sheet, and Cash Flow reports.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
+            <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="90d">Last 90 days</SelectItem>
+              <SelectItem value="ytd">Year to date</SelectItem>
+              <SelectItem value="all">All time</SelectItem>
+            </SelectContent>
+          </Select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="default" size="sm" className="min-h-11"><Download className="h-4 w-4 mr-2" /> Download</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Profit & Loss</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => handleDownload(downloadPnLPdf, "P&L PDF")}><FileText className="h-4 w-4 mr-2" /> PDF</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload(downloadPnLCsv, "P&L CSV")}><FileSpreadsheet className="h-4 w-4 mr-2" /> CSV</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Balance Sheet</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => handleDownload(downloadBalanceSheetPdf, "Balance Sheet PDF")}><FileText className="h-4 w-4 mr-2" /> PDF</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload(downloadBalanceSheetCsv, "Balance Sheet CSV")}><FileSpreadsheet className="h-4 w-4 mr-2" /> CSV</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Cash Flow</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => handleDownload(downloadCashFlowPdf, "Cash Flow PDF")}><FileText className="h-4 w-4 mr-2" /> PDF</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload(downloadCashFlowCsv, "Cash Flow CSV")}><FileSpreadsheet className="h-4 w-4 mr-2" /> CSV</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleDownload(downloadAllPdf, "Full report PDF")} className="font-medium"><FileText className="h-4 w-4 mr-2" /> Full Report (PDF)</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
+
 
       <Tabs defaultValue="pnl">
         <TabsList>

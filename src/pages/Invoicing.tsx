@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { ImportExportButtons } from "@/components/ImportExportButtons";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -272,10 +273,24 @@ export default function Invoicing() {
           <h1 className="text-2xl font-bold text-foreground">Invoicing</h1>
           <p className="text-muted-foreground">Create, send, and track invoices</p>
         </div>
-        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />New Invoice</Button>
-          </DialogTrigger>
+        <div className="flex flex-wrap items-center gap-2">
+          <ImportExportButtons
+            filename="invoices"
+            rows={invoices.map((i: any) => ({
+              invoice_number: i.invoice_number,
+              status: i.status,
+              issue_date: i.issue_date,
+              due_date: i.due_date,
+              subtotal: i.subtotal,
+              vat_amount: i.vat_amount,
+              total_amount: i.total_amount,
+              amount_paid: i.amount_paid,
+            }))}
+          />
+          <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4 mr-2" />New Invoice</Button>
+            </DialogTrigger>
           <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create Invoice</DialogTitle>

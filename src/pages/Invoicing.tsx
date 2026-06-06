@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { onAction } from "@/lib/action-bus";
 import { FileText, Plus, Send, Eye, Trash2, CreditCard, Search, Filter } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,6 +53,18 @@ export default function Invoicing() {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [paymentRef, setPaymentRef] = useState("");
+
+  // Voice agent: open & prefill create dialog
+  useEffect(() => {
+    return onAction("open-create-invoice", (p) => {
+      if (p?.customer_name) setCustomerName(p.customer_name);
+      if (p?.due_date) setDueDate(p.due_date);
+      if (p?.description || p?.amount) {
+        setItems([{ description: p.description || "", quantity: 1, unit_price: p.amount || 0 }]);
+      }
+      setCreateOpen(true);
+    });
+  }, []);
 
   const businessId = business?.id;
 

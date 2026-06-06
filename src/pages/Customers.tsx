@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { ImportExportButtons } from "@/components/ImportExportButtons";
 
 export default function Customers() {
   const { user } = useAuth();
@@ -171,37 +172,71 @@ export default function Customers() {
           <h1 className="text-2xl font-bold text-foreground">Customers</h1>
           <p className="text-muted-foreground">Manage your customer database and relationships</p>
         </div>
-        <Dialog open={customerOpen} onOpenChange={setCustomerOpen}>
-          <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add Customer</Button></DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>Add Customer</DialogTitle></DialogHeader>
-            <div className="space-y-4">
-              <div><Label>Name *</Label><Input value={custName} onChange={e => setCustName(e.target.value)} /></div>
-              <div className="grid grid-cols-2 gap-4">
-                <div><Label>Email</Label><Input type="email" value={custEmail} onChange={e => setCustEmail(e.target.value)} /></div>
-                <div><Label>Phone</Label><Input value={custPhone} onChange={e => setCustPhone(e.target.value)} /></div>
-              </div>
-              <div><Label>Company</Label><Input value={custCompany} onChange={e => setCustCompany(e.target.value)} /></div>
-              <div><Label>Address</Label><Input value={custAddress} onChange={e => setCustAddress(e.target.value)} /></div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Type</Label>
-                  <Select value={custType} onValueChange={setCustType}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="individual">Individual</SelectItem>
-                      <SelectItem value="business">Business</SelectItem>
-                    </SelectContent>
-                  </Select>
+        <div className="flex flex-wrap items-center gap-2">
+          <ImportExportButtons
+            filename="customers"
+            rows={customers.map(c => ({
+              name: c.name,
+              email: c.email || "",
+              phone: c.phone || "",
+              company: c.company_name || "",
+              type: c.customer_type,
+              credit_limit: c.credit_limit || 0,
+              outstanding_balance: c.outstanding_balance || 0,
+            }))}
+            onImport={async (rows) => {
+              if (!businessId) return;
+              const payload = rows
+                .filter(r => r.name)
+                .map(r => ({
+                  business_id: businessId,
+                  name: r.name,
+                  email: r.email || null,
+                  phone: r.phone || null,
+                  company_name: r.company || null,
+                  address: r.address || null,
+                  customer_type: r.type || "individual",
+                  credit_limit: parseFloat(r.credit_limit || "0") || 0,
+                }));
+              if (!payload.length) { toast.error("No valid rows"); return; }
+              const { error } = await supabase.from("customers").insert(payload);
+              if (error) { toast.error(error.message); return; }
+              toast.success(`Imported ${payload.length} customers`);
+              queryClient.invalidateQueries({ queryKey: ["customers"] });
+            }}
+          />
+          <Dialog open={customerOpen} onOpenChange={setCustomerOpen}>
+            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add Customer</Button></DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Add Customer</DialogTitle></DialogHeader>
+              <div className="space-y-4">
+                <div><Label>Name *</Label><Input value={custName} onChange={e => setCustName(e.target.value)} /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><Label>Email</Label><Input type="email" value={custEmail} onChange={e => setCustEmail(e.target.value)} /></div>
+                  <div><Label>Phone</Label><Input value={custPhone} onChange={e => setCustPhone(e.target.value)} /></div>
                 </div>
-                <div><Label>Credit Limit (₦)</Label><Input type="number" value={custCreditLimit} onChange={e => setCustCreditLimit(e.target.value)} /></div>
+                <div><Label>Company</Label><Input value={custCompany} onChange={e => setCustCompany(e.target.value)} /></div>
+                <div><Label>Address</Label><Input value={custAddress} onChange={e => setCustAddress(e.target.value)} /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Type</Label>
+                    <Select value={custType} onValueChange={setCustType}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="individual">Individual</SelectItem>
+                        <SelectItem value="business">Business</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label>Credit Limit (₦)</Label><Input type="number" value={custCreditLimit} onChange={e => setCustCreditLimit(e.target.value)} /></div>
+                </div>
+                <Button className="w-full" onClick={() => createCustomer.mutate()} disabled={createCustomer.isPending || !custName}>
+                  {createCustomer.isPending ? "Adding..." : "Add Customer"}
+                </Button>
               </div>
-              <Button className="w-full" onClick={() => createCustomer.mutate()} disabled={createCustomer.isPending || !custName}>
-                {createCustomer.isPending ? "Adding..." : "Add Customer"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Summary */}

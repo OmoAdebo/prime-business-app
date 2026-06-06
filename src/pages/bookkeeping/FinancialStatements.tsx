@@ -105,10 +105,44 @@ export default function FinancialStatements() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold font-display text-foreground">Financial Statements</h1>
-        <p className="text-muted-foreground mt-1">Profit & Loss, Balance Sheet, and Cash Flow reports.</p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold font-display text-foreground">Financial Statements</h1>
+          <p className="text-muted-foreground mt-1">Profit & Loss, Balance Sheet, and Cash Flow reports.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
+            <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="90d">Last 90 days</SelectItem>
+              <SelectItem value="ytd">Year to date</SelectItem>
+              <SelectItem value="all">All time</SelectItem>
+            </SelectContent>
+          </Select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="default" size="sm" className="min-h-11"><Download className="h-4 w-4 mr-2" /> Download</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Profit & Loss</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => handleDownload(downloadPnLPdf, "P&L PDF")}><FileText className="h-4 w-4 mr-2" /> PDF</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload(downloadPnLCsv, "P&L CSV")}><FileSpreadsheet className="h-4 w-4 mr-2" /> CSV</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Balance Sheet</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => handleDownload(downloadBalanceSheetPdf, "Balance Sheet PDF")}><FileText className="h-4 w-4 mr-2" /> PDF</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload(downloadBalanceSheetCsv, "Balance Sheet CSV")}><FileSpreadsheet className="h-4 w-4 mr-2" /> CSV</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Cash Flow</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => handleDownload(downloadCashFlowPdf, "Cash Flow PDF")}><FileText className="h-4 w-4 mr-2" /> PDF</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload(downloadCashFlowCsv, "Cash Flow CSV")}><FileSpreadsheet className="h-4 w-4 mr-2" /> CSV</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleDownload(downloadAllPdf, "Full report PDF")} className="font-medium"><FileText className="h-4 w-4 mr-2" /> Full Report (PDF)</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
+
 
       <Tabs defaultValue="pnl">
         <TabsList>

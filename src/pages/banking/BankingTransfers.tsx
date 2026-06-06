@@ -29,6 +29,15 @@ export default function BankingTransfers() {
   const { data: business } = useBusiness();
   const queryClient = useQueryClient();
   const businessId = business?.id;
+  const [transferTab, setTransferTab] = useState("intra");
+
+  useEffect(() => {
+    return onAction("open-new-transfer", (p) => {
+      setTransferTab("inter");
+      if (p?.amount) setIbAmount(String(p.amount));
+      if (p?.recipient) setIbAccountName(p.recipient);
+    });
+  }, []);
 
   // Intra-account
   const [fromAccount, setFromAccount] = useState("");

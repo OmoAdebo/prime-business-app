@@ -59,6 +59,8 @@ export function FloatingVoiceButton() {
   const recognitionRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const { category, subcategory } = useIndustry();
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, thinking]);
@@ -69,7 +71,7 @@ export function FloatingVoiceButton() {
     setThinking(true);
     try {
       const { data, error } = await supabase.functions.invoke("voice-agent", {
-        body: { messages: next, page: location.pathname },
+        body: { messages: next, page: location.pathname, industry: { category, subcategory } },
       });
       if (error) throw error;
       const reply: string = data?.reply || "";

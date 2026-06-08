@@ -140,9 +140,38 @@ export default function Onboarding() {
             {isBusinessOwner && step === 2 && (
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2 sm:col-span-2"><Label htmlFor="company">Company name *</Label><Input id="company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required /></div>
-                <div className="space-y-2"><Label>Industry</Label>
-                  <Select value={industry} onValueChange={setIndustry}><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger><SelectContent>{INDUSTRIES.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent></Select>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>Business category *</Label>
+                  <Select value={businessCategory} onValueChange={(v) => { setBusinessCategory(v); setBusinessSubcategory(''); setIndustry(v); }}>
+                    <SelectTrigger><SelectValue placeholder="Select your business focus" /></SelectTrigger>
+                    <SelectContent>
+                      {BUSINESS_CATEGORIES.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">{c}</span>
+                            <span className="text-xs text-muted-foreground">{INDUSTRY_CONFIG[c].hint}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {businessCategory && (
+                    <p className="text-xs text-muted-foreground">{INDUSTRY_CONFIG[businessCategory as keyof typeof INDUSTRY_CONFIG].hint}. Your dashboard, terminology and units of measurement will be tailored to this category.</p>
+                  )}
                 </div>
+                {businessCategory && (
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label>Subcategory</Label>
+                    <Select value={businessSubcategory} onValueChange={setBusinessSubcategory}>
+                      <SelectTrigger><SelectValue placeholder="Choose a subcategory (optional)" /></SelectTrigger>
+                      <SelectContent>
+                        {INDUSTRY_CONFIG[businessCategory as keyof typeof INDUSTRY_CONFIG].subcategories.map((s) => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <div className="space-y-2"><Label htmlFor="phone">Phone</Label><Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+234..." /></div>
                 <div className="space-y-2"><Label htmlFor="cac">CAC number</Label><Input id="cac" value={cacNumber} onChange={(e) => setCacNumber(e.target.value)} placeholder="RC1234567" /></div>
                 <div className="space-y-2"><Label htmlFor="tin">TIN number</Label><Input id="tin" value={tinNumber} onChange={(e) => setTinNumber(e.target.value)} placeholder="10-digit TIN" /></div>

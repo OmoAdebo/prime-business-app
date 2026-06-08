@@ -19,7 +19,7 @@ const NIGERIA_STATES = [
   'Taraba','Yobe','Zamfara',
 ];
 
-const INDUSTRIES = ['Retail','Wholesale','Manufacturing','Services','Technology','Hospitality','Healthcare','Education','Agriculture','Construction','Logistics','Other'];
+import { BUSINESS_CATEGORIES, INDUSTRY_CONFIG } from '@/lib/industry-config';
 
 export default function Onboarding() {
   const { user, profile, roles, refreshProfile, loading: authLoading } = useAuth();

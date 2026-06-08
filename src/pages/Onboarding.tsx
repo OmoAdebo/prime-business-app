@@ -185,7 +185,7 @@ export default function Onboarding() {
             {isBusinessOwner && step === 4 && (
               <div className="rounded-lg border p-4 text-sm space-y-1">
                 <p><span className="text-muted-foreground">Company:</span> <span className="font-medium">{companyName || '—'}</span></p>
-                <p><span className="text-muted-foreground">Industry:</span> {industry || '—'}</p>
+                <p><span className="text-muted-foreground">Business category:</span> {businessCategory || '—'}{businessSubcategory ? ` / ${businessSubcategory}` : ''}</p>
                 <p><span className="text-muted-foreground">CAC:</span> {cacNumber || '—'}</p>
                 <p><span className="text-muted-foreground">TIN:</span> {tinNumber || '—'}</p>
                 <p><span className="text-muted-foreground">Address:</span> {businessAddress || '—'}</p>

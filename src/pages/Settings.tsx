@@ -344,11 +344,7 @@ const NIGERIAN_STATES_LGAS: Record<string, string[]> = {
 
 const NIGERIAN_STATES = Object.keys(NIGERIAN_STATES_LGAS).sort();
 
-const INDUSTRIES = [
-  "Agriculture", "Construction", "Education", "Finance", "Healthcare",
-  "Hospitality", "Logistics", "Manufacturing", "Oil & Gas", "Retail",
-  "Technology", "Other",
-];
+import { BUSINESS_CATEGORIES, INDUSTRY_CONFIG, type BusinessCategory } from "@/lib/industry-config";
 
 // ─── Validation helpers ───
 const VALIDATION = {

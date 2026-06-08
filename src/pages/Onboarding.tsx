@@ -65,27 +65,21 @@ export default function Onboarding() {
 
       if (isBusinessOwner && companyName) {
         const { data: existing } = await supabase.from('businesses').select('id').eq('owner_id', user.id).maybeSingle();
+        const payload: any = {
+          company_name: companyName,
+          industry: industry || businessCategory || null,
+          business_category: businessCategory || null,
+          business_subcategory: businessSubcategory || null,
+          cac_number: cacNumber || null,
+          tin_number: tinNumber || null,
+          business_address: businessAddress || null,
+          state: state || null,
+          lga: lga || null,
+        };
         if (existing?.id) {
-          await supabase.from('businesses').update({
-            company_name: companyName,
-            industry: industry || null,
-            cac_number: cacNumber || null,
-            tin_number: tinNumber || null,
-            business_address: businessAddress || null,
-            state: state || null,
-            lga: lga || null,
-          }).eq('id', existing.id);
+          await supabase.from('businesses').update(payload).eq('id', existing.id);
         } else {
-          await supabase.from('businesses').insert({
-            owner_id: user.id,
-            company_name: companyName,
-            industry: industry || null,
-            cac_number: cacNumber || null,
-            tin_number: tinNumber || null,
-            business_address: businessAddress || null,
-            state: state || null,
-            lga: lga || null,
-          });
+          await supabase.from('businesses').insert({ owner_id: user.id, ...payload });
         }
       }
 

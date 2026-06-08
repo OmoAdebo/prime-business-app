@@ -32,6 +32,8 @@ export default function Onboarding() {
   // form state
   const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState('');
+  const [businessCategory, setBusinessCategory] = useState<string>('');
+  const [businessSubcategory, setBusinessSubcategory] = useState<string>('');
   const [cacNumber, setCacNumber] = useState('');
   const [tinNumber, setTinNumber] = useState('');
   const [businessAddress, setBusinessAddress] = useState('');

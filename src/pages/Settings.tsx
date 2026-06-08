@@ -373,6 +373,8 @@ function BusinessVerificationTab() {
     state: "",
     lga: "",
     industry: "",
+    business_category: "",
+    business_subcategory: "",
   });
 
   const { data: business, isLoading } = useQuery({
@@ -398,6 +400,8 @@ function BusinessVerificationTab() {
         state: business.state || "",
         lga: business.lga || "",
         industry: business.industry || "",
+        business_category: (business as any).business_category || "",
+        business_subcategory: (business as any).business_subcategory || "",
       });
     }
   }, [business]);

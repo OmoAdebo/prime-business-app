@@ -556,18 +556,52 @@ function BusinessVerificationTab() {
             </Select>
           </div>
 
-          {/* Industry */}
-          <div className="space-y-2">
-            <Label>Industry / Sector</Label>
-            <Select value={form.industry} onValueChange={(v) => handleFieldChange("industry", v)}>
-              <SelectTrigger><SelectValue placeholder="Select industry" /></SelectTrigger>
+          {/* Business Category */}
+          <div className="space-y-2 md:col-span-2">
+            <Label>Business Category / Focus *</Label>
+            <Select
+              value={form.business_category}
+              onValueChange={(v) => {
+                setTouched((t) => ({ ...t, business_category: true }));
+                setForm((f) => ({ ...f, business_category: v, business_subcategory: "", industry: v }));
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Select your business focus" /></SelectTrigger>
               <SelectContent>
-                {INDUSTRIES.map((i) => (
-                  <SelectItem key={i} value={i}>{i}</SelectItem>
+                {BUSINESS_CATEGORIES.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{c}</span>
+                      <span className="text-xs text-muted-foreground">{INDUSTRY_CONFIG[c].hint}</span>
+                    </div>
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {form.business_category && (
+              <p className="text-xs text-muted-foreground">
+                {INDUSTRY_CONFIG[form.business_category as BusinessCategory].hint}. Your dashboard, terminology and units of measurement adapt to this category.
+              </p>
+            )}
           </div>
+
+          {/* Subcategory */}
+          {form.business_category && (
+            <div className="space-y-2 md:col-span-2">
+              <Label>Subcategory</Label>
+              <Select
+                value={form.business_subcategory}
+                onValueChange={(v) => setForm((f) => ({ ...f, business_subcategory: v }))}
+              >
+                <SelectTrigger><SelectValue placeholder="Choose a subcategory (optional)" /></SelectTrigger>
+                <SelectContent>
+                  {INDUSTRY_CONFIG[form.business_category as BusinessCategory].subcategories.map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         {business && (

@@ -8,6 +8,7 @@ import { Mic, MicOff, Loader2, Send, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { dispatchAction, type AppAction } from "@/lib/action-bus";
 import { Input } from "@/components/ui/input";
+import { useIndustry } from "@/contexts/IndustryContext";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
@@ -17,6 +18,11 @@ const TOOL_TO_ACTION: Record<string, AppAction["type"]> = {
   open_record_expense: "open-record-expense",
   open_add_customer: "open-add-customer",
   open_new_transfer: "open-new-transfer",
+  open_add_supplier: "open-add-supplier",
+  open_stock_movement: "open-stock-movement",
+  open_journal_entry: "open-journal-entry",
+  open_payroll_run: "open-payroll-run",
+  open_create_order: "open-create-order",
 };
 
 const TOOL_TO_PATH: Record<string, string> = {
@@ -25,6 +31,11 @@ const TOOL_TO_PATH: Record<string, string> = {
   open_record_expense: "/bookkeeping/journal-entries",
   open_add_customer: "/customers",
   open_new_transfer: "/banking/transfers",
+  open_add_supplier: "/inventory/suppliers",
+  open_stock_movement: "/inventory/stock",
+  open_journal_entry: "/bookkeeping/journal-entries",
+  open_payroll_run: "/payroll",
+  open_create_order: "/store",
 };
 
 function speak(text: string) {
@@ -48,6 +59,8 @@ export function FloatingVoiceButton() {
   const recognitionRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const { category, subcategory } = useIndustry();
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, thinking]);
@@ -58,7 +71,7 @@ export function FloatingVoiceButton() {
     setThinking(true);
     try {
       const { data, error } = await supabase.functions.invoke("voice-agent", {
-        body: { messages: next, page: location.pathname },
+        body: { messages: next, page: location.pathname, industry: { category, subcategory } },
       });
       if (error) throw error;
       const reply: string = data?.reply || "";
@@ -101,7 +114,7 @@ export function FloatingVoiceButton() {
     } finally {
       setThinking(false);
     }
-  }, [messages, navigate, location.pathname, user]);
+  }, [messages, navigate, location.pathname, user, category, subcategory]);
 
   const startListening = useCallback(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;

@@ -459,6 +459,8 @@ export type Database = {
       businesses: {
         Row: {
           business_address: string | null
+          business_category: string | null
+          business_subcategory: string | null
           cac_document_url: string | null
           cac_number: string | null
           company_name: string
@@ -478,6 +480,8 @@ export type Database = {
         }
         Insert: {
           business_address?: string | null
+          business_category?: string | null
+          business_subcategory?: string | null
           cac_document_url?: string | null
           cac_number?: string | null
           company_name: string
@@ -497,6 +501,8 @@ export type Database = {
         }
         Update: {
           business_address?: string | null
+          business_category?: string | null
+          business_subcategory?: string | null
           cac_document_url?: string | null
           cac_number?: string | null
           company_name?: string

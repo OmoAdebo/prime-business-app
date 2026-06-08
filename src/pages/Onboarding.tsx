@@ -19,7 +19,7 @@ const NIGERIA_STATES = [
   'Taraba','Yobe','Zamfara',
 ];
 
-const INDUSTRIES = ['Retail','Wholesale','Manufacturing','Services','Technology','Hospitality','Healthcare','Education','Agriculture','Construction','Logistics','Other'];
+import { BUSINESS_CATEGORIES, INDUSTRY_CONFIG } from '@/lib/industry-config';
 
 export default function Onboarding() {
   const { user, profile, roles, refreshProfile, loading: authLoading } = useAuth();
@@ -32,6 +32,8 @@ export default function Onboarding() {
   // form state
   const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState('');
+  const [businessCategory, setBusinessCategory] = useState<string>('');
+  const [businessSubcategory, setBusinessSubcategory] = useState<string>('');
   const [cacNumber, setCacNumber] = useState('');
   const [tinNumber, setTinNumber] = useState('');
   const [businessAddress, setBusinessAddress] = useState('');
@@ -63,27 +65,21 @@ export default function Onboarding() {
 
       if (isBusinessOwner && companyName) {
         const { data: existing } = await supabase.from('businesses').select('id').eq('owner_id', user.id).maybeSingle();
+        const payload: any = {
+          company_name: companyName,
+          industry: industry || businessCategory || null,
+          business_category: businessCategory || null,
+          business_subcategory: businessSubcategory || null,
+          cac_number: cacNumber || null,
+          tin_number: tinNumber || null,
+          business_address: businessAddress || null,
+          state: state || null,
+          lga: lga || null,
+        };
         if (existing?.id) {
-          await supabase.from('businesses').update({
-            company_name: companyName,
-            industry: industry || null,
-            cac_number: cacNumber || null,
-            tin_number: tinNumber || null,
-            business_address: businessAddress || null,
-            state: state || null,
-            lga: lga || null,
-          }).eq('id', existing.id);
+          await supabase.from('businesses').update(payload).eq('id', existing.id);
         } else {
-          await supabase.from('businesses').insert({
-            owner_id: user.id,
-            company_name: companyName,
-            industry: industry || null,
-            cac_number: cacNumber || null,
-            tin_number: tinNumber || null,
-            business_address: businessAddress || null,
-            state: state || null,
-            lga: lga || null,
-          });
+          await supabase.from('businesses').insert({ owner_id: user.id, ...payload });
         }
       }
 
@@ -138,9 +134,38 @@ export default function Onboarding() {
             {isBusinessOwner && step === 2 && (
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2 sm:col-span-2"><Label htmlFor="company">Company name *</Label><Input id="company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required /></div>
-                <div className="space-y-2"><Label>Industry</Label>
-                  <Select value={industry} onValueChange={setIndustry}><SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger><SelectContent>{INDUSTRIES.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent></Select>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>Business category *</Label>
+                  <Select value={businessCategory} onValueChange={(v) => { setBusinessCategory(v); setBusinessSubcategory(''); setIndustry(v); }}>
+                    <SelectTrigger><SelectValue placeholder="Select your business focus" /></SelectTrigger>
+                    <SelectContent>
+                      {BUSINESS_CATEGORIES.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">{c}</span>
+                            <span className="text-xs text-muted-foreground">{INDUSTRY_CONFIG[c].hint}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {businessCategory && (
+                    <p className="text-xs text-muted-foreground">{INDUSTRY_CONFIG[businessCategory as keyof typeof INDUSTRY_CONFIG].hint}. Your dashboard, terminology and units of measurement will be tailored to this category.</p>
+                  )}
                 </div>
+                {businessCategory && (
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label>Subcategory</Label>
+                    <Select value={businessSubcategory} onValueChange={setBusinessSubcategory}>
+                      <SelectTrigger><SelectValue placeholder="Choose a subcategory (optional)" /></SelectTrigger>
+                      <SelectContent>
+                        {INDUSTRY_CONFIG[businessCategory as keyof typeof INDUSTRY_CONFIG].subcategories.map((s) => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <div className="space-y-2"><Label htmlFor="phone">Phone</Label><Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+234..." /></div>
                 <div className="space-y-2"><Label htmlFor="cac">CAC number</Label><Input id="cac" value={cacNumber} onChange={(e) => setCacNumber(e.target.value)} placeholder="RC1234567" /></div>
                 <div className="space-y-2"><Label htmlFor="tin">TIN number</Label><Input id="tin" value={tinNumber} onChange={(e) => setTinNumber(e.target.value)} placeholder="10-digit TIN" /></div>
@@ -160,7 +185,7 @@ export default function Onboarding() {
             {isBusinessOwner && step === 4 && (
               <div className="rounded-lg border p-4 text-sm space-y-1">
                 <p><span className="text-muted-foreground">Company:</span> <span className="font-medium">{companyName || '—'}</span></p>
-                <p><span className="text-muted-foreground">Industry:</span> {industry || '—'}</p>
+                <p><span className="text-muted-foreground">Business category:</span> {businessCategory || '—'}{businessSubcategory ? ` / ${businessSubcategory}` : ''}</p>
                 <p><span className="text-muted-foreground">CAC:</span> {cacNumber || '—'}</p>
                 <p><span className="text-muted-foreground">TIN:</span> {tinNumber || '—'}</p>
                 <p><span className="text-muted-foreground">Address:</span> {businessAddress || '—'}</p>
@@ -177,7 +202,7 @@ export default function Onboarding() {
               <div className="flex gap-2">
                 <Button variant="ghost" onClick={skip} disabled={saving}>Skip for now</Button>
                 {step < totalSteps ? (
-                  <Button onClick={next} disabled={isBusinessOwner && step === 2 && !companyName}>Continue <ArrowRight className="h-4 w-4 ml-1" /></Button>
+                  <Button onClick={next} disabled={isBusinessOwner && step === 2 && (!companyName || !businessCategory)}>Continue <ArrowRight className="h-4 w-4 ml-1" /></Button>
                 ) : (
                   <Button onClick={finish} disabled={saving}>{saving ? 'Saving...' : 'Finish setup'}</Button>
                 )}

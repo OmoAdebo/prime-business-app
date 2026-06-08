@@ -202,7 +202,7 @@ export default function Onboarding() {
               <div className="flex gap-2">
                 <Button variant="ghost" onClick={skip} disabled={saving}>Skip for now</Button>
                 {step < totalSteps ? (
-                  <Button onClick={next} disabled={isBusinessOwner && step === 2 && !companyName}>Continue <ArrowRight className="h-4 w-4 ml-1" /></Button>
+                  <Button onClick={next} disabled={isBusinessOwner && step === 2 && (!companyName || !businessCategory)}>Continue <ArrowRight className="h-4 w-4 ml-1" /></Button>
                 ) : (
                   <Button onClick={finish} disabled={saving}>{saving ? 'Saving...' : 'Finish setup'}</Button>
                 )}

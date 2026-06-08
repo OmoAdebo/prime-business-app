@@ -114,7 +114,7 @@ export function FloatingVoiceButton() {
     } finally {
       setThinking(false);
     }
-  }, [messages, navigate, location.pathname, user]);
+  }, [messages, navigate, location.pathname, user, category, subcategory]);
 
   const startListening = useCallback(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;

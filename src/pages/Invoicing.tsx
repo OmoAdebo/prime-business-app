@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ImportExportButtons } from "@/components/ImportExportButtons";
+import { useIndustryTerms } from "@/contexts/IndustryContext";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",
@@ -37,6 +38,7 @@ interface InvoiceItem {
 
 export default function Invoicing() {
   const { user } = useAuth();
+  const industryTerms = useIndustryTerms();
   const { data: business } = useBusiness();
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
@@ -62,6 +64,16 @@ export default function Invoicing() {
       if (p?.due_date) setDueDate(p.due_date);
       if (p?.description || p?.amount) {
         setItems([{ description: p.description || "", quantity: 1, unit_price: p.amount || 0 }]);
+      }
+      setCreateOpen(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    return onAction("open-create-order", (p) => {
+      if (p?.customer_name) setCustomerName(p.customer_name);
+      if (p?.product_name || p?.total) {
+        setItems([{ description: p.product_name || "Order item", quantity: p.quantity || 1, unit_price: p.total && p.quantity ? p.total / p.quantity : (p.total || 0) }]);
       }
       setCreateOpen(true);
     });
@@ -270,8 +282,8 @@ export default function Invoicing() {
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 p-3 sm:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Invoicing</h1>
-          <p className="text-muted-foreground">Create, send, and track invoices</p>
+          <h1 className="text-2xl font-bold text-foreground">{industryTerms.invoices}</h1>
+          <p className="text-muted-foreground">Create, send, and track {industryTerms.invoices.toLowerCase()}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ImportExportButtons
@@ -369,7 +381,7 @@ export default function Invoicing() {
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="pb-2"><CardDescription>Total Invoices</CardDescription></CardHeader>
+          <CardHeader className="pb-2"><CardDescription>Total {industryTerms.invoices}</CardDescription></CardHeader>
           <CardContent><p className="text-2xl font-bold">{invoices.length}</p></CardContent>
         </Card>
         <Card>

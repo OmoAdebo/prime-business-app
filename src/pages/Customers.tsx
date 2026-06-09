@@ -23,6 +23,7 @@ import { useIndustryTerms } from "@/contexts/IndustryContext";
 
 export default function Customers() {
   const { user } = useAuth();
+  const terms = useIndustryTerms();
   const { data: business } = useBusiness();
   const queryClient = useQueryClient();
   const businessId = business?.id;

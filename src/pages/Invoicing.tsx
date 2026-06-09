@@ -67,6 +67,16 @@ export default function Invoicing() {
     });
   }, []);
 
+  useEffect(() => {
+    return onAction("open-create-order", (p) => {
+      if (p?.customer_name) setCustomerName(p.customer_name);
+      if (p?.product_name || p?.total) {
+        setItems([{ description: p.product_name || "Order item", quantity: p.quantity || 1, unit_price: p.total && p.quantity ? p.total / p.quantity : (p.total || 0) }]);
+      }
+      setCreateOpen(true);
+    });
+  }, []);
+
   const businessId = business?.id;
 
   // Fetch invoices

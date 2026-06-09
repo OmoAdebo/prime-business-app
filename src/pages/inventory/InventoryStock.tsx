@@ -29,6 +29,16 @@ export default function InventoryStock() {
   const [showRecord, setShowRecord] = useState(false);
   const [form, setForm] = useState({ product_id: "", to_location_id: "", quantity: "", movement_type: "receipt", notes: "" });
 
+  const { data: products = [] } = useQuery({
+    queryKey: ["products", businessId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("*").eq("business_id", businessId!).order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!businessId,
+  });
+
   useEffect(() => {
     return onAction("open-stock-movement", (p) => {
       const matched = p?.product_name
@@ -45,16 +55,6 @@ export default function InventoryStock() {
       setShowRecord(true);
     });
   }, [products]);
-
-  const { data: products = [] } = useQuery({
-    queryKey: ["products", businessId],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("business_id", businessId!).order("name");
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!businessId,
-  });
 
   const { data: locations = [] } = useQuery({
     queryKey: ["inventory_locations", businessId],

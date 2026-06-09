@@ -28,6 +28,20 @@ export default function InventorySuppliers() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
 
+  useEffect(() => {
+    return onAction("open-add-supplier", (p) => {
+      setForm({
+        name: p?.name || "",
+        email: p?.email || "",
+        phone: p?.phone || "",
+        address: p?.address || "",
+        contact_person: "",
+      });
+      setEditId(null);
+      setShowAdd(true);
+    });
+  }, []);
+
   const { data: suppliers = [], isLoading } = useQuery({
     queryKey: ["suppliers", businessId],
     queryFn: async () => {

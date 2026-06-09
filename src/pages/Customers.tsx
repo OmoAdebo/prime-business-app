@@ -208,9 +208,9 @@ export default function Customers() {
             }}
           />
           <Dialog open={customerOpen} onOpenChange={setCustomerOpen}>
-            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add Customer</Button></DialogTrigger>
+            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add {terms.customer}</Button></DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Add Customer</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>Add {terms.customer}</DialogTitle></DialogHeader>
               <div className="space-y-4">
                 <div><Label>Name *</Label><Input value={custName} onChange={e => setCustName(e.target.value)} /></div>
                 <div className="grid grid-cols-2 gap-4">

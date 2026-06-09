@@ -56,6 +56,19 @@ export default function JournalEntries() {
     });
   }, []);
 
+  useEffect(() => {
+    return onAction("open-journal-entry", (p) => {
+      setEntryForm((f) => ({ ...f, description: p?.description || "" }));
+      if (p?.amount) {
+        setLines([
+          { account_id: "", debit: String(p.amount), credit: "", description: p?.debit_account || "" },
+          { account_id: "", debit: "", credit: String(p.amount), description: p?.credit_account || "" },
+        ]);
+      }
+      setShowAdd(true);
+    });
+  }, []);
+
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["journal_entries", businessId],

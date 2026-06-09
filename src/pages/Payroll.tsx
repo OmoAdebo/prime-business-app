@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { onAction } from "@/lib/action-bus";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -40,6 +41,14 @@ export default function Payroll() {
   const [deptForm, setDeptForm] = useState({ name: "", description: "" });
   const [payrollForm, setPayrollForm] = useState({ period_start: "", period_end: "", notes: "" });
   const [leaveForm, setLeaveForm] = useState({ employee_id: "", leave_type: "annual", start_date: "", end_date: "", reason: "" });
+
+  useEffect(() => {
+    return onAction("open-payroll-run", (p) => {
+      setPayrollForm((f) => ({ ...f, notes: p?.period || p?.employee_name || "" }));
+      setActiveTab("payroll");
+      setPayrollOpen(true);
+    });
+  }, []);
 
   const fmt = (n: number) => `₦${n.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 

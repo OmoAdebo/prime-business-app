@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { onAction } from "@/lib/action-bus";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/use-business";
@@ -26,6 +27,20 @@ export default function InventorySuppliers() {
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  useEffect(() => {
+    return onAction("open-add-supplier", (p) => {
+      setForm({
+        name: p?.name || "",
+        email: p?.email || "",
+        phone: p?.phone || "",
+        address: p?.address || "",
+        contact_person: "",
+      });
+      setEditId(null);
+      setShowAdd(true);
+    });
+  }, []);
 
   const { data: suppliers = [], isLoading } = useQuery({
     queryKey: ["suppliers", businessId],

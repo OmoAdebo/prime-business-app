@@ -19,9 +19,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ImportExportButtons } from "@/components/ImportExportButtons";
+import { useIndustryTerms } from "@/contexts/IndustryContext";
 
 export default function Customers() {
   const { user } = useAuth();
+  const terms = useIndustryTerms();
   const { data: business } = useBusiness();
   const queryClient = useQueryClient();
   const businessId = business?.id;
@@ -169,8 +171,8 @@ export default function Customers() {
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Customers</h1>
-          <p className="text-muted-foreground">Manage your customer database and relationships</p>
+          <h1 className="text-2xl font-bold text-foreground">{terms.customers}</h1>
+          <p className="text-muted-foreground">Manage your {terms.customers.toLowerCase()} database and relationships</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ImportExportButtons
@@ -206,9 +208,9 @@ export default function Customers() {
             }}
           />
           <Dialog open={customerOpen} onOpenChange={setCustomerOpen}>
-            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add Customer</Button></DialogTrigger>
+            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add {terms.customer}</Button></DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Add Customer</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>Add {terms.customer}</DialogTitle></DialogHeader>
               <div className="space-y-4">
                 <div><Label>Name *</Label><Input value={custName} onChange={e => setCustName(e.target.value)} /></div>
                 <div className="grid grid-cols-2 gap-4">
@@ -241,7 +243,7 @@ export default function Customers() {
 
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-        <Card><CardHeader className="pb-2"><CardDescription>Total Customers</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold">{totalCustomers}</p></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardDescription>Total {terms.customers}</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold">{totalCustomers}</p></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardDescription>Active</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{activeCustomers}</p></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardDescription>Outstanding Balance</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold text-yellow-600">₦{totalOutstanding.toLocaleString()}</p></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardDescription>Segments</CardDescription></CardHeader><CardContent><p className="text-2xl font-bold">{segments.length}</p></CardContent></Card>

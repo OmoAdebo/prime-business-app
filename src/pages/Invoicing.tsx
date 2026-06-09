@@ -38,6 +38,7 @@ interface InvoiceItem {
 
 export default function Invoicing() {
   const { user } = useAuth();
+  const terms = useIndustryTerms();
   const { data: business } = useBusiness();
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);

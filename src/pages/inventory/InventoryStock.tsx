@@ -29,6 +29,23 @@ export default function InventoryStock() {
   const [showRecord, setShowRecord] = useState(false);
   const [form, setForm] = useState({ product_id: "", to_location_id: "", quantity: "", movement_type: "receipt", notes: "" });
 
+  useEffect(() => {
+    return onAction("open-stock-movement", (p) => {
+      const matched = p?.product_name
+        ? (products as any[]).find(pr => pr.name?.toLowerCase().includes(p.product_name!.toLowerCase()))
+        : null;
+      const typeMap: Record<string, string> = { in: "receipt", out: "issue", adjust: "adjustment" };
+      setForm({
+        product_id: matched?.id || "",
+        to_location_id: "",
+        quantity: p?.quantity ? String(p.quantity) : "",
+        movement_type: p?.movement_type ? (typeMap[p.movement_type] || "receipt") : "receipt",
+        notes: p?.note || "",
+      });
+      setShowRecord(true);
+    });
+  }, [products]);
+
   const { data: products = [] } = useQuery({
     queryKey: ["products", businessId],
     queryFn: async () => {

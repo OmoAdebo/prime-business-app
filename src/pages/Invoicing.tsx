@@ -282,8 +282,8 @@ export default function Invoicing() {
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 p-3 sm:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Invoicing</h1>
-          <p className="text-muted-foreground">Create, send, and track invoices</p>
+          <h1 className="text-2xl font-bold text-foreground">{industryTerms.invoices}</h1>
+          <p className="text-muted-foreground">Create, send, and track {industryTerms.invoices.toLowerCase()}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ImportExportButtons

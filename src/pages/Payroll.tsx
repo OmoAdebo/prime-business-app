@@ -42,6 +42,14 @@ export default function Payroll() {
   const [payrollForm, setPayrollForm] = useState({ period_start: "", period_end: "", notes: "" });
   const [leaveForm, setLeaveForm] = useState({ employee_id: "", leave_type: "annual", start_date: "", end_date: "", reason: "" });
 
+  useEffect(() => {
+    return onAction("open-payroll-run", (p) => {
+      setPayrollForm((f) => ({ ...f, notes: p?.period || p?.employee_name || "" }));
+      setActiveTab("payroll");
+      setPayrollOpen(true);
+    });
+  }, []);
+
   const fmt = (n: number) => `₦${n.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 
   // Queries

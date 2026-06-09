@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ImportExportButtons } from "@/components/ImportExportButtons";
+import { useIndustryTerms } from "@/contexts/IndustryContext";
 
 const statusColors: Record<string, string> = {
   draft: "bg-muted text-muted-foreground",

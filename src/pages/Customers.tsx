@@ -171,8 +171,8 @@ export default function Customers() {
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Customers</h1>
-          <p className="text-muted-foreground">Manage your customer database and relationships</p>
+          <h1 className="text-2xl font-bold text-foreground">{terms.customers}</h1>
+          <p className="text-muted-foreground">Manage your {terms.customers.toLowerCase()} database and relationships</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ImportExportButtons

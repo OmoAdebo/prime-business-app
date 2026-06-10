@@ -154,15 +154,20 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const { messages, page, industry } = await req.json();
+    const { messages, page, industry, active_form } = await req.json();
     if (!Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: 'messages array required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    const today = new Date().toISOString().slice(0, 10);
     const ctx =
-      (page ? `\n\nCurrent page: ${page}` : '') +
+      `\n\nToday: ${today}` +
+      (page ? `\nCurrent page: ${page}` : '') +
       (industry?.category
-        ? `\n\nBusiness category: ${industry.category}${industry.subcategory ? ` / ${industry.subcategory}` : ''}. Use this industry's terminology when speaking back to the user.`
+        ? `\nBusiness category: ${industry.category}${industry.subcategory ? ` / ${industry.subcategory}` : ''}. Use this industry's terminology when speaking back to the user.`
+        : '') +
+      (active_form
+        ? `\n\nACTIVE FORM (the user is dictating into this modal — call fill_form_fields):\nform_id: ${active_form.form_id}\ntitle: ${active_form.title}\nfields: ${JSON.stringify(active_form.fields)}`
         : '');
 
     const payload = {

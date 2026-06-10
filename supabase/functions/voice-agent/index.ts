@@ -13,9 +13,25 @@ Rules:
 - If the user asks a general question, answer briefly without calling tools.
 - Always speak as if the action is happening now ("Opening invoice form..." / "Got it, navigating to reports...").
 - Never invent data values the user did not say.
-- Map industry-specific terminology to the right tool: "patient" → customer, "medication"/"drug" → product, "buyer" → customer, "SKU" → product, "client" → customer, "bill" → invoice.`;
+- Map industry-specific terminology to the right tool: "patient" → customer, "medication"/"drug" → product, "buyer" → customer, "SKU" → product, "client" → customer, "bill" → invoice.
+- IF an "active form" context is provided, the user is dictating field values into an open modal. Call the fill_form_fields tool with the form_id and a values object whose keys match the form's declared field names. Convert date phrases like "June 15" or "next Friday" to ISO YYYY-MM-DD. Convert spoken numbers ("fifty thousand") to integers. Only include fields the user actually mentioned. Do NOT call any other open_* tool while a form is active unless the user explicitly says "open" or "new" of a different form.`;
 
 const TOOLS = [
+  {
+    type: 'function',
+    function: {
+      name: 'fill_form_fields',
+      description: 'Fill fields in the currently open form/modal with values dictated by the user. Use ONLY when an active_form is provided in the context.',
+      parameters: {
+        type: 'object',
+        properties: {
+          form_id: { type: 'string', description: 'The form_id of the active form (must match exactly).' },
+          values: { type: 'object', description: 'Map of field name → value. Field names must match the active form schema. Dates as YYYY-MM-DD, numbers as plain integers.' },
+        },
+        required: ['form_id', 'values'],
+      },
+    },
+  },
   {
     type: 'function',
     function: {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { onAction } from "@/lib/action-bus";
+import { useVoiceForm } from "@/hooks/use-voice-form";
 import { FileText, Plus, Send, Eye, Trash2, CreditCard, Search, Filter } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,6 +79,55 @@ export default function Invoicing() {
       setCreateOpen(true);
     });
   }, []);
+
+  // Voice dictation into the Create Invoice modal
+  useVoiceForm({
+    enabled: createOpen,
+    formId: "create-invoice",
+    title: "Create Invoice",
+    fields: [
+      { name: "customer_name", type: "string", description: "Customer / patient / client name" },
+      { name: "due_date", type: "date", description: "Invoice due date (YYYY-MM-DD)" },
+      { name: "description", type: "string", description: "Line item description" },
+      { name: "quantity", type: "number" },
+      { name: "unit_price", type: "number", description: "Unit price in Naira" },
+      { name: "notes", type: "string" },
+      { name: "terms", type: "string", description: "Payment terms" },
+    ],
+    apply: (v) => {
+      if (v.customer_name) setCustomerName(String(v.customer_name));
+      if (v.due_date) setDueDate(String(v.due_date));
+      if (v.notes) setNotes(String(v.notes));
+      if (v.terms) setTerms(String(v.terms));
+      if (v.description || v.unit_price || v.quantity) {
+        setItems((prev) => {
+          const first = prev[0] ?? { description: "", quantity: 1, unit_price: 0 };
+          return [{
+            description: v.description ?? first.description,
+            quantity: Number(v.quantity ?? first.quantity) || 1,
+            unit_price: Number(v.unit_price ?? first.unit_price) || 0,
+          }, ...prev.slice(1)];
+        });
+      }
+    },
+  });
+
+  // Voice dictation into the Record Payment modal
+  useVoiceForm({
+    enabled: paymentOpen,
+    formId: "record-payment",
+    title: "Record Payment",
+    fields: [
+      { name: "amount", type: "number", description: "Payment amount in Naira" },
+      { name: "method", type: "string", description: "One of: bank_transfer, cash, card, mobile_money" },
+      { name: "reference", type: "string", description: "Payment reference / note" },
+    ],
+    apply: (v) => {
+      if (v.amount !== undefined) setPaymentAmount(String(v.amount));
+      if (v.method) setPaymentMethod(String(v.method));
+      if (v.reference) setPaymentRef(String(v.reference));
+    },
+  });
 
   const businessId = business?.id;
 

@@ -1,65 +1,64 @@
-# Plan: Industry-Focused Tailoring & Global Voice Data Entry
+# Always-Ready Voice Assistant for CRUD Operations
 
-## 1. New Business Category system
+## Goal
+Whenever a Create/Edit/Delete modal or form opens anywhere in the dashboard, the Prime voice assistant should automatically wake up, start listening, and fill the form's fields by voice — instead of sitting idle in the corner until clicked.
 
-Replace the current free-form industry list (Onboarding + Settings → Business) with **7 curated categories**, each with a hint and optional subcategories:
+## Approach
 
-| Category | Hint | Subcategories |
-|---|---|---|
-| MSMEs | Micro, small & medium businesses — retail, wholesale, services | Retail, Wholesale, Food & Beverage, Services, Logistics |
-| Healthcare | Clinics, pharmacies, hospitals, medical suppliers | Clinic, Pharmacy, Hospital, Diagnostics, Medical Supplies |
-| Agriculture | Farming, agro-processing, livestock, agri-inputs | Crop Farming, Livestock, Agro-Processing, Agri-Inputs |
-| Technology | Software, IT services, hardware, digital products | Software, IT Services, Hardware, SaaS |
-| Finance | Fintech, microfinance, advisory, insurance | Microfinance, Fintech, Insurance, Advisory |
-| Consultant | Professional services & advisory firms | Business, Legal, HR, Marketing, Engineering |
-| Manufacturing | Production, assembly, industrial goods | Food Processing, Textiles, Industrial Goods, FMCG |
+### 1. Global "modal-open" detector (new `src/contexts/VoiceCaptureContext.tsx`)
+Create a lightweight context + event bus:
+- `notifyModalOpen(formId, schema)` — any Dialog/Sheet calls this on open with the form context (e.g. `"create-invoice"`, fields: `due_date, customer_name, line_items, notes`).
+- `notifyModalClose(formId)` — called on close.
+- Internally maintains a stack of active forms (last opened wins).
 
-- Industry becomes **required** in onboarding (cannot skip step 2 without it).
-- Subcategory shown as a second select once category is chosen.
+### 2. Auto-listen behavior in `FloatingVoiceButton.tsx`
+- Subscribe to the context. When a modal opens:
+  - Animate the floating button into an **"active listening"** state (pulse ring + mic icon + tooltip "Listening — dictate field values").
+  - Auto-start `SpeechRecognition` (no need to open the sheet).
+  - Show a compact inline **voice strip** docked above the modal (transcript + stop button) instead of forcing the full sheet open.
+- When the modal closes, stop listening and return to idle.
+- Respect user preference: a small toggle "Auto-listen on forms" (stored in localStorage) so a user can disable it.
 
-## 2. Industry-tailored experience
+### 3. Field-level dictation
+- Extend `voice-agent` edge function with a new tool `fill_form_fields(form_id, fields)` that returns a map of field-name → value, given the open form's schema and the transcript.
+- On result, dispatch a new action `voice-fill-fields` via `action-bus.ts`. Each open modal registers an `onAction("voice-fill-fields")` listener filtered by its `formId` and writes values into its local form state.
+- Falls back to existing tool routing (`open_create_invoice`, etc.) when the user speaks a command instead of dictating values.
 
-Create a single source of truth in `src/lib/industry-config.ts` keyed by category that defines:
+### 4. Wire up every CRUD modal
+Add a tiny hook `useVoiceForm(formId, schema, applyFn)` and call it inside each existing Dialog/Sheet on open. Coverage:
+- Invoicing: Create Invoice, Record Payment
+- Customers: Add/Edit Customer
+- Inventory: Add Product, Add Supplier, Stock Movement, Purchase Order, Category
+- Bookkeeping: Journal Entry, Account, Tax record
+- Banking: New Transfer, Add Beneficiary, Add Account, Schedule Payment
+- Payroll & HR: Add Employee, Payroll Run, Leave Request, Attendance
+- POS: New Sale (cart add by voice)
+- Online Store: Create Order, Add Storefront Product
+- Debt & Credit: Add Receivable / Payable
+- Budgeting: Create Budget, Add Budget Item
+- Store Management: Add Location, Assign Staff
+- Settings: profile/business updates
 
-- **Terminology** (e.g., Healthcare: "Patient" instead of "Customer", "Prescription" instead of "Invoice line"; Agriculture: "Harvest", "Yield"; MSME Retail: standard "Customer/Sale").
-- **Units of measurement** defaults (Healthcare: mg/ml/tablets/boxes; Agriculture: kg/tonnes/bags/hectares; Manufacturing: units/pallets; MSME: pcs/cartons).
-- **Dashboard widgets shown/hidden** per category (e.g., Healthcare shows Prescriptions & Patient Visits; Agriculture shows Harvest Cycles & Input Costs; Consultant shows Billable Hours & Projects).
-- **Quick Actions** tailored per category.
-- **POS/Inventory field labels** swapped via a `useIndustryTerms()` hook.
+(One hook call per modal — small edits, no behavior change beyond enabling voice.)
 
-Persist `business_category` and `business_subcategory` on the `businesses` table (migration). Expose them through `useBusiness()` and a new `IndustryProvider` context that wraps `AppLayout` so every page reads tailored labels/units.
+### 5. Visual cues
+- Floating button gains 3 states: **idle** (sparkle), **armed** (mic outline, appears whenever a CRUD modal is open), **listening** (red pulse).
+- Inline mini-strip above the open modal shows live transcript and a "Done" button.
+- Toast feedback after each filled field ("Set due date to 2026-06-15").
 
-`RoleDashboard` for `business_owner` reads `industryConfig[category].dashboardSections` to render the matching widget set.
+### 6. Out of scope
+- No changes to data model or RLS.
+- Read-only/list views won't auto-activate (only modals/forms).
+- Voice still requires browser SpeechRecognition support; fallback message unchanged.
 
-## 3. Global Voice Command (data entry everywhere)
+## Files
+**New**: `src/contexts/VoiceCaptureContext.tsx`, `src/hooks/use-voice-form.ts`, `src/components/VoiceFormStrip.tsx`
+**Edited**: `src/components/FloatingVoiceButton.tsx`, `src/components/AppLayout.tsx` (wrap with provider), `src/lib/action-bus.ts` (add `voice-fill-fields`), `supabase/functions/voice-agent/index.ts` (add `fill_form_fields` tool + form-schema context), plus one-line `useVoiceForm()` calls inside each CRUD Dialog across the pages listed above.
 
-Today `FloatingVoiceButton` only fires a small set of navigation/open-modal actions. Expand it so users can dictate full records from any page:
+## Acceptance
+- Opening any Create/Edit modal arms the mic automatically; a visible "listening" strip appears.
+- Speaking "Due date June 15, customer John Doe, amount fifty thousand" fills the corresponding fields in the open Create Invoice dialog without leaving the modal.
+- Closing the modal stops listening.
+- A toggle lets the user disable auto-listen if they find it intrusive.
 
-- Extend `src/lib/action-bus.ts` with **prefilled-create** actions for: invoice, expense, customer, product, transfer, journal entry, payroll entry, stock movement, supplier, order.
-- Upgrade `supabase/functions/voice-agent/index.ts` to use Lovable AI Gateway with tool-calling: it parses natural speech into one of the above structured actions (e.g., "Add a new patient John Doe, phone 080…" → `open-add-customer` with payload; "Record sale of 5 paracetamol at 200 naira" → `open-create-invoice` prefilled).
-- The floating button stays mounted globally inside `AppLayout` (already is) but gains a **"dictation mode"** that, on any open modal/form, fills fields via the action bus dispatch.
-- Each list page (Customers, Products, Invoicing, Expenses, Journal Entries, Transfers, Payroll, Stock) registers an `onAction` listener that opens its create dialog and prefills fields from the voice payload.
-- Industry context is sent to the voice agent so terminology matches (e.g., "patient" maps to customer for Healthcare).
-
-## Technical Details
-
-- **DB migration**: add `business_category text` and `business_subcategory text` to `public.businesses`.
-- **New files**:
-  - `src/lib/industry-config.ts` — category → { hint, subcategories, terms, units, dashboard, quickActions }.
-  - `src/contexts/IndustryContext.tsx` + `useIndustry()` / `useIndustryTerms()` hooks.
-- **Edits**:
-  - `src/pages/Onboarding.tsx` — replace `INDUSTRIES` with new category + subcategory selects, hint text, make required.
-  - `src/pages/Settings.tsx` (Business tab) — same category/subcategory selectors with hints.
-  - `src/components/AppLayout.tsx` — wrap with `IndustryProvider`.
-  - `src/components/RoleDashboard.tsx` — render industry-specific widget set for business owners.
-  - `src/lib/action-bus.ts` — add new action types with payload fields.
-  - `src/components/FloatingVoiceButton.tsx` — pass industry context, handle expanded action types.
-  - `supabase/functions/voice-agent/index.ts` — Lovable AI tool-calling with structured output for all action types.
-  - List pages (Customers, Invoicing, InventoryProducts, BankingTransfers, JournalEntries, Payroll, InventoryStock, InventorySuppliers) — register `onAction` listeners to open dialogs prefilled from voice payload.
-- Terminology applied via `useIndustryTerms()` in headers/labels of POS, Inventory, Invoicing, Customers, Reports.
-
-## Out of scope (ask before adding)
-- Reworking the entire data model per industry (we relabel & filter, not fork schemas).
-- Adding new modules (e.g., dedicated EHR) — only tailored views over existing data.
-
-Say **implement** to proceed, or tell me what to adjust (e.g., different category list, more subcategories, or scope down voice to specific forms only).
+Say **implement** to proceed, or tell me to scope it down (e.g., start with Invoicing + Inventory only).

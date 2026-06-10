@@ -2,6 +2,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { BrandingProvider } from "@/contexts/BrandingContext";
 import { IndustryProvider } from "@/contexts/IndustryContext";
+import { VoiceCaptureProvider } from "@/contexts/VoiceCaptureContext";
 import { FloatingVoiceButton } from "@/components/FloatingVoiceButton";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Search, Settings, LogOut, ChevronDown, Menu, Home, X } from "lucide-react";
@@ -46,6 +47,7 @@ export function AppLayout() {
   return (
     <BrandingProvider>
     <IndustryProvider>
+    <VoiceCaptureProvider>
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
@@ -139,6 +141,7 @@ export function AppLayout() {
       </div>
       <FloatingVoiceButton />
     </SidebarProvider>
+    </VoiceCaptureProvider>
     </IndustryProvider>
     </BrandingProvider>
   );

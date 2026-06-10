@@ -10,7 +10,8 @@ export type AppAction =
   | { type: 'open-stock-movement'; payload?: { product_name?: string; quantity?: number; movement_type?: 'in' | 'out' | 'adjust'; note?: string } }
   | { type: 'open-journal-entry'; payload?: { description?: string; amount?: number; debit_account?: string; credit_account?: string } }
   | { type: 'open-payroll-run'; payload?: { period?: string; employee_name?: string; amount?: number } }
-  | { type: 'open-create-order'; payload?: { customer_name?: string; product_name?: string; quantity?: number; total?: number } };
+  | { type: 'open-create-order'; payload?: { customer_name?: string; product_name?: string; quantity?: number; total?: number } }
+  | { type: 'voice-fill-fields'; payload?: { form_id: string; values: Record<string, any> } };
 
 const target = new EventTarget();
 

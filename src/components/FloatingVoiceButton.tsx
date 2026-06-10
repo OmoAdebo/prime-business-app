@@ -4,11 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Mic, MicOff, Loader2, Send, Sparkles } from "lucide-react";
+import { Mic, MicOff, Loader2, Send, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { dispatchAction, type AppAction } from "@/lib/action-bus";
 import { Input } from "@/components/ui/input";
 import { useIndustry } from "@/contexts/IndustryContext";
+import { useVoiceCapture } from "@/contexts/VoiceCaptureContext";
+import { Switch } from "@/components/ui/switch";
 
 type ChatMsg = { role: "user" | "assistant"; content: string };
 
@@ -56,33 +58,39 @@ export function FloatingVoiceButton() {
   const [thinking, setThinking] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [liveTranscript, setLiveTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { category, subcategory } = useIndustry();
+  const { activeForm, autoListen, setAutoListen } = useVoiceCapture();
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, thinking]);
 
-  const sendToAgent = useCallback(async (text: string) => {
+  const sendToAgent = useCallback(async (text: string, form?: typeof activeForm) => {
     const next: ChatMsg[] = [...messages, { role: "user", content: text }];
     setMessages(next);
     setThinking(true);
     try {
       const { data, error } = await supabase.functions.invoke("voice-agent", {
-        body: { messages: next, page: location.pathname, industry: { category, subcategory } },
+        body: {
+          messages: next,
+          page: location.pathname,
+          industry: { category, subcategory },
+          active_form: form ? { form_id: form.formId, title: form.title, fields: form.fields } : null,
+        },
       });
       if (error) throw error;
       const reply: string = data?.reply || "";
       const calls: { name: string; args: any }[] = data?.tool_calls || [];
 
-      if (reply) {
+      if (reply && !form) {
         setMessages((m) => [...m, { role: "assistant", content: reply }]);
         speak(reply);
       }
 
-      // Log usage
       if (user) {
         await supabase.from("voice_usage").insert({
           user_id: user.id,
@@ -92,9 +100,12 @@ export function FloatingVoiceButton() {
         }).then(() => {}, () => {});
       }
 
-      // Execute tool calls
       for (const c of calls) {
-        if (c.name === "navigate" && c.args?.path) {
+        if (c.name === "fill_form_fields" && c.args?.form_id && c.args?.values) {
+          dispatchAction({ type: "voice-fill-fields", payload: { form_id: c.args.form_id, values: c.args.values } });
+          const keys = Object.keys(c.args.values).join(", ");
+          if (keys) toast.success(`Filled: ${keys}`);
+        } else if (c.name === "navigate" && c.args?.path) {
           setOpen(false);
           navigate(c.args.path);
         } else if (TOOL_TO_ACTION[c.name]) {
@@ -105,30 +116,43 @@ export function FloatingVoiceButton() {
           } else {
             dispatchAction({ type: TOOL_TO_ACTION[c.name], payload: c.args } as AppAction);
           }
-          setTimeout(() => setOpen(false), 600);
+          if (!form) setTimeout(() => setOpen(false), 600);
         }
       }
     } catch (e: any) {
       toast.error(e.message || "Voice agent failed");
-      setMessages((m) => [...m, { role: "assistant", content: "Sorry, I ran into an issue. Please try again." }]);
+      if (!form) setMessages((m) => [...m, { role: "assistant", content: "Sorry, I ran into an issue. Please try again." }]);
     } finally {
       setThinking(false);
     }
   }, [messages, navigate, location.pathname, user, category, subcategory]);
 
-  const startListening = useCallback(() => {
+  const startListening = useCallback((form?: typeof activeForm) => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { toast.error("Speech recognition not supported in this browser."); return; }
+    if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} }
     const rec = new SR();
-    rec.continuous = false;
+    rec.continuous = !!form; // keep listening while a form is open
     rec.interimResults = true;
     rec.lang = "en-US";
-    let finalText = "";
+    let buffer = "";
     rec.onresult = (e: any) => {
-      const cur = e.results[e.results.length - 1];
-      const t = cur[0].transcript;
-      setInput(t);
-      if (cur.isFinal) { finalText = t; }
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) {
+          const t = r[0].transcript.trim();
+          if (t) {
+            buffer = "";
+            setLiveTranscript("");
+            setInput("");
+            sendToAgent(t, form);
+          }
+        } else {
+          interim += r[0].transcript;
+        }
+      }
+      if (interim) { setLiveTranscript(interim); setInput(interim); }
     };
     rec.onerror = (e: any) => {
       setIsListening(false);
@@ -136,40 +160,81 @@ export function FloatingVoiceButton() {
     };
     rec.onend = () => {
       setIsListening(false);
-      const t = finalText.trim();
-      if (t) { setInput(""); sendToAgent(t); }
+      setLiveTranscript("");
     };
     recognitionRef.current = rec;
-    rec.start();
-    setIsListening(true);
+    try { rec.start(); setIsListening(true); } catch {}
   }, [sendToAgent]);
 
   const stopListening = useCallback(() => {
-    recognitionRef.current?.stop();
+    try { recognitionRef.current?.stop(); } catch {}
+    recognitionRef.current = null;
     setIsListening(false);
+    setLiveTranscript("");
   }, []);
+
+  // Auto-listen when a form/modal opens
+  useEffect(() => {
+    if (activeForm && autoListen && user) {
+      const t = setTimeout(() => startListening(activeForm), 200);
+      return () => { clearTimeout(t); stopListening(); };
+    }
+    if (!activeForm) stopListening();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeForm?.formId, autoListen, user]);
 
   const handleSend = () => {
     const t = input.trim();
     if (!t) return;
     setInput("");
-    sendToAgent(t);
+    sendToAgent(t, activeForm ?? undefined);
   };
 
   if (!user) return null;
 
+  const armed = !!activeForm;
+
   return (
     <>
+      {/* Inline voice strip when a form is open */}
+      {armed && (
+        <div className="fixed bottom-24 right-6 z-[60] max-w-md w-[min(92vw,28rem)] rounded-2xl border bg-card/95 backdrop-blur shadow-2xl p-3 flex items-center gap-3 animate-in slide-in-from-bottom-2">
+          <div className={`relative h-9 w-9 rounded-full flex items-center justify-center shrink-0 ${isListening ? "bg-destructive text-destructive-foreground" : "bg-primary/10 text-primary"}`}>
+            {isListening ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+            {isListening && <span className="absolute inset-0 rounded-full ring-2 ring-destructive/40 animate-ping" />}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-medium text-foreground truncate">
+              {isListening ? "Listening" : "Paused"} · {activeForm!.title}
+            </div>
+            <div className="text-xs text-muted-foreground truncate">
+              {liveTranscript || (thinking ? "Filling fields…" : "Speak field values, e.g. \"due date June 15, amount fifty thousand\"")}
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1.5 mr-1">
+              <Switch checked={autoListen} onCheckedChange={setAutoListen} aria-label="Auto-listen" />
+            </div>
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={isListening ? stopListening : () => startListening(activeForm)}>
+              {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            </Button>
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={stopListening}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center"
+        className={`fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center ${armed ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground"}`}
         aria-label="Voice command"
       >
-        <Sparkles className="h-6 w-6" />
-        <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-primary/80 border-2 border-background animate-pulse" />
+        {armed ? <Mic className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
+        <span className={`absolute -top-1 -right-1 h-3 w-3 rounded-full border-2 border-background animate-pulse ${armed ? "bg-destructive/80" : "bg-primary/80"}`} />
       </button>
 
-      <Sheet open={open} onOpenChange={(v) => { if (!v) stopListening(); setOpen(v); }}>
+      <Sheet open={open} onOpenChange={(v) => { if (!v && !armed) stopListening(); setOpen(v); }}>
         <SheetContent side="bottom" className="rounded-t-2xl h-[75vh] flex flex-col p-0">
           <SheetHeader className="text-left px-4 pt-4 pb-2 border-b">
             <SheetTitle className="text-base font-semibold flex items-center gap-2">
@@ -217,7 +282,7 @@ export function FloatingVoiceButton() {
               size="icon"
               variant={isListening ? "destructive" : "outline"}
               className="h-10 w-10 rounded-full shrink-0"
-              onClick={isListening ? stopListening : startListening}
+              onClick={isListening ? stopListening : () => startListening()}
               aria-label={isListening ? "Stop" : "Speak"}
             >
               {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}

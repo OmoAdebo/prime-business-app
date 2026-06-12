@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ImportExportButtons } from "@/components/ImportExportButtons";
 import { useIndustryTerms } from "@/contexts/IndustryContext";
+import { useVoiceForm } from "@/hooks/use-voice-form";
 
 export default function Customers() {
   const { user } = useAuth();
@@ -61,6 +62,48 @@ export default function Customers() {
   const [segName, setSegName] = useState("");
   const [segDescription, setSegDescription] = useState("");
   const [segColor, setSegColor] = useState("#22c55e");
+
+  useVoiceForm({
+    enabled: customerOpen,
+    formId: "add-customer",
+    title: `Add ${terms.customer}`,
+    fields: [
+      { name: "name", type: "string", description: "Full name" },
+      { name: "email", type: "string" },
+      { name: "phone", type: "string" },
+      { name: "address", type: "string" },
+      { name: "company", type: "string" },
+      { name: "type", type: "string", description: "individual or business" },
+      { name: "credit_limit", type: "number" },
+    ],
+    apply: (v) => {
+      if (v.name) setCustName(String(v.name));
+      if (v.email) setCustEmail(String(v.email));
+      if (v.phone) setCustPhone(String(v.phone));
+      if (v.address) setCustAddress(String(v.address));
+      if (v.company) setCustCompany(String(v.company));
+      if (v.type) setCustType(String(v.type));
+      if (v.credit_limit !== undefined) setCustCreditLimit(String(v.credit_limit));
+    },
+  });
+
+  useVoiceForm({
+    enabled: interactionOpen,
+    formId: "customer-interaction",
+    title: "Log Interaction",
+    fields: [
+      { name: "type", type: "string", description: "note, call, email, meeting" },
+      { name: "subject", type: "string" },
+      { name: "description", type: "string" },
+    ],
+    apply: (v) => {
+      if (v.type) setIntType(String(v.type));
+      if (v.subject) setIntSubject(String(v.subject));
+      if (v.description) setIntDescription(String(v.description));
+    },
+  });
+
+
 
   const { data: customers = [], isLoading } = useQuery({
     queryKey: ["customers", businessId],

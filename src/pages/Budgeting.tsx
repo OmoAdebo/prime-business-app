@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { useVoiceForm } from "@/hooks/use-voice-form";
 
 export default function Budgeting() {
   const { user } = useAuth();
@@ -31,6 +32,41 @@ export default function Budgeting() {
   const [itemCategory, setItemCategory] = useState("");
   const [itemAmount, setItemAmount] = useState("");
   const [itemNotes, setItemNotes] = useState("");
+
+  useVoiceForm({
+    enabled: budgetOpen,
+    formId: "create-budget",
+    title: "Create Budget",
+    fields: [
+      { name: "name", type: "string", description: "Budget name" },
+      { name: "period_start", type: "date" },
+      { name: "period_end", type: "date" },
+      { name: "total_amount", type: "number" },
+    ],
+    apply: (v) => {
+      if (v.name) setBudgetName(String(v.name));
+      if (v.period_start) setPeriodStart(String(v.period_start));
+      if (v.period_end) setPeriodEnd(String(v.period_end));
+      if (v.total_amount !== undefined) setTotalAmount(String(v.total_amount));
+    },
+  });
+
+  useVoiceForm({
+    enabled: itemOpen,
+    formId: "add-budget-item",
+    title: "Add Budget Item",
+    fields: [
+      { name: "category", type: "string" },
+      { name: "amount", type: "number" },
+      { name: "notes", type: "string" },
+    ],
+    apply: (v) => {
+      if (v.category) setItemCategory(String(v.category));
+      if (v.amount !== undefined) setItemAmount(String(v.amount));
+      if (v.notes) setItemNotes(String(v.notes));
+    },
+  });
+
 
   const { data: budgets = [], isLoading } = useQuery({
     queryKey: ["budgets", businessId],

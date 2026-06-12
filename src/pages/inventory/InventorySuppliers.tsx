@@ -16,6 +16,7 @@ import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Truck, Plus, Search, Edit, Trash2, Mail, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 import { ImportExportButtons } from "@/components/ImportExportButtons";
+import { useVoiceForm } from "@/hooks/use-voice-form";
 
 const emptyForm = { name: "", email: "", phone: "", address: "", contact_person: "" };
 
@@ -27,6 +28,27 @@ export default function InventorySuppliers() {
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  useVoiceForm({
+    enabled: showAdd,
+    formId: "add-supplier",
+    title: editId ? "Edit Supplier" : "Add Supplier",
+    fields: [
+      { name: "name", type: "string", description: "Supplier / vendor company name" },
+      { name: "contact_person", type: "string" },
+      { name: "email", type: "string" },
+      { name: "phone", type: "string" },
+      { name: "address", type: "string" },
+    ],
+    apply: (v) => setForm((f) => ({
+      ...f,
+      name: v.name !== undefined ? String(v.name) : f.name,
+      contact_person: v.contact_person !== undefined ? String(v.contact_person) : f.contact_person,
+      email: v.email !== undefined ? String(v.email) : f.email,
+      phone: v.phone !== undefined ? String(v.phone) : f.phone,
+      address: v.address !== undefined ? String(v.address) : f.address,
+    })),
+  });
 
   useEffect(() => {
     return onAction("open-add-supplier", (p) => {

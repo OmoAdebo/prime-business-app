@@ -21,6 +21,7 @@ import {
   TrendingUp, DollarSign, Calendar, Users
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
+import { useVoiceForm } from "@/hooks/use-voice-form";
 
 export default function DebtCredit() {
   const { user } = useAuth();
@@ -34,6 +35,58 @@ export default function DebtCredit() {
   const [recForm, setRecForm] = useState({ customer_id: "", description: "", amount: "", due_date: "" });
   const [payForm, setPayForm] = useState({ supplier_id: "", description: "", amount: "", due_date: "" });
   const [schedForm, setSchedForm] = useState({ payable_id: "", scheduled_date: "", amount: "", notes: "" });
+
+  useVoiceForm({
+    enabled: receivableOpen,
+    formId: "add-receivable",
+    title: "Add Receivable",
+    fields: [
+      { name: "description", type: "string" },
+      { name: "amount", type: "number" },
+      { name: "due_date", type: "date" },
+    ],
+    apply: (v) => setRecForm((f) => ({
+      ...f,
+      description: v.description !== undefined ? String(v.description) : f.description,
+      amount: v.amount !== undefined ? String(v.amount) : f.amount,
+      due_date: v.due_date !== undefined ? String(v.due_date) : f.due_date,
+    })),
+  });
+
+  useVoiceForm({
+    enabled: payableOpen,
+    formId: "add-payable",
+    title: "Add Payable",
+    fields: [
+      { name: "description", type: "string" },
+      { name: "amount", type: "number" },
+      { name: "due_date", type: "date" },
+    ],
+    apply: (v) => setPayForm((f) => ({
+      ...f,
+      description: v.description !== undefined ? String(v.description) : f.description,
+      amount: v.amount !== undefined ? String(v.amount) : f.amount,
+      due_date: v.due_date !== undefined ? String(v.due_date) : f.due_date,
+    })),
+  });
+
+  useVoiceForm({
+    enabled: scheduleOpen,
+    formId: "schedule-payment",
+    title: "Schedule Payment",
+    fields: [
+      { name: "amount", type: "number" },
+      { name: "scheduled_date", type: "date" },
+      { name: "notes", type: "string" },
+    ],
+    apply: (v) => setSchedForm((f) => ({
+      ...f,
+      amount: v.amount !== undefined ? String(v.amount) : f.amount,
+      scheduled_date: v.scheduled_date !== undefined ? String(v.scheduled_date) : f.scheduled_date,
+      notes: v.notes !== undefined ? String(v.notes) : f.notes,
+    })),
+  });
+
 
   const fmt = (n: number) => `₦${n.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 

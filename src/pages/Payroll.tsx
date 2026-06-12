@@ -22,6 +22,7 @@ import {
   DollarSign, FileText, CheckCircle, XCircle, AlertCircle
 } from "lucide-react";
 import { format } from "date-fns";
+import { useVoiceForm } from "@/hooks/use-voice-form";
 
 const EMPLOYMENT_TYPES = ["full_time", "part_time", "contract", "intern"];
 const LEAVE_TYPES = ["annual", "sick", "maternity", "paternity", "unpaid", "compassionate"];
@@ -41,6 +42,85 @@ export default function Payroll() {
   const [deptForm, setDeptForm] = useState({ name: "", description: "" });
   const [payrollForm, setPayrollForm] = useState({ period_start: "", period_end: "", notes: "" });
   const [leaveForm, setLeaveForm] = useState({ employee_id: "", leave_type: "annual", start_date: "", end_date: "", reason: "" });
+
+  useVoiceForm({
+    enabled: employeeOpen,
+    formId: "add-employee",
+    title: "Add Employee",
+    fields: [
+      { name: "full_name", type: "string" },
+      { name: "email", type: "string" },
+      { name: "phone", type: "string" },
+      { name: "position", type: "string" },
+      { name: "employment_type", type: "string", description: "full_time, part_time, contract, intern" },
+      { name: "basic_salary", type: "number" },
+      { name: "bank_name", type: "string" },
+      { name: "account_number", type: "string" },
+      { name: "hire_date", type: "date" },
+    ],
+    apply: (v) => setEmpForm((f) => ({
+      ...f,
+      full_name: v.full_name !== undefined ? String(v.full_name) : f.full_name,
+      email: v.email !== undefined ? String(v.email) : f.email,
+      phone: v.phone !== undefined ? String(v.phone) : f.phone,
+      position: v.position !== undefined ? String(v.position) : f.position,
+      employment_type: v.employment_type !== undefined ? String(v.employment_type) : f.employment_type,
+      basic_salary: v.basic_salary !== undefined ? String(v.basic_salary) : f.basic_salary,
+      bank_name: v.bank_name !== undefined ? String(v.bank_name) : f.bank_name,
+      account_number: v.account_number !== undefined ? String(v.account_number) : f.account_number,
+      hire_date: v.hire_date !== undefined ? String(v.hire_date) : f.hire_date,
+    })),
+  });
+
+  useVoiceForm({
+    enabled: departmentOpen,
+    formId: "add-department",
+    title: "Add Department",
+    fields: [
+      { name: "name", type: "string" },
+      { name: "description", type: "string" },
+    ],
+    apply: (v) => setDeptForm((f) => ({
+      name: v.name !== undefined ? String(v.name) : f.name,
+      description: v.description !== undefined ? String(v.description) : f.description,
+    })),
+  });
+
+  useVoiceForm({
+    enabled: payrollOpen,
+    formId: "run-payroll",
+    title: "Run Payroll",
+    fields: [
+      { name: "period_start", type: "date" },
+      { name: "period_end", type: "date" },
+      { name: "notes", type: "string" },
+    ],
+    apply: (v) => setPayrollForm((f) => ({
+      period_start: v.period_start !== undefined ? String(v.period_start) : f.period_start,
+      period_end: v.period_end !== undefined ? String(v.period_end) : f.period_end,
+      notes: v.notes !== undefined ? String(v.notes) : f.notes,
+    })),
+  });
+
+  useVoiceForm({
+    enabled: leaveOpen,
+    formId: "leave-request",
+    title: "Leave Request",
+    fields: [
+      { name: "leave_type", type: "string", description: "annual, sick, maternity, paternity, unpaid, compassionate" },
+      { name: "start_date", type: "date" },
+      { name: "end_date", type: "date" },
+      { name: "reason", type: "string" },
+    ],
+    apply: (v) => setLeaveForm((f) => ({
+      ...f,
+      leave_type: v.leave_type !== undefined ? String(v.leave_type) : f.leave_type,
+      start_date: v.start_date !== undefined ? String(v.start_date) : f.start_date,
+      end_date: v.end_date !== undefined ? String(v.end_date) : f.end_date,
+      reason: v.reason !== undefined ? String(v.reason) : f.reason,
+    })),
+  });
+
 
   useEffect(() => {
     return onAction("open-payroll-run", (p) => {

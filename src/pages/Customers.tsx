@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ImportExportButtons } from "@/components/ImportExportButtons";
 import { useIndustryTerms } from "@/contexts/IndustryContext";
+import { useVoiceForm } from "@/hooks/use-voice-form";
 
 export default function Customers() {
   const { user } = useAuth();

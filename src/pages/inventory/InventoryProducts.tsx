@@ -19,6 +19,7 @@ import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Package, Plus, Search, Edit, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ImportExportButtons } from "@/components/ImportExportButtons";
+import { useVoiceForm } from "@/hooks/use-voice-form";
 
 const PRODUCT_CATEGORIES = [
   "Electronics", "Food & Beverages", "Clothing", "Health & Beauty",
@@ -46,6 +47,38 @@ export default function InventoryProducts() {
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+
+  useVoiceForm({
+    enabled: showAdd,
+    formId: "add-product",
+    title: editId ? "Edit Product" : "Add Product",
+    fields: [
+      { name: "name", type: "string", description: "Product / service / item name" },
+      { name: "sku", type: "string" },
+      { name: "category", type: "string" },
+      { name: "description", type: "string" },
+      { name: "unit_price", type: "number", description: "Selling price in Naira" },
+      { name: "cost_price", type: "number" },
+      { name: "unit_of_measure", type: "string", description: "e.g. pcs, kg, litre, box" },
+      { name: "low_stock_threshold", type: "number" },
+      { name: "barcode", type: "string" },
+      { name: "initial_quantity", type: "number" },
+    ],
+    apply: (v) => setForm((f) => ({
+      ...f,
+      name: v.name !== undefined ? String(v.name) : f.name,
+      sku: v.sku !== undefined ? String(v.sku) : f.sku,
+      category: v.category !== undefined ? String(v.category) : f.category,
+      description: v.description !== undefined ? String(v.description) : f.description,
+      unit_price: v.unit_price !== undefined ? String(v.unit_price) : f.unit_price,
+      cost_price: v.cost_price !== undefined ? String(v.cost_price) : f.cost_price,
+      unit_of_measure: v.unit_of_measure !== undefined ? String(v.unit_of_measure) : f.unit_of_measure,
+      low_stock_threshold: v.low_stock_threshold !== undefined ? String(v.low_stock_threshold) : f.low_stock_threshold,
+      barcode: v.barcode !== undefined ? String(v.barcode) : f.barcode,
+      initial_quantity: v.initial_quantity !== undefined ? String(v.initial_quantity) : f.initial_quantity,
+    })),
+  });
+
 
   useEffect(() => {
     return onAction("open-add-product", (p) => {

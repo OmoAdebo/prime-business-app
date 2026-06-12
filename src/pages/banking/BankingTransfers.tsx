@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { useVoiceForm } from "@/hooks/use-voice-form";
 
 const NIGERIAN_BANKS = [
   "Access Bank", "Citibank", "Ecobank", "Fidelity Bank", "First Bank of Nigeria",
@@ -60,6 +61,59 @@ export default function BankingTransfers() {
   const [ibAmount, setIbAmount] = useState("");
   const [ibNarration, setIbNarration] = useState("");
   const [ibBeneficiaryId, setIbBeneficiaryId] = useState("");
+
+  useVoiceForm({
+    enabled: transferTab === "intra",
+    formId: "intra-transfer",
+    title: "Internal Transfer",
+    fields: [
+      { name: "amount", type: "number" },
+      { name: "description", type: "string" },
+    ],
+    apply: (v) => {
+      if (v.amount !== undefined) setAmount(String(v.amount));
+      if (v.description) setDescription(String(v.description));
+    },
+  });
+
+  useVoiceForm({
+    enabled: transferTab === "same-bank",
+    formId: "same-bank-transfer",
+    title: "Same-bank Transfer",
+    fields: [
+      { name: "account_number", type: "string" },
+      { name: "account_name", type: "string" },
+      { name: "amount", type: "number" },
+      { name: "narration", type: "string" },
+    ],
+    apply: (v) => {
+      if (v.account_number) setSbToAccountNumber(String(v.account_number));
+      if (v.account_name) setSbToAccountName(String(v.account_name));
+      if (v.amount !== undefined) setSbAmount(String(v.amount));
+      if (v.narration) setSbNarration(String(v.narration));
+    },
+  });
+
+  useVoiceForm({
+    enabled: transferTab === "inter",
+    formId: "inter-bank-transfer",
+    title: "Inter-bank Transfer",
+    fields: [
+      { name: "bank_name", type: "string", description: "Recipient bank" },
+      { name: "account_number", type: "string" },
+      { name: "account_name", type: "string" },
+      { name: "amount", type: "number" },
+      { name: "narration", type: "string" },
+    ],
+    apply: (v) => {
+      if (v.bank_name) setIbBankName(String(v.bank_name));
+      if (v.account_number) setIbAccountNumber(String(v.account_number));
+      if (v.account_name) setIbAccountName(String(v.account_name));
+      if (v.amount !== undefined) setIbAmount(String(v.amount));
+      if (v.narration) setIbNarration(String(v.narration));
+    },
+  });
+
 
   const { data: accounts = [] } = useQuery({
     queryKey: ["bank-accounts", businessId],

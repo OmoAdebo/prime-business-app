@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Layers, Plus, ArrowRightLeft, Search } from "lucide-react";
+import { useVoiceForm } from "@/hooks/use-voice-form";
 import { motion } from "framer-motion";
 
 export default function InventoryStock() {
@@ -28,6 +29,23 @@ export default function InventoryStock() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showRecord, setShowRecord] = useState(false);
   const [form, setForm] = useState({ product_id: "", to_location_id: "", quantity: "", movement_type: "receipt", notes: "" });
+
+  useVoiceForm({
+    enabled: showRecord,
+    formId: "stock-movement",
+    title: "Record Stock Movement",
+    fields: [
+      { name: "quantity", type: "number" },
+      { name: "movement_type", type: "string", description: "receipt, issue, or adjustment" },
+      { name: "notes", type: "string" },
+    ],
+    apply: (v) => setForm((f) => ({
+      ...f,
+      quantity: v.quantity !== undefined ? String(v.quantity) : f.quantity,
+      movement_type: v.movement_type !== undefined ? String(v.movement_type) : f.movement_type,
+      notes: v.notes !== undefined ? String(v.notes) : f.notes,
+    })),
+  });
 
   const { data: products = [] } = useQuery({
     queryKey: ["products", businessId],

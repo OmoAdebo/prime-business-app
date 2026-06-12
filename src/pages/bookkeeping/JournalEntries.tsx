@@ -19,6 +19,7 @@ import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { FileEdit, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { useVoiceForm } from "@/hooks/use-voice-form";
 
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
@@ -42,6 +43,23 @@ export default function JournalEntries() {
     { account_id: "", debit: "", credit: "", description: "" },
     { account_id: "", debit: "", credit: "", description: "" },
   ]);
+
+  useVoiceForm({
+    enabled: showAdd,
+    formId: "journal-entry",
+    title: "Journal Entry",
+    fields: [
+      { name: "description", type: "string" },
+      { name: "reference", type: "string" },
+      { name: "entry_date", type: "date", description: "YYYY-MM-DD" },
+    ],
+    apply: (v) => setEntryForm((f) => ({
+      description: v.description !== undefined ? String(v.description) : f.description,
+      reference: v.reference !== undefined ? String(v.reference) : f.reference,
+      entry_date: v.entry_date !== undefined ? String(v.entry_date) : f.entry_date,
+    })),
+  });
+
 
   useEffect(() => {
     return onAction("open-record-expense", (p) => {

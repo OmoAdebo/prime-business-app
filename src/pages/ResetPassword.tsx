@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { PublicLayout } from '@/components/PublicLayout';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -60,17 +61,17 @@ export default function ResetPassword() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <PublicLayout variant="centered">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin" />
           <p className="text-sm">Verifying reset link…</p>
         </div>
-      </div>
+      </PublicLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <PublicLayout variant="centered">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold font-display text-foreground">Reset Password</h1>
@@ -97,6 +98,6 @@ export default function ResetPassword() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PublicLayout>
   );
 }

@@ -231,6 +231,6 @@ export default function Signup() {
           </Link>
         </p>
       </div>
-    </div>
+    </PublicLayout>
   );
 }

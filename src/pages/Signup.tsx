@@ -10,6 +10,7 @@ import { Eye, EyeOff, UserPlus, Building2, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Progress } from '@/components/ui/progress';
+import { PublicLayout } from '@/components/PublicLayout';
 
 type AccountType = 'business_owner' | 'individual';
 
@@ -88,7 +89,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
+    <PublicLayout variant="centered">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg mb-4">

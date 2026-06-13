@@ -1,6 +1,7 @@
 // Industry / Business Category configuration
-// Drives terminology, units of measurement, dashboard widgets, and quick actions
-// for the entire app based on the business owner's selected focus.
+// Drives terminology, units of measurement, dashboard widgets, quick actions,
+// sidebar nav overrides and hidden modules for the entire app
+// based on the business owner's selected focus.
 
 export type BusinessCategory =
   | "MSMEs"
@@ -32,6 +33,12 @@ export interface IndustryConfig {
   defaultUnit: string;
   dashboardSections: string[];     // widget keys to show
   quickActions: { label: string; action: string; route?: string }[];
+  /** Sidebar nav label overrides keyed by route. */
+  navOverrides: Record<string, string>;
+  /** Routes the sidebar should hide for this industry. */
+  hiddenModules: string[];
+  /** Industry-specific KPIs for the dashboard. */
+  kpis: { key: string; label: string; helper: string }[];
 }
 
 const DEFAULTS: IndustryTerms = {
@@ -60,6 +67,14 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { label: "Add Product", action: "open-add-product", route: "/inventory/products" },
       { label: "Add Customer", action: "open-add-customer", route: "/customers" },
     ],
+    navOverrides: {},
+    hiddenModules: [],
+    kpis: [
+      { key: "revenue", label: "Total Revenue", helper: "Across all sales" },
+      { key: "orders", label: "Total Orders", helper: "POS + online" },
+      { key: "customers", label: "Active Customers", helper: "With recent activity" },
+      { key: "inventory", label: "Stock Value", helper: "On-hand inventory" },
+    ],
   },
   Healthcare: {
     category: "Healthcare",
@@ -82,8 +97,21 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
     dashboardSections: ["revenue", "patients", "prescriptions", "inventory", "invoices"],
     quickActions: [
       { label: "New Patient", action: "open-add-customer", route: "/customers" },
-      { label: "Dispense", action: "open-create-invoice", route: "/invoicing" },
+      { label: "Dispense Medication", action: "open-create-invoice", route: "/invoicing" },
       { label: "Add Medication", action: "open-add-product", route: "/inventory/products" },
+    ],
+    navOverrides: {
+      "/customers": "Patients",
+      "/invoicing": "Bills & Prescriptions",
+      "/inventory": "Stock",
+      "/pos": "Dispense",
+    },
+    hiddenModules: ["/store"],
+    kpis: [
+      { key: "revenue", label: "Total Billed", helper: "Patient bills issued" },
+      { key: "patients", label: "Active Patients", helper: "Seen this month" },
+      { key: "dispenses", label: "Dispenses", helper: "Medication dispensed" },
+      { key: "stock", label: "Stock Alerts", helper: "Low / expiring" },
     ],
   },
   Agriculture: {
@@ -103,8 +131,20 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
     dashboardSections: ["revenue", "harvests", "inputs", "inventory", "customers"],
     quickActions: [
       { label: "Record Harvest", action: "open-add-product", route: "/inventory/products" },
-      { label: "Log Sale", action: "open-create-invoice", route: "/invoicing" },
+      { label: "Log Buyer Sale", action: "open-create-invoice", route: "/invoicing" },
       { label: "Add Buyer", action: "open-add-customer", route: "/customers" },
+    ],
+    navOverrides: {
+      "/customers": "Buyers & Offtakers",
+      "/inventory": "Stockyard",
+      "/invoicing": "Sales & Offtake",
+    },
+    hiddenModules: ["/store"],
+    kpis: [
+      { key: "revenue", label: "Harvest Revenue", helper: "Total sold" },
+      { key: "produce", label: "Produce on Hand", helper: "Stockyard balance" },
+      { key: "buyers", label: "Active Buyers", helper: "Repeat offtakers" },
+      { key: "inputs", label: "Input Costs", helper: "Seed, feed, agro-chem" },
     ],
   },
   Technology: {
@@ -126,7 +166,18 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
     quickActions: [
       { label: "New Client", action: "open-add-customer", route: "/customers" },
       { label: "Send Invoice", action: "open-create-invoice", route: "/invoicing" },
-      { label: "Add Product", action: "open-add-product", route: "/inventory/products" },
+      { label: "Add Product / Plan", action: "open-add-product", route: "/inventory/products" },
+    ],
+    navOverrides: {
+      "/customers": "Clients",
+      "/inventory": "Products & Plans",
+    },
+    hiddenModules: ["/pos"],
+    kpis: [
+      { key: "revenue", label: "MRR", helper: "Monthly recurring revenue" },
+      { key: "clients", label: "Active Clients", helper: "Subscribed" },
+      { key: "invoices", label: "Open Invoices", helper: "Awaiting payment" },
+      { key: "churn", label: "Churn (30d)", helper: "Cancelled accounts" },
     ],
   },
   Finance: {
@@ -149,6 +200,17 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { label: "New Client", action: "open-add-customer", route: "/customers" },
       { label: "Record Transfer", action: "open-new-transfer", route: "/banking/transfers" },
       { label: "Generate Invoice", action: "open-create-invoice", route: "/invoicing" },
+    ],
+    navOverrides: {
+      "/customers": "Clients",
+      "/inventory": "Service Catalog",
+    },
+    hiddenModules: ["/pos", "/store"],
+    kpis: [
+      { key: "revenue", label: "Fee Revenue", helper: "All sources" },
+      { key: "clients", label: "Active Clients", helper: "With balances" },
+      { key: "loans", label: "Outstanding Loans", helper: "Principal due" },
+      { key: "transactions", label: "Transactions (7d)", helper: "Across products" },
     ],
   },
   Consultant: {
@@ -173,6 +235,18 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { label: "Bill Client", action: "open-create-invoice", route: "/invoicing" },
       { label: "Log Expense", action: "open-record-expense", route: "/bookkeeping/journal-entries" },
     ],
+    navOverrides: {
+      "/customers": "Clients",
+      "/inventory": "Service Catalog",
+      "/invoicing": "Billing & Retainers",
+    },
+    hiddenModules: ["/pos", "/store", "/store-management"],
+    kpis: [
+      { key: "revenue", label: "Billings", helper: "Invoiced this month" },
+      { key: "clients", label: "Active Clients", helper: "Engaged" },
+      { key: "hours", label: "Billable Hours", helper: "Logged this week" },
+      { key: "outstanding", label: "Outstanding", helper: "Unpaid invoices" },
+    ],
   },
   Manufacturing: {
     category: "Manufacturing",
@@ -195,6 +269,18 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { label: "New Order", action: "open-create-invoice", route: "/invoicing" },
       { label: "Add SKU", action: "open-add-product", route: "/inventory/products" },
       { label: "Add Buyer", action: "open-add-customer", route: "/customers" },
+    ],
+    navOverrides: {
+      "/customers": "Buyers & Distributors",
+      "/inventory": "Warehouse",
+      "/invoicing": "Orders",
+    },
+    hiddenModules: [],
+    kpis: [
+      { key: "revenue", label: "Order Revenue", helper: "Fulfilled orders" },
+      { key: "production", label: "Production (7d)", helper: "Units produced" },
+      { key: "orders", label: "Open Orders", helper: "In progress" },
+      { key: "warehouse", label: "Warehouse Value", helper: "On-hand stock" },
     ],
   },
 };

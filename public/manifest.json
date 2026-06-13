@@ -1,8 +1,9 @@
 {
-  "name": "Prime Business Suites",
+  "name": "Prime Business",
   "short_name": "Prime",
-  "description": "All-in-one business management platform",
+  "description": "Industry-tailored business management platform for African SMEs.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#22c55e",

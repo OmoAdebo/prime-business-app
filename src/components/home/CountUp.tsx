@@ -25,7 +25,8 @@ export function CountUp({ to, duration = 1800, prefix = "", suffix = "", format 
             const tick = (now: number) => {
               const t = Math.min(1, (now - start) / duration);
               const eased = 1 - Math.pow(1 - t, 3);
-              setN(Math.round(to * eased));
+              const v = to * eased;
+              setN(format ? v : Math.round(v));
               if (t < 1) requestAnimationFrame(tick);
             };
             requestAnimationFrame(tick);

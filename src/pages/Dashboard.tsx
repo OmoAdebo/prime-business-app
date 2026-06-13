@@ -11,50 +11,69 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useIndustry } from "@/contexts/IndustryContext";
+import { dispatchAction, type AppAction } from "@/lib/action-bus";
 
-const kpiCards = [
-  {
-    title: "Total Revenue",
-    value: "₦0.00",
-    icon: DollarSign,
-    desc: "No transactions yet",
-  },
-  {
-    title: "Net Profit",
-    value: "₦0.00",
-    icon: TrendingUp,
-    desc: "No data yet",
-  },
-  {
-    title: "Total Orders",
-    value: "0",
-    icon: ShoppingCart,
-    desc: "No orders yet",
-  },
-  {
-    title: "Active Clients",
-    value: "0",
-    icon: Users,
-    desc: "No clients yet",
-  },
-];
-
-const quickActions = [
-  { label: "Create Invoice", icon: FileText, href: "/invoicing", color: "text-primary" },
-  { label: "Add Product", icon: Package, href: "/inventory", color: "text-primary" },
-  { label: "View Reports", icon: BarChart3, href: "/reports", color: "text-primary" },
-  { label: "Manage Customers", icon: Users, href: "/customers", color: "text-primary" },
-];
+const KPI_ICONS: Record<string, any> = {
+  revenue: DollarSign,
+  orders: ShoppingCart,
+  sales: ShoppingCart,
+  customers: Users,
+  clients: Users,
+  patients: Users,
+  buyers: Users,
+  inventory: Package,
+  stock: Package,
+  warehouse: Package,
+  produce: Package,
+  dispenses: TrendingUp,
+  production: TrendingUp,
+  invoices: FileText,
+  outstanding: FileText,
+  hours: BarChart3,
+  loans: DollarSign,
+  transactions: BarChart3,
+  churn: TrendingUp,
+};
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { config, terms, category } = useIndustry();
+
+  const kpiCards = config.kpis.map((k) => ({
+    title: k.label,
+    value: k.key === "revenue" ? "₦0.00" : "0",
+    icon: KPI_ICONS[k.key] || BarChart3,
+    desc: k.helper,
+  }));
+
+  const quickActions = config.quickActions.map((a) => ({
+    label: a.label,
+    icon:
+      a.action === "open-create-invoice" ? FileText :
+      a.action === "open-add-product" ? Package :
+      a.action === "open-add-customer" ? Users :
+      a.action === "open-new-transfer" ? DollarSign :
+      a.action === "open-record-expense" ? BarChart3 : ShoppingCart,
+    onClick: () => {
+      if (a.route) navigate(a.route);
+      setTimeout(() => dispatchAction({ type: a.action as AppAction['type'], payload: {} } as AppAction), 120);
+    },
+  }));
 
   return (
     <div className="space-y-6 max-w-7xl">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold font-display text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Welcome — here's your business overview.</p>
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-xl font-bold font-display text-foreground">Business Overview</h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Tailored for <span className="font-medium text-foreground">{category || "your industry"}</span> — terminology, units &amp; KPIs adapt automatically.
+          </p>
+        </div>
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+          {category || "MSMEs"} workspace
+        </span>
       </div>
 
       {/* KPI Cards */}
@@ -68,19 +87,20 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="mt-3">
+                <p className="text-xs text-muted-foreground">{kpi.title}</p>
                 <p className="text-lg sm:text-2xl font-bold text-foreground">{kpi.value}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{kpi.desc}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{kpi.desc}</p>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions — industry-tailored */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg font-display">Quick Actions</CardTitle>
-          <CardDescription>Get started by setting up your business</CardDescription>
+          <CardDescription>Shortcuts tailored to {category || "your industry"}.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -89,9 +109,9 @@ export default function Dashboard() {
                 key={action.label}
                 variant="outline"
                 className="h-auto flex-col gap-2 py-4 hover:border-primary/40"
-                onClick={() => navigate(action.href)}
+                onClick={action.onClick}
               >
-                <action.icon className={`h-5 w-5 ${action.color}`} />
+                <action.icon className="h-5 w-5 text-primary" />
                 <span className="text-xs font-medium">{action.label}</span>
               </Button>
             ))}
@@ -101,7 +121,6 @@ export default function Dashboard() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
-        {/* Revenue Chart */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
@@ -121,20 +140,16 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Weekly Sales */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-display">Weekly Sales</CardTitle>
-            <CardDescription>This week's order count</CardDescription>
+            <CardTitle className="text-lg font-display">Weekly {terms.sales}</CardTitle>
+            <CardDescription>This week's {terms.sale.toLowerCase()} count</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center justify-center h-[220px] text-muted-foreground">
               <ShoppingCart className="h-10 w-10 mb-3 text-muted-foreground/30" />
-              <p className="text-sm font-medium">No sales data yet</p>
-              <p className="text-xs mt-1 text-center">Process your first order in POS or Online Store.</p>
-              <Button variant="link" size="sm" className="mt-2" onClick={() => navigate("/pos")}>
-                Open POS <ArrowRight className="h-3 w-3 ml-1" />
-              </Button>
+              <p className="text-sm font-medium">No {terms.sale.toLowerCase()} data yet</p>
+              <p className="text-xs mt-1 text-center">Record your first {terms.sale.toLowerCase()} to see trends.</p>
             </div>
           </CardContent>
         </Card>

@@ -1,64 +1,67 @@
-# Always-Ready Voice Assistant for CRUD Operations
+## 1. Industry-tailored experience — make it real across the app
 
-## Goal
-Whenever a Create/Edit/Delete modal or form opens anywhere in the dashboard, the Prime voice assistant should automatically wake up, start listening, and fill the form's fields by voice — instead of sitting idle in the corner until clicked.
+**Problem:** `useIndustry()` / `useIndustryTerms()` exist but only Customers, Invoicing, Onboarding and Settings read them. Switching a business to Healthcare changes almost nothing visible. Also: changing industry on an existing account should not be a casual setting.
 
-## Approach
+**Changes:**
+- **Lock industry post-onboarding.** In `src/pages/Settings.tsx`, render Industry/Sector + Subcategory as **read-only** (badge + "Set during onboarding — contact support to change") for accounts that already completed onboarding. Keep editable only when `businesses.business_category` is null. Remove the free-change Select.
+- **Require category on onboarding.** Already required in Step 2 — also block "Finish" if missing and add a one-line hint under the field describing what changes (terminology, units, dashboard widgets, quick actions).
+- **Expand `src/lib/industry-config.ts`** with richer per-industry payload used app-wide:
+  - `nav`: sidebar item overrides (e.g. Healthcare → "Patients" replaces "Customers", "Prescriptions" replaces "Invoicing"; Agriculture → "Produce", "Harvests"; Consultant → "Engagements", "Time & Billing"; Manufacturing → "Production", "Warehouse")
+  - `hiddenModules`: modules to hide per industry (e.g. Consultant hides Inventory/POS by default; Finance hides POS; Healthcare keeps Inventory but renamed "Stock")
+  - `kpis`: dashboard KPI definitions (label, source query key, icon, formatter)
+  - `quickActions`: already exists — surface on the role dashboard
+  - `productFields`: extra fields shown in Add Product modal (Healthcare → dosage, expiry; Agriculture → batch, harvest date; Manufacturing → SKU code, lot)
+  - `customerFields`: extra fields (Healthcare → DOB, allergies; Finance → KYC tier)
+- **Wire `AppSidebar.tsx`** to read `useIndustry()` and rename/hide nav items based on `nav` + `hiddenModules`.
+- **Wire `RoleDashboard.tsx` / `Dashboard.tsx`** to render industry-specific KPI cards, headings ("Patients" vs "Customers"), and `quickActions` from the config.
+- **Wire page headers** on Customers, Inventory, Invoicing, POS, Reports to call `useIndustryTerms()` for titles, breadcrumbs, empty states, and table column labels.
+- **Units of measurement** — Inventory Products & Stock modals read `config.units` for the unit dropdown and default to `config.defaultUnit`.
+- **No DB change required** — everything keys off existing `business_category` / `business_subcategory`.
 
-### 1. Global "modal-open" detector (new `src/contexts/VoiceCaptureContext.tsx`)
-Create a lightweight context + event bus:
-- `notifyModalOpen(formId, schema)` — any Dialog/Sheet calls this on open with the form context (e.g. `"create-invoice"`, fields: `due_date, customer_name, line_items, notes`).
-- `notifyModalClose(formId)` — called on close.
-- Internally maintains a stack of active forms (last opened wins).
+## 2. Admin login redirect + dashboard cleanup
 
-### 2. Auto-listen behavior in `FloatingVoiceButton.tsx`
-- Subscribe to the context. When a modal opens:
-  - Animate the floating button into an **"active listening"** state (pulse ring + mic icon + tooltip "Listening — dictate field values").
-  - Auto-start `SpeechRecognition` (no need to open the sheet).
-  - Show a compact inline **voice strip** docked above the modal (transcript + stop button) instead of forcing the full sheet open.
-- When the modal closes, stop listening and return to idle.
-- Respect user preference: a small toggle "Auto-listen on forms" (stored in localStorage) so a user can disable it.
+**Problem:** Admins land on `/dashboard` after login and see admin-only widgets ("Welcome, Oreon Admin", "All Users / Business Verifications").
 
-### 3. Field-level dictation
-- Extend `voice-agent` edge function with a new tool `fill_form_fields(form_id, fields)` that returns a map of field-name → value, given the open form's schema and the transcript.
-- On result, dispatch a new action `voice-fill-fields` via `action-bus.ts`. Each open modal registers an `onAction("voice-fill-fields")` listener filtered by its `formId` and writes values into its local form state.
-- Falls back to existing tool routing (`open_create_invoice`, etc.) when the user speaks a command instead of dictating values.
+**Changes:**
+- In `src/pages/Login.tsx` (and Signup post-confirm flow): after auth, read roles and redirect: admins (`super_admin | admin | support_admin`) → `/admin`; everyone else → `/dashboard` (or `/onboarding` if pending).
+- Add an `AdminRedirect` guard in `AppLayout` so any admin who lands on `/dashboard` is auto-routed to `/admin`.
+- **Remove admin-only blocks from the BO dashboard** (`RoleDashboard.tsx` super_admin branch + any "All Users / Business Verifications" tabs currently rendered there). Move that content into `src/pages/admin/AdminOverview.tsx` so admins see Total Users / Business Owners / Super Admins / Pending Verifications stat cards and the All Users + Business Verifications tabbed table.
 
-### 4. Wire up every CRUD modal
-Add a tiny hook `useVoiceForm(formId, schema, applyFn)` and call it inside each existing Dialog/Sheet on open. Coverage:
-- Invoicing: Create Invoice, Record Payment
-- Customers: Add/Edit Customer
-- Inventory: Add Product, Add Supplier, Stock Movement, Purchase Order, Category
-- Bookkeeping: Journal Entry, Account, Tax record
-- Banking: New Transfer, Add Beneficiary, Add Account, Schedule Payment
-- Payroll & HR: Add Employee, Payroll Run, Leave Request, Attendance
-- POS: New Sale (cart add by voice)
-- Online Store: Create Order, Add Storefront Product
-- Debt & Credit: Add Receivable / Payable
-- Budgeting: Create Budget, Add Budget Item
-- Store Management: Add Location, Assign Staff
-- Settings: profile/business updates
+## 3. Domain rebrand to getprime.app
 
-(One hook call per modal — small edits, no behavior change beyond enabling voice.)
+- Replace every `*.lovable.app` / `lovableproject.com` reference with `https://www.getprime.app/`. Files: `src/main.tsx` (PWA gating — keep host detection but stop hard-coding lovable hostnames in user-facing strings), `index.html` (canonical, OG, twitter URLs), `public/manifest.json` (start_url, scope), `public/robots.txt` (sitemap), email templates in edge functions, README, any "powered by" footer text.
+- Add a single `SITE_URL` constant in `src/lib/site.ts` so future links use one source.
 
-### 5. Visual cues
-- Floating button gains 3 states: **idle** (sparkle), **armed** (mic outline, appears whenever a CRUD modal is open), **listening** (red pulse).
-- Inline mini-strip above the open modal shows live transcript and a "Done" button.
-- Toast feedback after each filled field ("Set due date to 2026-06-15").
+## 4. Onboarding refinements
 
-### 6. Out of scope
-- No changes to data model or RLS.
-- Read-only/list views won't auto-activate (only modals/forms).
-- Voice still requires browser SpeechRecognition support; fallback message unchanged.
+- **Rename "Business category"** label → **"Industry / Sector"** (Step 2) to match Settings.
+- **Dynamic LGA select.** Add a `NIGERIA_LGAS: Record<State, string[]>` map (new file `src/lib/nigeria-lgas.ts` with all 36 states + FCT LGAs). Change the LGA `<Input>` in Step 3 to a `<Select>` populated from `NIGERIA_LGAS[state]`; disable until a state is chosen; reset LGA when state changes.
+- **Make onboarding fields mirror Settings tabs.** Re-organize the 4 onboarding steps to map 1:1 onto Settings tabs (Business Profile, Industry & Operations, Address & Contact, Branding/Preferences) — same field names, same validation, same Select options — so what a user fills during onboarding is exactly what appears (pre-filled) in Settings later.
 
-## Files
-**New**: `src/contexts/VoiceCaptureContext.tsx`, `src/hooks/use-voice-form.ts`, `src/components/VoiceFormStrip.tsx`
-**Edited**: `src/components/FloatingVoiceButton.tsx`, `src/components/AppLayout.tsx` (wrap with provider), `src/lib/action-bus.ts` (add `voice-fill-fields`), `supabase/functions/voice-agent/index.ts` (add `fill_form_fields` tool + form-schema context), plus one-line `useVoiceForm()` calls inside each CRUD Dialog across the pages listed above.
+## 5. Home page revamp (`src/pages/Index.tsx`)
 
-## Acceptance
-- Opening any Create/Edit modal arms the mic automatically; a visible "listening" strip appears.
-- Speaking "Due date June 15, customer John Doe, amount fifty thousand" fills the corresponding fields in the open Create Invoice dialog without leaving the modal.
-- Closing the modal stops listening.
-- A toggle lets the user disable auto-listen if they find it intrusive.
+Total rebuild to feel authentic and human:
+- **Hero**: real headline + sub, primary CTA → Sign up, secondary → Watch demo. Subtle Nigerian-market illustration or photo (generate with `imagegen` — diverse Nigerian SME owners using a phone/POS).
+- **"Built for your industry" section**: 7 cards, one per category (MSMEs, Healthcare, Agriculture, Technology, Finance, Consultant, Manufacturing), each with a lucide icon, 1-line hint from `INDUSTRY_CONFIG[c].hint`, and a "See what's tailored" link → `/signup?industry=Healthcare` (prefills onboarding).
+- **Services grid**: Invoicing, Bookkeeping, Inventory, POS, Banking, Payroll & HR, Online Store, Capital Access, Voice Assistant — each as a card with icon, blurb, and "Learn more".
+- **Social proof**: testimonial trio (generated portraits or initials avatars), logos strip ("Trusted by 1,200+ Nigerian businesses").
+- **How-it-works**: 3-step (Sign up → Pick your industry → Run your business) with iconography.
+- **Final CTA band** + footer.
+- Use the existing emerald brand tokens; add subtle gradients & framer-motion fades consistent with `mem://style/visual-identity-oreon`.
 
-Say **implement** to proceed, or tell me to scope it down (e.g., start with Invoicing + Inventory only).
+## 6. Reusable navbar + footer + apply to /login
+
+- Promote `src/components/PublicNavbar.tsx` (already exists) and create `src/components/PublicFooter.tsx` (sitemap links, contact, social, copyright, getprime.app branding).
+- Create a `PublicLayout` wrapper `<PublicNavbar /> <main>{children}</main> <PublicFooter />` and use it on `/`, `/about`, `/contact`, `/pricing`, `/login`, `/signup`, `/reset-password`, `/accept-invite/:token`.
+- Login page keeps centered card but inside `PublicLayout` so navbar/footer surround it.
+
+## Technical notes
+
+- **Files touched:**
+  - New: `src/lib/site.ts`, `src/lib/nigeria-lgas.ts`, `src/components/PublicLayout.tsx`, `src/components/PublicFooter.tsx`.
+  - Edited: `src/lib/industry-config.ts`, `src/components/AppSidebar.tsx`, `src/components/RoleDashboard.tsx`, `src/pages/Dashboard.tsx`, `src/pages/admin/AdminOverview.tsx`, `src/pages/Login.tsx`, `src/pages/Signup.tsx`, `src/pages/Onboarding.tsx`, `src/pages/Settings.tsx`, `src/pages/Index.tsx`, `src/pages/Customers.tsx`, `src/pages/Invoicing.tsx`, `src/pages/inventory/InventoryProducts.tsx`, `src/pages/inventory/InventoryStock.tsx`, `src/pages/POS.tsx`, `src/pages/Reports.tsx`, `index.html`, `public/manifest.json`, `public/robots.txt`, `src/main.tsx`, `README.md`.
+- **No schema changes** — uses existing `businesses.business_category` / `business_subcategory`.
+- **No breaking RLS work.**
+- **Out of scope:** payment provider, voice agent changes, role permissions overhaul.
+
+Reply **implement** to proceed, or tell me which sections to drop/shrink.

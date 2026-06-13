@@ -10,16 +10,9 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { ArrowRight, ArrowLeft, CheckCircle2, Rocket } from 'lucide-react';
-
-const NIGERIA_STATES = [
-  'Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno','Cross River','Delta',
-  'Ebonyi','Edo','Ekiti','Enugu','FCT','Gombe','Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi',
-  'Kogi','Kwara','Lagos','Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto',
-  'Taraba','Yobe','Zamfara',
-];
-
-import { BUSINESS_CATEGORIES, INDUSTRY_CONFIG } from '@/lib/industry-config';
+import { ArrowRight, ArrowLeft, CheckCircle2, Rocket, Sparkles } from 'lucide-react';
+import { BUSINESS_CATEGORIES, INDUSTRY_CONFIG, type BusinessCategory } from '@/lib/industry-config';
+import { NIGERIA_STATES, getLgasForState } from '@/lib/nigeria-lgas';
 
 export default function Onboarding() {
   const { user, profile, roles, refreshProfile, loading: authLoading } = useAuth();
@@ -31,7 +24,6 @@ export default function Onboarding() {
 
   // form state
   const [companyName, setCompanyName] = useState('');
-  const [industry, setIndustry] = useState('');
   const [businessCategory, setBusinessCategory] = useState<string>('');
   const [businessSubcategory, setBusinessSubcategory] = useState<string>('');
   const [cacNumber, setCacNumber] = useState('');
@@ -49,11 +41,21 @@ export default function Onboarding() {
     }
   }, [user, profile, authLoading, navigate]);
 
+  // Reset LGA whenever state changes
+  useEffect(() => { setLga(''); }, [state]);
+
+  const lgas = getLgasForState(state);
+
   const next = () => setStep((s) => Math.min(s + 1, totalSteps));
   const prev = () => setStep((s) => Math.max(s - 1, 1));
 
   const finish = async () => {
     if (!user) return;
+    if (isBusinessOwner && !businessCategory) {
+      toast.error('Industry / Sector is required to tailor your dashboard');
+      setStep(2);
+      return;
+    }
     setSaving(true);
     try {
       await supabase.from('profiles').update({
@@ -67,7 +69,7 @@ export default function Onboarding() {
         const { data: existing } = await supabase.from('businesses').select('id').eq('owner_id', user.id).maybeSingle();
         const payload: any = {
           company_name: companyName,
-          industry: industry || businessCategory || null,
+          industry: businessCategory || null,
           business_category: businessCategory || null,
           business_subcategory: businessSubcategory || null,
           cac_number: cacNumber || null,
@@ -84,7 +86,7 @@ export default function Onboarding() {
       }
 
       await refreshProfile();
-      toast.success("You're all set! Welcome to Prime Business.");
+      toast.success("You're all set! Your dashboard is tailored to your industry.");
       navigate('/dashboard');
     } catch (e: any) {
       toast.error(e.message || 'Could not save onboarding');
@@ -95,12 +97,18 @@ export default function Onboarding() {
 
   const skip = async () => {
     if (!user) return;
+    if (isBusinessOwner && !businessCategory) {
+      toast.error('Please pick your Industry / Sector before skipping — it tailors your dashboard.');
+      setStep(2);
+      return;
+    }
     await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', user.id);
     await refreshProfile();
     navigate('/dashboard');
   };
 
   const progress = (step / totalSteps) * 100;
+  const canContinueStep2 = !!companyName && !!businessCategory;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8">
@@ -116,8 +124,8 @@ export default function Onboarding() {
 
         <Card>
           <CardHeader>
-            {step === 1 && (<><CardTitle>Welcome{profile?.full_name ? `, ${profile.full_name}` : ''}</CardTitle><CardDescription>{isBusinessOwner ? "We'll help you set up your business profile in a few quick steps." : "Quick setup before you explore the platform."}</CardDescription></>)}
-            {isBusinessOwner && step === 2 && (<><CardTitle>Business details</CardTitle><CardDescription>Tell us about your business.</CardDescription></>)}
+            {step === 1 && (<><CardTitle>Welcome{profile?.full_name ? `, ${profile.full_name}` : ''}</CardTitle><CardDescription>{isBusinessOwner ? "We'll tailor Prime to your industry in a few quick steps." : "Quick setup before you explore the platform."}</CardDescription></>)}
+            {isBusinessOwner && step === 2 && (<><CardTitle>Business profile</CardTitle><CardDescription>This determines how your dashboard, terminology and quick actions look.</CardDescription></>)}
             {isBusinessOwner && step === 3 && (<><CardTitle>Business address</CardTitle><CardDescription>Where is your business located?</CardDescription></>)}
             {isBusinessOwner && step === 4 && (<><CardTitle>Almost done</CardTitle><CardDescription>Review and confirm.</CardDescription></>)}
             {!isBusinessOwner && step === 2 && (<><CardTitle>Contact info</CardTitle><CardDescription>Add a phone number so businesses can reach you.</CardDescription></>)}
@@ -125,7 +133,7 @@ export default function Onboarding() {
           <CardContent className="space-y-4">
             {step === 1 && (
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> Personalize your dashboard</li>
+                <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> Personalize your dashboard for your industry</li>
                 <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> {isBusinessOwner ? 'Set up your business profile' : 'Add your contact info'}</li>
                 <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" /> Get started in under 2 minutes</li>
               </ul>
@@ -133,10 +141,18 @@ export default function Onboarding() {
 
             {isBusinessOwner && step === 2 && (
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2 sm:col-span-2"><Label htmlFor="company">Company name *</Label><Input id="company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required /></div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label>Business category *</Label>
-                  <Select value={businessCategory} onValueChange={(v) => { setBusinessCategory(v); setBusinessSubcategory(''); setIndustry(v); }}>
+                  <Label htmlFor="company">Company name *</Label>
+                  <Input id="company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label className="flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" /> Industry / Sector *
+                  </Label>
+                  <Select
+                    value={businessCategory}
+                    onValueChange={(v) => { setBusinessCategory(v); setBusinessSubcategory(''); }}
+                  >
                     <SelectTrigger><SelectValue placeholder="Select your business focus" /></SelectTrigger>
                     <SelectContent>
                       {BUSINESS_CATEGORIES.map((c) => (
@@ -149,9 +165,9 @@ export default function Onboarding() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {businessCategory && (
-                    <p className="text-xs text-muted-foreground">{INDUSTRY_CONFIG[businessCategory as keyof typeof INDUSTRY_CONFIG].hint}. Your dashboard, terminology and units of measurement will be tailored to this category.</p>
-                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Your entire dashboard — terminology (e.g. Patient vs Customer), units of measurement, KPIs, sidebar and quick actions — will adapt to this choice. <span className="text-foreground font-medium">This can't easily be changed later</span>, so pick carefully.
+                  </p>
                 </div>
                 {businessCategory && (
                   <div className="space-y-2 sm:col-span-2">
@@ -159,7 +175,7 @@ export default function Onboarding() {
                     <Select value={businessSubcategory} onValueChange={setBusinessSubcategory}>
                       <SelectTrigger><SelectValue placeholder="Choose a subcategory (optional)" /></SelectTrigger>
                       <SelectContent>
-                        {INDUSTRY_CONFIG[businessCategory as keyof typeof INDUSTRY_CONFIG].subcategories.map((s) => (
+                        {INDUSTRY_CONFIG[businessCategory as BusinessCategory].subcategories.map((s) => (
                           <SelectItem key={s} value={s}>{s}</SelectItem>
                         ))}
                       </SelectContent>
@@ -167,25 +183,44 @@ export default function Onboarding() {
                   </div>
                 )}
                 <div className="space-y-2"><Label htmlFor="phone">Phone</Label><Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+234..." /></div>
-                <div className="space-y-2"><Label htmlFor="cac">CAC number</Label><Input id="cac" value={cacNumber} onChange={(e) => setCacNumber(e.target.value)} placeholder="RC1234567" /></div>
-                <div className="space-y-2"><Label htmlFor="tin">TIN number</Label><Input id="tin" value={tinNumber} onChange={(e) => setTinNumber(e.target.value)} placeholder="10-digit TIN" /></div>
+                <div className="space-y-2"><Label htmlFor="cac">CAC number</Label><Input id="cac" value={cacNumber} onChange={(e) => setCacNumber(e.target.value.toUpperCase())} placeholder="RC1234567" /></div>
+                <div className="space-y-2 sm:col-span-2"><Label htmlFor="tin">TIN number</Label><Input id="tin" value={tinNumber} onChange={(e) => setTinNumber(e.target.value.replace(/\D/g, '').slice(0, 10))} placeholder="10-digit TIN" /></div>
               </div>
             )}
 
             {isBusinessOwner && step === 3 && (
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2 sm:col-span-2"><Label htmlFor="addr">Business address</Label><Textarea id="addr" value={businessAddress} onChange={(e) => setBusinessAddress(e.target.value)} rows={2} /></div>
-                <div className="space-y-2"><Label>State</Label>
-                  <Select value={state} onValueChange={setState}><SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger><SelectContent>{NIGERIA_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent></Select>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="addr">Business address</Label>
+                  <Textarea id="addr" value={businessAddress} onChange={(e) => setBusinessAddress(e.target.value)} rows={2} placeholder="Street, city" />
                 </div>
-                <div className="space-y-2"><Label htmlFor="lga">LGA</Label><Input id="lga" value={lga} onChange={(e) => setLga(e.target.value)} /></div>
+                <div className="space-y-2">
+                  <Label>State</Label>
+                  <Select value={state} onValueChange={setState}>
+                    <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
+                    <SelectContent>
+                      {NIGERIA_STATES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>LGA</Label>
+                  <Select value={lga} onValueChange={setLga} disabled={!state}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={state ? 'Select LGA' : 'Select a state first'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {lgas.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
 
             {isBusinessOwner && step === 4 && (
               <div className="rounded-lg border p-4 text-sm space-y-1">
                 <p><span className="text-muted-foreground">Company:</span> <span className="font-medium">{companyName || '—'}</span></p>
-                <p><span className="text-muted-foreground">Business category:</span> {businessCategory || '—'}{businessSubcategory ? ` / ${businessSubcategory}` : ''}</p>
+                <p><span className="text-muted-foreground">Industry / Sector:</span> {businessCategory || '—'}{businessSubcategory ? ` / ${businessSubcategory}` : ''}</p>
                 <p><span className="text-muted-foreground">CAC:</span> {cacNumber || '—'}</p>
                 <p><span className="text-muted-foreground">TIN:</span> {tinNumber || '—'}</p>
                 <p><span className="text-muted-foreground">Address:</span> {businessAddress || '—'}</p>
@@ -202,7 +237,9 @@ export default function Onboarding() {
               <div className="flex gap-2">
                 <Button variant="ghost" onClick={skip} disabled={saving}>Skip for now</Button>
                 {step < totalSteps ? (
-                  <Button onClick={next} disabled={isBusinessOwner && step === 2 && (!companyName || !businessCategory)}>Continue <ArrowRight className="h-4 w-4 ml-1" /></Button>
+                  <Button onClick={next} disabled={isBusinessOwner && step === 2 && !canContinueStep2}>
+                    Continue <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
                 ) : (
                   <Button onClick={finish} disabled={saving}>{saving ? 'Saving...' : 'Finish setup'}</Button>
                 )}

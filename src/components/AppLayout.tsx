@@ -6,7 +6,7 @@ import { VoiceCaptureProvider } from "@/contexts/VoiceCaptureContext";
 import { FloatingVoiceButton } from "@/components/FloatingVoiceButton";
 import { Outlet, useNavigate, Navigate } from "react-router-dom";
 import { Search, Settings, LogOut, ChevronDown, Menu, Home, X } from "lucide-react";
-import { useEffect } from "react";
+
 
 const ADMIN_ROLES = ['super_admin', 'admin', 'support_admin'];
 import { useState } from "react";

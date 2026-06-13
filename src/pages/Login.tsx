@@ -4,10 +4,36 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { PublicLayout } from '@/components/PublicLayout';
+
+const ADMIN_ROLES = ['super_admin', 'admin', 'support_admin'];
+
+async function resolveLandingPath(userId: string): Promise<string> {
+  // Roles
+  const { data: rolesData } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId);
+  const roles = (rolesData ?? []).map((r: any) => r.role as string);
+
+  if (roles.some((r) => ADMIN_ROLES.includes(r))) return '/admin';
+
+  // Onboarding check for BO / individual
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('onboarding_completed')
+    .eq('id', userId)
+    .maybeSingle();
+  const needsOnboarding =
+    (roles.includes('business_owner') || roles.includes('individual')) &&
+    profile?.onboarding_completed === false;
+
+  return needsOnboarding ? '/onboarding' : '/dashboard';
+}
 
 export default function Login() {
   const { user, loading: authLoading } = useAuth();
@@ -19,7 +45,7 @@ export default function Login() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      navigate('/dashboard', { replace: true });
+      resolveLandingPath(user.id).then((path) => navigate(path, { replace: true }));
     }
   }, [user, authLoading, navigate]);
 
@@ -27,16 +53,17 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      toast.error(error.message);
+    if (error || !data.user) {
+      toast.error(error?.message || 'Could not sign in');
       setLoading(false);
       return;
     }
 
     toast.success('Welcome back!');
-    navigate('/dashboard');
+    const path = await resolveLandingPath(data.user.id);
+    navigate(path, { replace: true });
   };
 
   const handleForgotPassword = async () => {
@@ -52,13 +79,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <PublicLayout variant="centered">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg mb-4">
             P
           </div>
-          <h1 className="text-2xl font-bold font-display text-foreground">Welcome to Prime</h1>
+          <h1 className="text-2xl font-bold font-display text-foreground">Welcome back to Prime</h1>
           <p className="text-muted-foreground mt-1">Sign in to your business suite</p>
         </div>
 
@@ -125,6 +152,6 @@ export default function Login() {
           </Link>
         </p>
       </div>
-    </div>
+    </PublicLayout>
   );
 }

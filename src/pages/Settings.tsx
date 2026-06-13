@@ -517,52 +517,65 @@ function BusinessVerificationTab() {
             </Select>
           </div>
 
-          {/* Business Category */}
+          {/* Industry / Sector — locked once chosen at onboarding */}
           <div className="space-y-2 md:col-span-2">
-            <Label>Business Category / Focus *</Label>
-            <Select
-              value={form.business_category}
-              onValueChange={(v) => {
-                setTouched((t) => ({ ...t, business_category: true }));
-                setForm((f) => ({ ...f, business_category: v, business_subcategory: "", industry: v }));
-              }}
-            >
-              <SelectTrigger><SelectValue placeholder="Select your business focus" /></SelectTrigger>
-              <SelectContent>
-                {BUSINESS_CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{c}</span>
-                      <span className="text-xs text-muted-foreground">{INDUSTRY_CONFIG[c].hint}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {form.business_category && (
-              <p className="text-xs text-muted-foreground">
-                {INDUSTRY_CONFIG[form.business_category as BusinessCategory].hint}. Your dashboard, terminology and units of measurement adapt to this category.
-              </p>
+            <Label>Industry / Sector *</Label>
+            {form.business_category ? (
+              <div className="rounded-lg border bg-muted/40 p-3 flex items-start gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="secondary" className="capitalize">{form.business_category}</Badge>
+                    {form.business_subcategory && (
+                      <Badge variant="outline">{form.business_subcategory}</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {INDUSTRY_CONFIG[form.business_category as BusinessCategory]?.hint}. Your dashboard, terminology, units of measurement and quick actions are tailored to this. <span className="text-foreground font-medium">Set during onboarding — contact support to change.</span>
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Select
+                  value={form.business_category}
+                  onValueChange={(v) => {
+                    setTouched((t) => ({ ...t, business_category: true }));
+                    setForm((f) => ({ ...f, business_category: v, business_subcategory: "", industry: v }));
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select your business focus" /></SelectTrigger>
+                  <SelectContent>
+                    {BUSINESS_CATEGORIES.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">{c}</span>
+                          <span className="text-xs text-muted-foreground">{INDUSTRY_CONFIG[c].hint}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.business_category && (
+                  <>
+                    <Select
+                      value={form.business_subcategory}
+                      onValueChange={(v) => setForm((f) => ({ ...f, business_subcategory: v }))}
+                    >
+                      <SelectTrigger><SelectValue placeholder="Choose a subcategory (optional)" /></SelectTrigger>
+                      <SelectContent>
+                        {INDUSTRY_CONFIG[form.business_category as BusinessCategory].subcategories.map((s) => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {INDUSTRY_CONFIG[form.business_category as BusinessCategory].hint}. Once saved, your dashboard adapts and this can't be changed without support.
+                    </p>
+                  </>
+                )}
+              </>
             )}
           </div>
-
-          {/* Subcategory */}
-          {form.business_category && (
-            <div className="space-y-2 md:col-span-2">
-              <Label>Subcategory</Label>
-              <Select
-                value={form.business_subcategory}
-                onValueChange={(v) => setForm((f) => ({ ...f, business_subcategory: v }))}
-              >
-                <SelectTrigger><SelectValue placeholder="Choose a subcategory (optional)" /></SelectTrigger>
-                <SelectContent>
-                  {INDUSTRY_CONFIG[form.business_category as BusinessCategory].subcategories.map((s) => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
         </div>
 
         {business && (

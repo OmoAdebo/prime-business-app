@@ -24,6 +24,7 @@ import { NavLink } from "@/components/NavLink";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBranding } from "@/contexts/BrandingContext";
+import { useIndustry } from "@/contexts/IndustryContext";
 import { AppRole } from "@/contexts/AuthContext";
 import {
   Sidebar,
@@ -85,15 +86,23 @@ function filterByRole(items: NavItem[], userRoles: AppRole[]): NavItem[] {
   return items.filter(item => userRoles.some(r => item.allowedRoles.includes(r)));
 }
 
+function applyIndustry(items: NavItem[], overrides: Record<string, string>, hidden: string[]): NavItem[] {
+  return items
+    .filter((i) => !hidden.includes(i.url))
+    .map((i) => (overrides[i.url] ? { ...i, title: overrides[i.url] } : i));
+}
+
 interface NavGroupProps {
   label: string;
   items: NavItem[];
   collapsed: boolean;
   userRoles: AppRole[];
+  navOverrides: Record<string, string>;
+  hiddenModules: string[];
 }
 
-function NavGroup({ label, items, collapsed, userRoles }: NavGroupProps) {
-  const filtered = filterByRole(items, userRoles);
+function NavGroup({ label, items, collapsed, userRoles, navOverrides, hiddenModules }: NavGroupProps) {
+  const filtered = applyIndustry(filterByRole(items, userRoles), navOverrides, hiddenModules);
   if (filtered.length === 0) return null;
 
   return (
@@ -127,6 +136,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { signOut, profile, roles } = useAuth();
   const branding = useBranding();
+  const { config: industry } = useIndustry();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -141,6 +151,8 @@ export function AppSidebar() {
   };
 
   const filteredBottom = filterByRole(bottomItems, roles);
+  const navOverrides = industry.navOverrides;
+  const hiddenModules = industry.hiddenModules;
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -157,7 +169,7 @@ export function AppSidebar() {
             <div>
               <h2 className="text-sm font-semibold text-sidebar-foreground font-display">{branding.brandName}</h2>
               <p className="text-xs text-sidebar-foreground/50">
-                {profile?.company_name || 'Business Suite'}
+                {profile?.company_name || industry.category}
               </p>
             </div>
           )}
@@ -167,9 +179,9 @@ export function AppSidebar() {
       <Separator className="bg-sidebar-border" />
 
       <SidebarContent className="px-2 py-2 overflow-y-auto scrollbar-thin">
-        <NavGroup label="Overview" items={mainItems} collapsed={collapsed} userRoles={roles} />
-        <NavGroup label="Operations" items={operationsItems} collapsed={collapsed} userRoles={roles} />
-        <NavGroup label="Insights" items={insightItems} collapsed={collapsed} userRoles={roles} />
+        <NavGroup label="Overview" items={mainItems} collapsed={collapsed} userRoles={roles} navOverrides={navOverrides} hiddenModules={hiddenModules} />
+        <NavGroup label="Operations" items={operationsItems} collapsed={collapsed} userRoles={roles} navOverrides={navOverrides} hiddenModules={hiddenModules} />
+        <NavGroup label="Insights" items={insightItems} collapsed={collapsed} userRoles={roles} navOverrides={navOverrides} hiddenModules={hiddenModules} />
       </SidebarContent>
 
       <Separator className="bg-sidebar-border" />

@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useIndustry } from "@/contexts/IndustryContext";
-import { emit } from "@/lib/action-bus";
+import { dispatchAction, type AppAction } from "@/lib/action-bus";
 
 const KPI_ICONS: Record<string, any> = {
   revenue: DollarSign,
@@ -57,8 +57,7 @@ export default function Dashboard() {
       a.action === "open-record-expense" ? BarChart3 : ShoppingCart,
     onClick: () => {
       if (a.route) navigate(a.route);
-      // give the page a tick to mount, then trigger its open-modal action
-      setTimeout(() => emit(a.action as any, {}), 120);
+      setTimeout(() => dispatchAction({ type: a.action as AppAction['type'], payload: {} } as AppAction), 120);
     },
   }));
 

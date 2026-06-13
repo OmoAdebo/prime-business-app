@@ -4,8 +4,11 @@ import { BrandingProvider } from "@/contexts/BrandingContext";
 import { IndustryProvider } from "@/contexts/IndustryContext";
 import { VoiceCaptureProvider } from "@/contexts/VoiceCaptureContext";
 import { FloatingVoiceButton } from "@/components/FloatingVoiceButton";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, Navigate } from "react-router-dom";
 import { Search, Settings, LogOut, ChevronDown, Menu, Home, X } from "lucide-react";
+
+
+const ADMIN_ROLES = ['super_admin', 'admin', 'support_admin'];
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,16 +36,23 @@ function getInitials(name: string | null | undefined): string {
 }
 
 export function AppLayout() {
-  const { profile, roles, user, signOut } = useAuth();
+  const { profile, roles, user, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const primaryRole = roles[0] || "employee";
   const initials = getInitials(profile?.full_name);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
+  const isAdmin = roles.some((r) => ADMIN_ROLES.includes(r));
+
   const handleSignOut = async () => {
     await signOut();
     navigate("/login");
   };
+
+  // Admins should never see the BO dashboard — bounce them to /admin
+  if (!loading && isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
 
   return (
     <BrandingProvider>

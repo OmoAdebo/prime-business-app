@@ -2,11 +2,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AppRole } from '@/contexts/AuthContext';
 import Dashboard from '@/pages/Dashboard';
 import {
-  BookOpen, Package, Users, CreditCard, FileText, Store, BarChart3, Landmark, PiggyBank, Settings,
+  BookOpen, Package, Users, CreditCard, FileText, Store, BarChart3, Landmark, PiggyBank,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { AdminUserManagement } from '@/components/AdminUserManagement';
 import { ActivityFeed } from '@/components/ActivityFeed';
 
 interface QuickAction {
@@ -16,22 +15,9 @@ interface QuickAction {
   color: string;
 }
 
-const roleQuickActions: Record<AppRole, QuickAction[]> = {
-  super_admin: [
-    { title: 'Admin Console', icon: Settings, path: '/admin', color: 'bg-primary/10 text-primary' },
-    { title: 'User Management', icon: Users, path: '/admin/users', color: 'bg-accent text-accent-foreground' },
-    { title: 'All Reports', icon: BarChart3, path: '/reports', color: 'bg-secondary/20 text-secondary-foreground' },
-    { title: 'System Settings', icon: Settings, path: '/settings', color: 'bg-muted text-muted-foreground' },
-  ],
-  admin: [
-    { title: 'Admin Console', icon: Settings, path: '/admin', color: 'bg-primary/10 text-primary' },
-    { title: 'Businesses', icon: Store, path: '/admin/businesses', color: 'bg-accent text-accent-foreground' },
-    { title: 'Activity', icon: BarChart3, path: '/admin/activity', color: 'bg-secondary/20 text-secondary-foreground' },
-  ],
-  support_admin: [
-    { title: 'Admin Console', icon: Settings, path: '/admin', color: 'bg-primary/10 text-primary' },
-    { title: 'Users', icon: Users, path: '/admin/users', color: 'bg-accent text-accent-foreground' },
-  ],
+// Admin roles are redirected to /admin by AppLayout — we no longer render
+// admin-only quick actions or panels here. The dashboard is for operators.
+const roleQuickActions: Partial<Record<AppRole, QuickAction[]>> = {
   business_owner: [
     { title: 'Bookkeeping', icon: BookOpen, path: '/bookkeeping', color: 'bg-primary/10 text-primary' },
     { title: 'Invoicing', icon: FileText, path: '/invoicing', color: 'bg-accent text-accent-foreground' },
@@ -61,10 +47,7 @@ const roleQuickActions: Record<AppRole, QuickAction[]> = {
   ],
 };
 
-const roleGreetings: Record<AppRole, string> = {
-  super_admin: 'System overview — full control at your fingertips.',
-  admin: 'Platform admin overview — manage businesses and users.',
-  support_admin: 'Support overview — assist users and review activity.',
+const roleGreetings: Partial<Record<AppRole, string>> = {
   business_owner: 'Your business at a glance — finances, sales & operations.',
   store_manager: 'Store operations overview — inventory, sales & orders.',
   accountant: 'Financial overview — books, reports & reconciliation.',
@@ -75,8 +58,8 @@ const roleGreetings: Record<AppRole, string> = {
 export default function RoleDashboard() {
   const { roles, profile } = useAuth();
   const navigate = useNavigate();
-  const primaryRole = roles[0] || 'employee';
-  const greeting = roleGreetings[primaryRole];
+  const primaryRole = (roles[0] as AppRole) || 'employee';
+  const greeting = roleGreetings[primaryRole] || 'Welcome.';
   const actions = roleQuickActions[primaryRole] || [];
 
   return (
@@ -91,7 +74,7 @@ export default function RoleDashboard() {
         </span>
       </div>
 
-      {/* Quick Actions - hidden for business_owner since sidebar covers navigation */}
+      {/* Quick Actions - hidden for business_owner since sidebar + industry Dashboard cover navigation */}
       {primaryRole !== 'business_owner' && actions.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {actions.map((action) => (
@@ -111,11 +94,8 @@ export default function RoleDashboard() {
         </div>
       )}
 
-      {/* Super Admin: show user management */}
-      {primaryRole === 'super_admin' && <AdminUserManagement />}
-
-      {/* Show full dashboard for admin/owner roles */}
-      {(primaryRole === 'super_admin' || primaryRole === 'business_owner') && <Dashboard />}
+      {/* Full industry-tailored dashboard for business owners */}
+      {primaryRole === 'business_owner' && <Dashboard />}
 
       {/* Activity feed — visible to business owners */}
       {primaryRole === 'business_owner' && <ActivityFeed />}

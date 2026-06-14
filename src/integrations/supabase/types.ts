@@ -1081,6 +1081,50 @@ export type Database = {
           },
         ]
       }
+      jobs: {
+        Row: {
+          business_id: string
+          code: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           business_id: string
@@ -1089,7 +1133,9 @@ export type Database = {
           description: string | null
           entry_date: string
           id: string
+          is_reversing: boolean
           reference: string | null
+          reverses_entry_id: string | null
           status: string
           total_credit: number
           total_debit: number
@@ -1102,7 +1148,9 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          is_reversing?: boolean
           reference?: string | null
+          reverses_entry_id?: string | null
           status?: string
           total_credit?: number
           total_debit?: number
@@ -1115,7 +1163,9 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          is_reversing?: boolean
           reference?: string | null
+          reverses_entry_id?: string | null
           status?: string
           total_credit?: number
           total_debit?: number
@@ -1129,6 +1179,13 @@ export type Database = {
             referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "journal_entries_reverses_entry_id_fkey"
+            columns: ["reverses_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
         ]
       }
       journal_entry_lines: {
@@ -1139,6 +1196,8 @@ export type Database = {
           debit: number
           description: string | null
           id: string
+          job: string | null
+          job_id: string | null
           journal_entry_id: string
         }
         Insert: {
@@ -1148,6 +1207,8 @@ export type Database = {
           debit?: number
           description?: string | null
           id?: string
+          job?: string | null
+          job_id?: string | null
           journal_entry_id: string
         }
         Update: {
@@ -1157,6 +1218,8 @@ export type Database = {
           debit?: number
           description?: string | null
           id?: string
+          job?: string | null
+          job_id?: string | null
           journal_entry_id?: string
         }
         Relationships: [
@@ -1165,6 +1228,13 @@ export type Database = {
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_lines_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
           {
@@ -2727,6 +2797,56 @@ export type Database = {
             foreignKeyName: "storefronts_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          amount: number | null
+          business_id: string
+          created_at: string
+          current_period_end: string | null
+          id: string
+          paystack_customer_code: string | null
+          paystack_reference: string | null
+          period: string
+          plan: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          business_id: string
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          paystack_customer_code?: string | null
+          paystack_reference?: string | null
+          period?: string
+          plan: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          business_id?: string
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          paystack_customer_code?: string | null
+          paystack_reference?: string | null
+          period?: string
+          plan?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
             referencedRelation: "businesses"
             referencedColumns: ["id"]
           },

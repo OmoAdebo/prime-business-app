@@ -104,7 +104,7 @@ export default function JournalEntryGridMSME() {
 
   const addJob = useMutation({
     mutationFn: async (name: string) => {
-      const { data, error } = await supabase.from("jobs" as any).insert({
+      const { data, error } = await (supabase as any).from("jobs").insert({
         business_id: businessId!,
         name,
         created_by: user!.id,

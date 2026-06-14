@@ -39,6 +39,8 @@ export interface IndustryConfig {
   hiddenModules: string[];
   /** Industry-specific KPIs for the dashboard. */
   kpis: { key: string; label: string; helper: string }[];
+  /** Which journal entry UI variant to render. */
+  journalEntryVariant?: "default" | "msme";
 }
 
 const DEFAULTS: IndustryTerms = {
@@ -75,6 +77,7 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { key: "customers", label: "Active Customers", helper: "With recent activity" },
       { key: "inventory", label: "Stock Value", helper: "On-hand inventory" },
     ],
+    journalEntryVariant: "msme",
   },
   Healthcare: {
     category: "Healthcare",

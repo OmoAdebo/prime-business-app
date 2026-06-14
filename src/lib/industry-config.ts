@@ -77,6 +77,7 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { key: "customers", label: "Active Customers", helper: "With recent activity" },
       { key: "inventory", label: "Stock Value", helper: "On-hand inventory" },
     ],
+    journalEntryVariant: "msme",
   },
   Healthcare: {
     category: "Healthcare",

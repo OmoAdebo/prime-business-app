@@ -60,8 +60,8 @@ export default function JournalEntryGridMSME() {
     queryKey: ["jobs", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("jobs" as any).select("id, name, code")
+      const { data, error } = await (supabase as any)
+        .from("jobs").select("id, name, code")
         .eq("business_id", businessId!).eq("status", "active").order("name");
       if (error) throw error;
       return (data ?? []) as Array<{ id: string; name: string; code: string | null }>;

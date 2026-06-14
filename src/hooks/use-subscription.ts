@@ -21,8 +21,8 @@ export function useSubscription() {
     queryKey: ["subscription", businessId],
     enabled: !!businessId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("subscriptions" as any)
+      const { data, error } = await (supabase as any)
+        .from("subscriptions")
         .select("*")
         .eq("business_id", businessId!)
         .maybeSingle();

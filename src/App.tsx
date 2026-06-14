@@ -54,6 +54,7 @@ import AdminOverview from "./pages/admin/AdminOverview";
 import AdminManagement from "./pages/admin/AdminManagement";
 import AdminBusinesses from "./pages/admin/AdminBusinesses";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminActivity from "./pages/admin/AdminActivity";
 import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
 import AcceptInvite from "./pages/AcceptInvite";
@@ -96,6 +97,7 @@ const App = () => (
                 <Route index element={<AdminOverview />} />
                 <Route path="businesses" element={<AdminBusinesses />} />
                 <Route path="users" element={<AdminUsers />} />
+                <Route path="subscriptions" element={<AdminSubscriptions />} />
                 <Route path="admins" element={<AdminManagement />} />
                 <Route path="activity" element={<AdminActivity />} />
                 <Route path="announcements" element={<AdminAnnouncements />} />

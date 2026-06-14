@@ -39,6 +39,8 @@ export interface IndustryConfig {
   hiddenModules: string[];
   /** Industry-specific KPIs for the dashboard. */
   kpis: { key: string; label: string; helper: string }[];
+  /** Which journal entry UI variant to render. */
+  journalEntryVariant?: "default" | "msme";
 }
 
 const DEFAULTS: IndustryTerms = {

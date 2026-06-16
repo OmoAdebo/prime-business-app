@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { onAction } from "@/lib/action-bus";
 import { useVoiceForm } from "@/hooks/use-voice-form";
-import { FileText, Plus, Send, Eye, Trash2, CreditCard, Search, Filter } from "lucide-react";
+import { FileText, Plus, Send, Eye, Trash2, CreditCard, Search, Filter, Download } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/use-business";
@@ -509,6 +509,9 @@ export default function Invoicing() {
                               <CreditCard className="h-4 w-4" />
                             </Button>
                           )}
+                          <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => exportInvoicePdf(inv.id)} title="Download PDF">
+                            <Download className="h-4 w-4" />
+                          </Button>
                           {inv.status === "draft" && (
                             <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => deleteInvoice.mutate(inv.id)} title="Delete">
                               <Trash2 className="h-4 w-4 text-destructive" />

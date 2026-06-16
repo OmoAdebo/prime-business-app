@@ -419,6 +419,20 @@ export default function Bookkeeping() {
                 <SelectItem value="expense">Expense</SelectItem>
               </SelectContent>
             </Select>
+            <ExportMenu
+              filename="transactions"
+              title="Transactions"
+              rows={filteredTx.map((t: any) => ({
+                date: t.transaction_date,
+                ref: t.reference_number || "",
+                type: t.type,
+                category: t.category || "",
+                description: t.description || "",
+                payment_method: t.payment_method || "",
+                amount: Number(t.amount),
+                vat: Number(t.vat_amount || 0),
+              }))}
+            />
           </div>
 
           <Card>

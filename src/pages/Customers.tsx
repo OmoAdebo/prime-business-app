@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { onAction } from "@/lib/action-bus";
-import { Users, Plus, MessageSquare, Search, Tag, Mail, Phone } from "lucide-react";
+import { Users, Plus, MessageSquare, Search, Tag, Mail, Phone, Pencil } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/use-business";
@@ -30,6 +30,7 @@ export default function Customers() {
   const businessId = business?.id;
 
   const [customerOpen, setCustomerOpen] = useState(false);
+  const [editingCustomerId, setEditingCustomerId] = useState<string | null>(null);
   const [interactionOpen, setInteractionOpen] = useState(false);
   const [segmentOpen, setSegmentOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
@@ -43,6 +44,24 @@ export default function Customers() {
   const [custCompany, setCustCompany] = useState("");
   const [custType, setCustType] = useState("individual");
   const [custCreditLimit, setCustCreditLimit] = useState("");
+
+  const resetCustomerForm = () => {
+    setEditingCustomerId(null);
+    setCustName(""); setCustEmail(""); setCustPhone("");
+    setCustAddress(""); setCustCompany(""); setCustType("individual"); setCustCreditLimit("");
+  };
+
+  const openEditCustomer = (c: any) => {
+    setEditingCustomerId(c.id);
+    setCustName(c.name || "");
+    setCustEmail(c.email || "");
+    setCustPhone(c.phone || "");
+    setCustAddress(c.address || "");
+    setCustCompany(c.company_name || "");
+    setCustType(c.customer_type || "individual");
+    setCustCreditLimit(String(c.credit_limit ?? ""));
+    setCustomerOpen(true);
+  };
 
   useEffect(() => {
     return onAction("open-add-customer", (p) => {
@@ -137,7 +156,7 @@ export default function Customers() {
 
   const createCustomer = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("customers").insert({
+      const payload = {
         business_id: businessId!,
         name: custName,
         email: custEmail || null,
@@ -146,14 +165,21 @@ export default function Customers() {
         company_name: custCompany || null,
         customer_type: custType,
         credit_limit: parseFloat(custCreditLimit) || 0,
-      });
-      if (error) throw error;
+      };
+      if (editingCustomerId) {
+        const { error } = await supabase.from("customers").update(payload).eq("id", editingCustomerId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("customers").insert(payload);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       setCustomerOpen(false);
-      setCustName(""); setCustEmail(""); setCustPhone(""); setCustAddress(""); setCustCompany(""); setCustCreditLimit("");
-      toast.success("Customer added");
+      const wasEdit = !!editingCustomerId;
+      resetCustomerForm();
+      toast.success(wasEdit ? "Customer updated" : "Customer added");
     },
     onError: (e: Error) => toast.error(e.message),
   });

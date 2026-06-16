@@ -276,10 +276,10 @@ export default function Customers() {
               queryClient.invalidateQueries({ queryKey: ["customers"] });
             }}
           />
-          <Dialog open={customerOpen} onOpenChange={setCustomerOpen}>
-            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add {terms.customer}</Button></DialogTrigger>
+          <Dialog open={customerOpen} onOpenChange={(v) => { setCustomerOpen(v); if (!v) resetCustomerForm(); }}>
+            <DialogTrigger asChild><Button onClick={resetCustomerForm}><Plus className="h-4 w-4 mr-2" />Add {terms.customer}</Button></DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Add {terms.customer}</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>{editingCustomerId ? `Edit ${terms.customer}` : `Add ${terms.customer}`}</DialogTitle></DialogHeader>
               <div className="space-y-4">
                 <div><Label>Name *</Label><Input value={custName} onChange={e => setCustName(e.target.value)} /></div>
                 <div className="grid grid-cols-2 gap-4">
@@ -302,7 +302,7 @@ export default function Customers() {
                   <div><Label>Credit Limit (₦)</Label><Input type="number" value={custCreditLimit} onChange={e => setCustCreditLimit(e.target.value)} /></div>
                 </div>
                 <Button className="w-full" onClick={() => createCustomer.mutate()} disabled={createCustomer.isPending || !custName}>
-                  {createCustomer.isPending ? "Adding..." : "Add Customer"}
+                  {createCustomer.isPending ? "Saving..." : editingCustomerId ? "Save Changes" : "Add Customer"}
                 </Button>
               </div>
             </DialogContent>

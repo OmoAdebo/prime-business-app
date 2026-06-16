@@ -298,6 +298,40 @@ export default function Invoicing() {
     setItems([{ description: "", quantity: 1, unit_price: 0 }]);
   };
 
+  const exportInvoicePdf = async (invoiceId: string) => {
+    const inv = invoices.find((i: any) => i.id === invoiceId);
+    if (!inv) return;
+    const { data: lines } = await supabase.from("invoice_items").select("*").eq("invoice_id", invoiceId);
+    const { default: jsPDF } = await import("jspdf");
+    const autoTable = (await import("jspdf-autotable")).default;
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text(business?.name || "Invoice", 14, 18);
+    doc.setFontSize(11);
+    doc.text(`Invoice: ${inv.invoice_number}`, 14, 28);
+    doc.text(`Status: ${inv.status}`, 14, 34);
+    doc.text(`Issue Date: ${inv.issue_date ? new Date(inv.issue_date).toLocaleDateString() : "—"}`, 14, 40);
+    doc.text(`Due Date: ${inv.due_date ? new Date(inv.due_date).toLocaleDateString() : "—"}`, 14, 46);
+    autoTable(doc, {
+      startY: 56,
+      head: [["Description", "Qty", "Unit Price (₦)", "Total (₦)"]],
+      body: (lines || []).map((l: any) => [
+        l.description,
+        l.quantity,
+        Number(l.unit_price).toLocaleString(),
+        Number(l.total_price).toLocaleString(),
+      ]),
+      headStyles: { fillColor: [16, 122, 87] },
+    });
+    const endY = (doc as any).lastAutoTable.finalY + 8;
+    doc.text(`Subtotal: ₦${Number(inv.subtotal).toLocaleString()}`, 140, endY);
+    doc.text(`VAT (7.5%): ₦${Number(inv.vat_amount).toLocaleString()}`, 140, endY + 6);
+    doc.setFontSize(13);
+    doc.text(`Total: ₦${Number(inv.total_amount).toLocaleString()}`, 140, endY + 14);
+    if (inv.notes) { doc.setFontSize(10); doc.text(`Notes: ${inv.notes}`, 14, endY + 24); }
+    doc.save(`${inv.invoice_number}.pdf`);
+  };
+
   const addItem = () => setItems([...items, { description: "", quantity: 1, unit_price: 0 }]);
   const removeItem = (idx: number) => setItems(items.filter((_, i) => i !== idx));
   const updateItem = (idx: number, field: keyof InvoiceItem, value: string | number) => {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { onAction } from "@/lib/action-bus";
 import { useVoiceForm } from "@/hooks/use-voice-form";
-import { FileText, Plus, Send, Eye, Trash2, CreditCard, Search, Filter } from "lucide-react";
+import { FileText, Plus, Send, Eye, Trash2, CreditCard, Search, Filter, Download } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/use-business";
@@ -298,6 +298,40 @@ export default function Invoicing() {
     setItems([{ description: "", quantity: 1, unit_price: 0 }]);
   };
 
+  const exportInvoicePdf = async (invoiceId: string) => {
+    const inv = invoices.find((i: any) => i.id === invoiceId);
+    if (!inv) return;
+    const { data: lines } = await supabase.from("invoice_items").select("*").eq("invoice_id", invoiceId);
+    const { default: jsPDF } = await import("jspdf");
+    const autoTable = (await import("jspdf-autotable")).default;
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text((business as any)?.company_name || (business as any)?.name || "Invoice", 14, 18);
+    doc.setFontSize(11);
+    doc.text(`Invoice: ${inv.invoice_number}`, 14, 28);
+    doc.text(`Status: ${inv.status}`, 14, 34);
+    doc.text(`Issue Date: ${inv.issue_date ? new Date(inv.issue_date).toLocaleDateString() : "—"}`, 14, 40);
+    doc.text(`Due Date: ${inv.due_date ? new Date(inv.due_date).toLocaleDateString() : "—"}`, 14, 46);
+    autoTable(doc, {
+      startY: 56,
+      head: [["Description", "Qty", "Unit Price (₦)", "Total (₦)"]],
+      body: (lines || []).map((l: any) => [
+        l.description,
+        l.quantity,
+        Number(l.unit_price).toLocaleString(),
+        Number(l.total_price).toLocaleString(),
+      ]),
+      headStyles: { fillColor: [16, 122, 87] },
+    });
+    const endY = (doc as any).lastAutoTable.finalY + 8;
+    doc.text(`Subtotal: ₦${Number(inv.subtotal).toLocaleString()}`, 140, endY);
+    doc.text(`VAT (7.5%): ₦${Number(inv.vat_amount).toLocaleString()}`, 140, endY + 6);
+    doc.setFontSize(13);
+    doc.text(`Total: ₦${Number(inv.total_amount).toLocaleString()}`, 140, endY + 14);
+    if (inv.notes) { doc.setFontSize(10); doc.text(`Notes: ${inv.notes}`, 14, endY + 24); }
+    doc.save(`${inv.invoice_number}.pdf`);
+  };
+
   const addItem = () => setItems([...items, { description: "", quantity: 1, unit_price: 0 }]);
   const removeItem = (idx: number) => setItems(items.filter((_, i) => i !== idx));
   const updateItem = (idx: number, field: keyof InvoiceItem, value: string | number) => {
@@ -509,6 +543,9 @@ export default function Invoicing() {
                               <CreditCard className="h-4 w-4" />
                             </Button>
                           )}
+                          <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => exportInvoicePdf(inv.id)} title="Download PDF">
+                            <Download className="h-4 w-4" />
+                          </Button>
                           {inv.status === "draft" && (
                             <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => deleteInvoice.mutate(inv.id)} title="Delete">
                               <Trash2 className="h-4 w-4 text-destructive" />

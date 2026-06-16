@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { onAction } from "@/lib/action-bus";
-import { Users, Plus, MessageSquare, Search, Tag, Mail, Phone } from "lucide-react";
+import { Users, Plus, MessageSquare, Search, Tag, Mail, Phone, Pencil } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/use-business";
@@ -30,6 +30,7 @@ export default function Customers() {
   const businessId = business?.id;
 
   const [customerOpen, setCustomerOpen] = useState(false);
+  const [editingCustomerId, setEditingCustomerId] = useState<string | null>(null);
   const [interactionOpen, setInteractionOpen] = useState(false);
   const [segmentOpen, setSegmentOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
@@ -43,6 +44,24 @@ export default function Customers() {
   const [custCompany, setCustCompany] = useState("");
   const [custType, setCustType] = useState("individual");
   const [custCreditLimit, setCustCreditLimit] = useState("");
+
+  const resetCustomerForm = () => {
+    setEditingCustomerId(null);
+    setCustName(""); setCustEmail(""); setCustPhone("");
+    setCustAddress(""); setCustCompany(""); setCustType("individual"); setCustCreditLimit("");
+  };
+
+  const openEditCustomer = (c: any) => {
+    setEditingCustomerId(c.id);
+    setCustName(c.name || "");
+    setCustEmail(c.email || "");
+    setCustPhone(c.phone || "");
+    setCustAddress(c.address || "");
+    setCustCompany(c.company_name || "");
+    setCustType(c.customer_type || "individual");
+    setCustCreditLimit(String(c.credit_limit ?? ""));
+    setCustomerOpen(true);
+  };
 
   useEffect(() => {
     return onAction("open-add-customer", (p) => {
@@ -137,7 +156,7 @@ export default function Customers() {
 
   const createCustomer = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("customers").insert({
+      const payload = {
         business_id: businessId!,
         name: custName,
         email: custEmail || null,
@@ -146,14 +165,21 @@ export default function Customers() {
         company_name: custCompany || null,
         customer_type: custType,
         credit_limit: parseFloat(custCreditLimit) || 0,
-      });
-      if (error) throw error;
+      };
+      if (editingCustomerId) {
+        const { error } = await supabase.from("customers").update(payload).eq("id", editingCustomerId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("customers").insert(payload);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       setCustomerOpen(false);
-      setCustName(""); setCustEmail(""); setCustPhone(""); setCustAddress(""); setCustCompany(""); setCustCreditLimit("");
-      toast.success("Customer added");
+      const wasEdit = !!editingCustomerId;
+      resetCustomerForm();
+      toast.success(wasEdit ? "Customer updated" : "Customer added");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -250,10 +276,10 @@ export default function Customers() {
               queryClient.invalidateQueries({ queryKey: ["customers"] });
             }}
           />
-          <Dialog open={customerOpen} onOpenChange={setCustomerOpen}>
-            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add {terms.customer}</Button></DialogTrigger>
+          <Dialog open={customerOpen} onOpenChange={(v) => { setCustomerOpen(v); if (!v) resetCustomerForm(); }}>
+            <DialogTrigger asChild><Button onClick={resetCustomerForm}><Plus className="h-4 w-4 mr-2" />Add {terms.customer}</Button></DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Add {terms.customer}</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>{editingCustomerId ? `Edit ${terms.customer}` : `Add ${terms.customer}`}</DialogTitle></DialogHeader>
               <div className="space-y-4">
                 <div><Label>Name *</Label><Input value={custName} onChange={e => setCustName(e.target.value)} /></div>
                 <div className="grid grid-cols-2 gap-4">
@@ -276,7 +302,7 @@ export default function Customers() {
                   <div><Label>Credit Limit (₦)</Label><Input type="number" value={custCreditLimit} onChange={e => setCustCreditLimit(e.target.value)} /></div>
                 </div>
                 <Button className="w-full" onClick={() => createCustomer.mutate()} disabled={createCustomer.isPending || !custName}>
-                  {createCustomer.isPending ? "Adding..." : "Add Customer"}
+                  {createCustomer.isPending ? "Saving..." : editingCustomerId ? "Save Changes" : "Add Customer"}
                 </Button>
               </div>
             </DialogContent>
@@ -346,9 +372,14 @@ export default function Customers() {
                         <TableCell className={c.outstanding_balance && c.outstanding_balance > 0 ? "text-yellow-600" : ""}>₦{(c.outstanding_balance || 0).toLocaleString()}</TableCell>
                         <TableCell className="hidden sm:table-cell">{c.loyalty_points || 0} pts</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => { setSelectedCustomer(c.id); setInteractionOpen(true); }} title="Log Interaction">
-                            <MessageSquare className="h-4 w-4" />
-                          </Button>
+                          <div className="flex justify-end gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => openEditCustomer(c)} title="Edit">
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => { setSelectedCustomer(c.id); setInteractionOpen(true); }} title="Log Interaction">
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))

@@ -4,6 +4,7 @@ export type AppAction =
   | { type: 'open-create-invoice'; payload?: { customer_name?: string; amount?: number; description?: string; due_date?: string; quantity?: number; product_name?: string; unit_price?: number } }
   | { type: 'open-add-product'; payload?: { name?: string; price?: number; sku?: string; quantity?: number; unit?: string; category?: string } }
   | { type: 'open-record-expense'; payload?: { amount?: number; description?: string; category?: string; date?: string } }
+  | { type: 'open-record-transaction'; payload?: { type?: 'income' | 'expense'; amount?: number; description?: string; category?: string; date?: string } }
   | { type: 'open-add-customer'; payload?: { name?: string; email?: string; phone?: string; address?: string } }
   | { type: 'open-new-transfer'; payload?: { amount?: number; recipient?: string; account_number?: string; bank?: string; note?: string } }
   | { type: 'open-add-supplier'; payload?: { name?: string; email?: string; phone?: string; address?: string } }

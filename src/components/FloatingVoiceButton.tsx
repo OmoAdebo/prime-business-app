@@ -198,7 +198,7 @@ export function FloatingVoiceButton() {
     <>
       {/* Inline voice strip when a form is open */}
       {armed && (
-        <div className="fixed bottom-24 right-6 z-[60] max-w-md w-[min(92vw,28rem)] rounded-2xl border bg-card/95 backdrop-blur shadow-2xl p-3 flex items-center gap-3 animate-in slide-in-from-bottom-2">
+        <div className="fixed bottom-24 right-6 z-[210] max-w-md w-[min(92vw,28rem)] rounded-2xl border bg-card/95 backdrop-blur shadow-2xl p-3 flex items-center gap-3 animate-in slide-in-from-bottom-2 pointer-events-auto">
           <div className={`relative h-9 w-9 rounded-full flex items-center justify-center shrink-0 ${isListening ? "bg-destructive text-destructive-foreground" : "bg-primary/10 text-primary"}`}>
             {isListening ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
             {isListening && <span className="absolute inset-0 rounded-full ring-2 ring-destructive/40 animate-ping" />}
@@ -227,7 +227,7 @@ export function FloatingVoiceButton() {
 
       <button
         onClick={() => setOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center ${armed ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground"}`}
+        className={`fixed bottom-6 right-6 z-[200] h-14 w-14 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center pointer-events-auto ${armed ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground"}`}
         aria-label="Voice command"
       >
         {armed ? <Mic className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}

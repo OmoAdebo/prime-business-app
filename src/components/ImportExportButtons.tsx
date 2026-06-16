@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Download, Upload } from "lucide-react";
-import { exportToCsv, pickAndParseCsv } from "@/lib/csv-utils";
+import { Upload } from "lucide-react";
+import { pickAndParseCsv } from "@/lib/csv-utils";
+import { ExportMenu } from "@/components/ExportMenu";
 
 interface ImportExportButtonsProps<T extends Record<string, any>> {
   filename: string;
@@ -8,6 +9,7 @@ interface ImportExportButtonsProps<T extends Record<string, any>> {
   columns?: { key: keyof T; label: string }[];
   onImport?: (rows: Record<string, string>[]) => void | Promise<void>;
   disabled?: boolean;
+  title?: string;
 }
 
 export function ImportExportButtons<T extends Record<string, any>>({
@@ -16,6 +18,7 @@ export function ImportExportButtons<T extends Record<string, any>>({
   columns,
   onImport,
   disabled,
+  title,
 }: ImportExportButtonsProps<T>) {
   return (
     <div className="flex gap-2">
@@ -34,16 +37,13 @@ export function ImportExportButtons<T extends Record<string, any>>({
           Import
         </Button>
       )}
-      <Button
-        variant="outline"
-        size="sm"
-        className="h-10 min-h-[44px]"
-        disabled={disabled || !rows.length}
-        onClick={() => exportToCsv(filename, rows, columns)}
-      >
-        <Download className="h-4 w-4 mr-2" />
-        Export
-      </Button>
+      <ExportMenu
+        filename={filename}
+        rows={rows}
+        columns={columns}
+        disabled={disabled}
+        title={title}
+      />
     </div>
   );
 }

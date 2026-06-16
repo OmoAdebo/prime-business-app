@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,21 +17,41 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, Plus, ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown,
-  DollarSign, Receipt, FileText, Calculator, Search, Filter
+  Receipt, FileText, Calculator, Search, Filter, RefreshCw, Settings2, Trash2
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { onAction } from "@/lib/action-bus";
+import { ExportMenu } from "@/components/ExportMenu";
 
-const CATEGORIES = [
-  "Sales Revenue", "Service Revenue", "Rent", "Utilities", "Salaries",
-  "Office Supplies", "Marketing", "Transportation", "Maintenance", "Insurance",
-  "Professional Fees", "Inventory Purchase", "Equipment", "Miscellaneous"
+const INCOME_CATEGORIES = [
+  "Sales Revenue", "Service Revenue", "Interest Income", "Commission", "Refunds Received", "Other Income"
+];
+const EXPENSE_CATEGORIES = [
+  "Rent", "Utilities", "Salaries", "Office Supplies", "Marketing", "Transportation",
+  "Maintenance", "Insurance", "Professional Fees", "Inventory Purchase", "Equipment", "Miscellaneous"
 ];
 
 const PAYMENT_METHODS = ["Cash", "Bank Transfer", "Card", "Mobile Money", "Cheque"];
 
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
+}
+
+function generateRef() {
+  const d = format(new Date(), "yyyyMMdd");
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `TXN-${d}-${rand}`;
+}
+
+function loadCustomCategories(businessId: string, type: "income" | "expense"): string[] {
+  try {
+    const raw = localStorage.getItem(`tx-cat:${businessId}:${type}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+function saveCustomCategories(businessId: string, type: "income" | "expense", list: string[]) {
+  try { localStorage.setItem(`tx-cat:${businessId}:${type}`, JSON.stringify(list)); } catch {}
 }
 
 export default function Bookkeeping() {
@@ -42,19 +62,24 @@ export default function Bookkeeping() {
   const [showAddTx, setShowAddTx] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
+  const [showManageCats, setShowManageCats] = useState(false);
+  const [newCatInput, setNewCatInput] = useState("");
+  const [customIncomeCats, setCustomIncomeCats] = useState<string[]>([]);
+  const [customExpenseCats, setCustomExpenseCats] = useState<string[]>([]);
 
   // Form state
   const [txForm, setTxForm] = useState({
-    type: "expense",
+    type: "expense" as "income" | "expense",
     category: "",
     description: "",
     amount: "",
     transaction_date: format(new Date(), "yyyy-MM-dd"),
     payment_method: "",
-    reference_number: "",
+    reference_number: generateRef(),
     notes: "",
     include_vat: false,
   });
+
 
   const businessId = business?.id;
 
@@ -136,9 +161,79 @@ export default function Bookkeeping() {
     setTxForm({
       type: "expense", category: "", description: "", amount: "",
       transaction_date: format(new Date(), "yyyy-MM-dd"),
-      payment_method: "", reference_number: "", notes: "", include_vat: false,
+      payment_method: "", reference_number: generateRef(), notes: "", include_vat: false,
     });
   }
+
+  // Load custom categories per business
+  useEffect(() => {
+    if (!businessId) return;
+    setCustomIncomeCats(loadCustomCategories(businessId, "income"));
+    setCustomExpenseCats(loadCustomCategories(businessId, "expense"));
+  }, [businessId]);
+
+  // Regenerate ref + reset category when modal opens or type changes
+  useEffect(() => {
+    if (showAddTx) setTxForm(p => ({ ...p, reference_number: p.reference_number || generateRef() }));
+  }, [showAddTx]);
+
+  // Listen for dashboard / voice action to open the modal
+  useEffect(() => {
+    return onAction("open-record-transaction", (p) => {
+      setTxForm(prev => ({
+        ...prev,
+        type: (p?.type as "income" | "expense") || prev.type,
+        amount: p?.amount !== undefined ? String(p.amount) : prev.amount,
+        description: p?.description ?? prev.description,
+        category: p?.category ?? prev.category,
+        transaction_date: p?.date ?? prev.transaction_date,
+        reference_number: prev.reference_number || generateRef(),
+      }));
+      setShowAddTx(true);
+    });
+  }, []);
+
+  const availableCategories = useMemo(() => {
+    const base = txForm.type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+    const custom = txForm.type === "income" ? customIncomeCats : customExpenseCats;
+    return [...base, ...custom];
+  }, [txForm.type, customIncomeCats, customExpenseCats]);
+
+  const handleAddCustomCategory = () => {
+    const name = newCatInput.trim();
+    if (!name || !businessId) return;
+    if (txForm.type === "income") {
+      if (customIncomeCats.includes(name) || INCOME_CATEGORIES.includes(name)) {
+        toast({ title: "Category already exists" }); return;
+      }
+      const next = [...customIncomeCats, name];
+      setCustomIncomeCats(next);
+      saveCustomCategories(businessId, "income", next);
+    } else {
+      if (customExpenseCats.includes(name) || EXPENSE_CATEGORIES.includes(name)) {
+        toast({ title: "Category already exists" }); return;
+      }
+      const next = [...customExpenseCats, name];
+      setCustomExpenseCats(next);
+      saveCustomCategories(businessId, "expense", next);
+    }
+    setTxForm(p => ({ ...p, category: name }));
+    setNewCatInput("");
+    toast({ title: "Category added", description: name });
+  };
+
+  const handleDeleteCustomCategory = (type: "income" | "expense", name: string) => {
+    if (!businessId) return;
+    if (type === "income") {
+      const next = customIncomeCats.filter(c => c !== name);
+      setCustomIncomeCats(next);
+      saveCustomCategories(businessId, "income", next);
+    } else {
+      const next = customExpenseCats.filter(c => c !== name);
+      setCustomExpenseCats(next);
+      saveCustomCategories(businessId, "expense", next);
+    }
+  };
 
   // Calculations
   const totalIncome = transactions.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
@@ -188,7 +283,10 @@ export default function Bookkeeping() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Type</Label>
-                  <Select value={txForm.type} onValueChange={v => setTxForm(p => ({ ...p, type: v }))}>
+                  <Select
+                    value={txForm.type}
+                    onValueChange={v => setTxForm(p => ({ ...p, type: v as "income" | "expense", category: "" }))}
+                  >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="income">Income</SelectItem>
@@ -202,13 +300,30 @@ export default function Bookkeeping() {
                 </div>
               </div>
               <div>
-                <Label>Category</Label>
+                <div className="flex items-center justify-between mb-1">
+                  <Label>Category</Label>
+                  <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setShowManageCats(true)}>
+                    <Settings2 className="h-3 w-3 mr-1" /> Manage
+                  </Button>
+                </div>
                 <Select value={txForm.category} onValueChange={v => setTxForm(p => ({ ...p, category: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={`Select ${txForm.type} category`} /></SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    {availableCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    value={newCatInput}
+                    onChange={e => setNewCatInput(e.target.value)}
+                    placeholder={`Add a new ${txForm.type} category…`}
+                    className="h-9 text-sm"
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCustomCategory(); } }}
+                  />
+                  <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={handleAddCustomCategory} disabled={!newCatInput.trim()}>
+                    <Plus className="h-3 w-3 mr-1" /> Add
+                  </Button>
+                </div>
               </div>
               <div>
                 <Label>Description</Label>
@@ -237,8 +352,14 @@ export default function Bookkeeping() {
                 )}
               </div>
               <div>
-                <Label>Reference Number (optional)</Label>
-                <Input value={txForm.reference_number} onChange={e => setTxForm(p => ({ ...p, reference_number: e.target.value }))} placeholder="INV-001" />
+                <Label>Reference Number</Label>
+                <div className="flex gap-2">
+                  <Input value={txForm.reference_number} onChange={e => setTxForm(p => ({ ...p, reference_number: e.target.value }))} placeholder="TXN-..." />
+                  <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setTxForm(p => ({ ...p, reference_number: generateRef() }))} title="Regenerate">
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1">Auto-generated. You can override if needed.</p>
               </div>
               <div>
                 <Label>Notes (optional)</Label>
@@ -298,6 +419,20 @@ export default function Bookkeeping() {
                 <SelectItem value="expense">Expense</SelectItem>
               </SelectContent>
             </Select>
+            <ExportMenu
+              filename="transactions"
+              title="Transactions"
+              rows={filteredTx.map((t: any) => ({
+                date: t.transaction_date,
+                ref: t.reference_number || "",
+                type: t.type,
+                category: t.category || "",
+                description: t.description || "",
+                payment_method: t.payment_method || "",
+                amount: Number(t.amount),
+                vat: Number(t.vat_amount || 0),
+              }))}
+            />
           </div>
 
           <Card>
@@ -416,6 +551,56 @@ export default function Bookkeeping() {
           <AccountsManager businessId={businessId!} accounts={accounts} isLoading={accLoading} />
         </TabsContent>
       </Tabs>
+
+      {/* Manage Categories Dialog */}
+      <Dialog open={showManageCats} onOpenChange={setShowManageCats}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Manage Categories</DialogTitle>
+            <DialogDescription>Add or remove your custom income and expense categories.</DialogDescription>
+          </DialogHeader>
+          <Tabs defaultValue="expense">
+            <TabsList className="grid grid-cols-2">
+              <TabsTrigger value="income">Income</TabsTrigger>
+              <TabsTrigger value="expense">Expense</TabsTrigger>
+            </TabsList>
+            {(["income", "expense"] as const).map(t => {
+              const defaults = t === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+              const custom = t === "income" ? customIncomeCats : customExpenseCats;
+              return (
+                <TabsContent key={t} value={t} className="space-y-3">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Built-in</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {defaults.map(c => <Badge key={c} variant="secondary">{c}</Badge>)}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Custom</p>
+                    {custom.length === 0 ? (
+                      <p className="text-xs text-muted-foreground italic">No custom categories yet.</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {custom.map(c => (
+                          <div key={c} className="flex items-center justify-between text-sm border rounded-md px-2 py-1">
+                            <span>{c}</span>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteCustomCategory(t, c)}>
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              );
+            })}
+          </Tabs>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowManageCats(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

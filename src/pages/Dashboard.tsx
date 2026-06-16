@@ -54,7 +54,8 @@ export default function Dashboard() {
       a.action === "open-add-product" ? Package :
       a.action === "open-add-customer" ? Users :
       a.action === "open-new-transfer" ? DollarSign :
-      a.action === "open-record-expense" ? BarChart3 : ShoppingCart,
+      a.action === "open-record-expense" ? BarChart3 :
+      a.action === "open-record-transaction" ? DollarSign : ShoppingCart,
     onClick: () => {
       if (a.route) navigate(a.route);
       setTimeout(() => dispatchAction({ type: a.action as AppAction['type'], payload: {} } as AppAction), 120);

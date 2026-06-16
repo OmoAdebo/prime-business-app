@@ -161,9 +161,79 @@ export default function Bookkeeping() {
     setTxForm({
       type: "expense", category: "", description: "", amount: "",
       transaction_date: format(new Date(), "yyyy-MM-dd"),
-      payment_method: "", reference_number: "", notes: "", include_vat: false,
+      payment_method: "", reference_number: generateRef(), notes: "", include_vat: false,
     });
   }
+
+  // Load custom categories per business
+  useEffect(() => {
+    if (!businessId) return;
+    setCustomIncomeCats(loadCustomCategories(businessId, "income"));
+    setCustomExpenseCats(loadCustomCategories(businessId, "expense"));
+  }, [businessId]);
+
+  // Regenerate ref + reset category when modal opens or type changes
+  useEffect(() => {
+    if (showAddTx) setTxForm(p => ({ ...p, reference_number: p.reference_number || generateRef() }));
+  }, [showAddTx]);
+
+  // Listen for dashboard / voice action to open the modal
+  useEffect(() => {
+    return onAction("open-record-transaction", (p) => {
+      setTxForm(prev => ({
+        ...prev,
+        type: (p?.type as "income" | "expense") || prev.type,
+        amount: p?.amount !== undefined ? String(p.amount) : prev.amount,
+        description: p?.description ?? prev.description,
+        category: p?.category ?? prev.category,
+        transaction_date: p?.date ?? prev.transaction_date,
+        reference_number: prev.reference_number || generateRef(),
+      }));
+      setShowAddTx(true);
+    });
+  }, []);
+
+  const availableCategories = useMemo(() => {
+    const base = txForm.type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+    const custom = txForm.type === "income" ? customIncomeCats : customExpenseCats;
+    return [...base, ...custom];
+  }, [txForm.type, customIncomeCats, customExpenseCats]);
+
+  const handleAddCustomCategory = () => {
+    const name = newCatInput.trim();
+    if (!name || !businessId) return;
+    if (txForm.type === "income") {
+      if (customIncomeCats.includes(name) || INCOME_CATEGORIES.includes(name)) {
+        toast({ title: "Category already exists" }); return;
+      }
+      const next = [...customIncomeCats, name];
+      setCustomIncomeCats(next);
+      saveCustomCategories(businessId, "income", next);
+    } else {
+      if (customExpenseCats.includes(name) || EXPENSE_CATEGORIES.includes(name)) {
+        toast({ title: "Category already exists" }); return;
+      }
+      const next = [...customExpenseCats, name];
+      setCustomExpenseCats(next);
+      saveCustomCategories(businessId, "expense", next);
+    }
+    setTxForm(p => ({ ...p, category: name }));
+    setNewCatInput("");
+    toast({ title: "Category added", description: name });
+  };
+
+  const handleDeleteCustomCategory = (type: "income" | "expense", name: string) => {
+    if (!businessId) return;
+    if (type === "income") {
+      const next = customIncomeCats.filter(c => c !== name);
+      setCustomIncomeCats(next);
+      saveCustomCategories(businessId, "income", next);
+    } else {
+      const next = customExpenseCats.filter(c => c !== name);
+      setCustomExpenseCats(next);
+      saveCustomCategories(businessId, "expense", next);
+    }
+  };
 
   // Calculations
   const totalIncome = transactions.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
@@ -213,7 +283,10 @@ export default function Bookkeeping() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Type</Label>
-                  <Select value={txForm.type} onValueChange={v => setTxForm(p => ({ ...p, type: v }))}>
+                  <Select
+                    value={txForm.type}
+                    onValueChange={v => setTxForm(p => ({ ...p, type: v as "income" | "expense", category: "" }))}
+                  >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="income">Income</SelectItem>
@@ -227,13 +300,30 @@ export default function Bookkeeping() {
                 </div>
               </div>
               <div>
-                <Label>Category</Label>
+                <div className="flex items-center justify-between mb-1">
+                  <Label>Category</Label>
+                  <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setShowManageCats(true)}>
+                    <Settings2 className="h-3 w-3 mr-1" /> Manage
+                  </Button>
+                </div>
                 <Select value={txForm.category} onValueChange={v => setTxForm(p => ({ ...p, category: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={`Select ${txForm.type} category`} /></SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    {availableCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    value={newCatInput}
+                    onChange={e => setNewCatInput(e.target.value)}
+                    placeholder={`Add a new ${txForm.type} category…`}
+                    className="h-9 text-sm"
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCustomCategory(); } }}
+                  />
+                  <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={handleAddCustomCategory} disabled={!newCatInput.trim()}>
+                    <Plus className="h-3 w-3 mr-1" /> Add
+                  </Button>
+                </div>
               </div>
               <div>
                 <Label>Description</Label>

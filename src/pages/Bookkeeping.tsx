@@ -551,6 +551,56 @@ export default function Bookkeeping() {
           <AccountsManager businessId={businessId!} accounts={accounts} isLoading={accLoading} />
         </TabsContent>
       </Tabs>
+
+      {/* Manage Categories Dialog */}
+      <Dialog open={showManageCats} onOpenChange={setShowManageCats}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Manage Categories</DialogTitle>
+            <DialogDescription>Add or remove your custom income and expense categories.</DialogDescription>
+          </DialogHeader>
+          <Tabs defaultValue="expense">
+            <TabsList className="grid grid-cols-2">
+              <TabsTrigger value="income">Income</TabsTrigger>
+              <TabsTrigger value="expense">Expense</TabsTrigger>
+            </TabsList>
+            {(["income", "expense"] as const).map(t => {
+              const defaults = t === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+              const custom = t === "income" ? customIncomeCats : customExpenseCats;
+              return (
+                <TabsContent key={t} value={t} className="space-y-3">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Built-in</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {defaults.map(c => <Badge key={c} variant="secondary">{c}</Badge>)}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Custom</p>
+                    {custom.length === 0 ? (
+                      <p className="text-xs text-muted-foreground italic">No custom categories yet.</p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {custom.map(c => (
+                          <div key={c} className="flex items-center justify-between text-sm border rounded-md px-2 py-1">
+                            <span>{c}</span>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteCustomCategory(t, c)}>
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              );
+            })}
+          </Tabs>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowManageCats(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

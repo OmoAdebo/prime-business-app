@@ -1,6 +1,6 @@
-import { NavLink, Outlet, Navigate } from 'react-router-dom';
+import { NavLink, Outlet, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { LayoutDashboard, Building2, Users, Shield, Activity, Megaphone, CreditCard, LogOut } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, Shield, Activity, Megaphone, CreditCard, LogOut, Home, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -70,10 +70,37 @@ export default function AdminLayout() {
           </Button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto">
-        <div className="p-6 md:p-8 max-w-7xl mx-auto">
+      <main className="flex-1 overflow-auto flex flex-col">
+        <header className="h-12 border-b bg-card/50 backdrop-blur flex items-center justify-end gap-2 px-4 sticky top-0 z-10">
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/"><Home className="h-4 w-4 mr-1.5" /> Home</Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/about">About</Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/pricing">Pricing</Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/contact">Contact</Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <a href="/" target="_blank" rel="noreferrer">
+              View site <ExternalLink className="h-3 w-3 ml-1.5" />
+            </a>
+          </Button>
+        </header>
+        <div className="p-6 md:p-8 max-w-7xl mx-auto w-full">
           <Outlet />
         </div>
+        <footer className="mt-auto border-t bg-card/50 py-4 px-6 text-xs text-muted-foreground flex flex-wrap items-center justify-between gap-2">
+          <span>© {new Date().getFullYear()} Prime · Admin Console</span>
+          <div className="flex items-center gap-3">
+            <Link to="/help" className="hover:text-foreground">Help</Link>
+            <Link to="/contact" className="hover:text-foreground">Support</Link>
+            <Link to="/" className="hover:text-foreground">Marketing site</Link>
+          </div>
+        </footer>
       </main>
     </div>
   );

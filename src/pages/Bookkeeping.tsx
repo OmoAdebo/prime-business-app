@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,21 +17,41 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, Plus, ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown,
-  DollarSign, Receipt, FileText, Calculator, Search, Filter
+  Receipt, FileText, Calculator, Search, Filter, RefreshCw, Settings2, Trash2
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { onAction } from "@/lib/action-bus";
+import { ExportMenu } from "@/components/ExportMenu";
 
-const CATEGORIES = [
-  "Sales Revenue", "Service Revenue", "Rent", "Utilities", "Salaries",
-  "Office Supplies", "Marketing", "Transportation", "Maintenance", "Insurance",
-  "Professional Fees", "Inventory Purchase", "Equipment", "Miscellaneous"
+const INCOME_CATEGORIES = [
+  "Sales Revenue", "Service Revenue", "Interest Income", "Commission", "Refunds Received", "Other Income"
+];
+const EXPENSE_CATEGORIES = [
+  "Rent", "Utilities", "Salaries", "Office Supplies", "Marketing", "Transportation",
+  "Maintenance", "Insurance", "Professional Fees", "Inventory Purchase", "Equipment", "Miscellaneous"
 ];
 
 const PAYMENT_METHODS = ["Cash", "Bank Transfer", "Card", "Mobile Money", "Cheque"];
 
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
+}
+
+function generateRef() {
+  const d = format(new Date(), "yyyyMMdd");
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `TXN-${d}-${rand}`;
+}
+
+function loadCustomCategories(businessId: string, type: "income" | "expense"): string[] {
+  try {
+    const raw = localStorage.getItem(`tx-cat:${businessId}:${type}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+function saveCustomCategories(businessId: string, type: "income" | "expense", list: string[]) {
+  try { localStorage.setItem(`tx-cat:${businessId}:${type}`, JSON.stringify(list)); } catch {}
 }
 
 export default function Bookkeeping() {
@@ -42,19 +62,24 @@ export default function Bookkeeping() {
   const [showAddTx, setShowAddTx] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
+  const [showManageCats, setShowManageCats] = useState(false);
+  const [newCatInput, setNewCatInput] = useState("");
+  const [customIncomeCats, setCustomIncomeCats] = useState<string[]>([]);
+  const [customExpenseCats, setCustomExpenseCats] = useState<string[]>([]);
 
   // Form state
   const [txForm, setTxForm] = useState({
-    type: "expense",
+    type: "expense" as "income" | "expense",
     category: "",
     description: "",
     amount: "",
     transaction_date: format(new Date(), "yyyy-MM-dd"),
     payment_method: "",
-    reference_number: "",
+    reference_number: generateRef(),
     notes: "",
     include_vat: false,
   });
+
 
   const businessId = business?.id;
 

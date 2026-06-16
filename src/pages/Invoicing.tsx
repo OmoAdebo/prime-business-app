@@ -306,7 +306,7 @@ export default function Invoicing() {
     const autoTable = (await import("jspdf-autotable")).default;
     const doc = new jsPDF();
     doc.setFontSize(18);
-    doc.text(business?.name || "Invoice", 14, 18);
+    doc.text((business as any)?.company_name || (business as any)?.name || "Invoice", 14, 18);
     doc.setFontSize(11);
     doc.text(`Invoice: ${inv.invoice_number}`, 14, 28);
     doc.text(`Status: ${inv.status}`, 14, 34);

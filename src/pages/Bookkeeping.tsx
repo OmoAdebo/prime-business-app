@@ -352,8 +352,14 @@ export default function Bookkeeping() {
                 )}
               </div>
               <div>
-                <Label>Reference Number (optional)</Label>
-                <Input value={txForm.reference_number} onChange={e => setTxForm(p => ({ ...p, reference_number: e.target.value }))} placeholder="INV-001" />
+                <Label>Reference Number</Label>
+                <div className="flex gap-2">
+                  <Input value={txForm.reference_number} onChange={e => setTxForm(p => ({ ...p, reference_number: e.target.value }))} placeholder="TXN-..." />
+                  <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setTxForm(p => ({ ...p, reference_number: generateRef() }))} title="Regenerate">
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1">Auto-generated. You can override if needed.</p>
               </div>
               <div>
                 <Label>Notes (optional)</Label>

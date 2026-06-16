@@ -66,6 +66,7 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
     dashboardSections: ["revenue", "sales", "inventory", "customers", "invoices"],
     quickActions: [
       { label: "New Sale", action: "open-create-invoice", route: "/pos" },
+      { label: "Add Transaction", action: "open-record-transaction", route: "/bookkeeping" },
       { label: "Add Product", action: "open-add-product", route: "/inventory/products" },
       { label: "Add Customer", action: "open-add-customer", route: "/customers" },
     ],
@@ -102,6 +103,7 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { label: "New Patient", action: "open-add-customer", route: "/customers" },
       { label: "Dispense Medication", action: "open-create-invoice", route: "/invoicing" },
       { label: "Add Medication", action: "open-add-product", route: "/inventory/products" },
+      { label: "Add Transaction", action: "open-record-transaction", route: "/bookkeeping" },
     ],
     navOverrides: {
       "/customers": "Patients",
@@ -136,6 +138,7 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { label: "Record Harvest", action: "open-add-product", route: "/inventory/products" },
       { label: "Log Buyer Sale", action: "open-create-invoice", route: "/invoicing" },
       { label: "Add Buyer", action: "open-add-customer", route: "/customers" },
+      { label: "Add Transaction", action: "open-record-transaction", route: "/bookkeeping" },
     ],
     navOverrides: {
       "/customers": "Buyers & Offtakers",
@@ -170,6 +173,7 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { label: "New Client", action: "open-add-customer", route: "/customers" },
       { label: "Send Invoice", action: "open-create-invoice", route: "/invoicing" },
       { label: "Add Product / Plan", action: "open-add-product", route: "/inventory/products" },
+      { label: "Add Transaction", action: "open-record-transaction", route: "/bookkeeping" },
     ],
     navOverrides: {
       "/customers": "Clients",
@@ -203,6 +207,7 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { label: "New Client", action: "open-add-customer", route: "/customers" },
       { label: "Record Transfer", action: "open-new-transfer", route: "/banking/transfers" },
       { label: "Generate Invoice", action: "open-create-invoice", route: "/invoicing" },
+      { label: "Add Transaction", action: "open-record-transaction", route: "/bookkeeping" },
     ],
     navOverrides: {
       "/customers": "Clients",
@@ -237,6 +242,7 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { label: "New Client", action: "open-add-customer", route: "/customers" },
       { label: "Bill Client", action: "open-create-invoice", route: "/invoicing" },
       { label: "Log Expense", action: "open-record-expense", route: "/bookkeeping/journal-entries" },
+      { label: "Add Transaction", action: "open-record-transaction", route: "/bookkeeping" },
     ],
     navOverrides: {
       "/customers": "Clients",
@@ -272,6 +278,7 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
       { label: "New Order", action: "open-create-invoice", route: "/invoicing" },
       { label: "Add SKU", action: "open-add-product", route: "/inventory/products" },
       { label: "Add Buyer", action: "open-add-customer", route: "/customers" },
+      { label: "Add Transaction", action: "open-record-transaction", route: "/bookkeeping" },
     ],
     navOverrides: {
       "/customers": "Buyers & Distributors",

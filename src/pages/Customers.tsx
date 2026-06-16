@@ -372,9 +372,14 @@ export default function Customers() {
                         <TableCell className={c.outstanding_balance && c.outstanding_balance > 0 ? "text-yellow-600" : ""}>₦{(c.outstanding_balance || 0).toLocaleString()}</TableCell>
                         <TableCell className="hidden sm:table-cell">{c.loyalty_points || 0} pts</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => { setSelectedCustomer(c.id); setInteractionOpen(true); }} title="Log Interaction">
-                            <MessageSquare className="h-4 w-4" />
-                          </Button>
+                          <div className="flex justify-end gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => openEditCustomer(c)} title="Edit">
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => { setSelectedCustomer(c.id); setInteractionOpen(true); }} title="Log Interaction">
+                              <MessageSquare className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))

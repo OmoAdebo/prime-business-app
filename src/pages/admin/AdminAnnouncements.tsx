@@ -24,8 +24,13 @@ export default function AdminAnnouncements() {
 
   const create = async () => {
     if (!title.trim() || !body.trim()) return toast.error('Title and body are required');
-    const { error } = await supabase.from('announcements').insert({ title, body, severity });
+    const { data, error } = await supabase.from('announcements').insert({ title, body, severity }).select().single();
     if (error) return toast.error(error.message);
+    (supabase as any).rpc('log_activity', {
+      _business_id: null, _action: 'announcement_published',
+      _entity_type: 'announcements', _entity_id: data?.id ?? null,
+      _details: { title, severity },
+    });
     toast.success('Announcement published');
     setOpen(false); setTitle(''); setBody(''); setSeverity('info');
     load();
@@ -33,11 +38,19 @@ export default function AdminAnnouncements() {
 
   const toggleActive = async (id: string, active: boolean) => {
     await supabase.from('announcements').update({ active }).eq('id', id);
+    (supabase as any).rpc('log_activity', {
+      _business_id: null, _action: active ? 'announcement_activated' : 'announcement_deactivated',
+      _entity_type: 'announcements', _entity_id: id, _details: {},
+    });
     load();
   };
 
   const remove = async (id: string) => {
     await supabase.from('announcements').delete().eq('id', id);
+    (supabase as any).rpc('log_activity', {
+      _business_id: null, _action: 'announcement_deleted',
+      _entity_type: 'announcements', _entity_id: id, _details: {},
+    });
     load();
   };
 

@@ -138,8 +138,15 @@ export default function AdminSubscriptions() {
         if (error) throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (_d, v) => {
       toast({ title: "Subscription updated" });
+      (supabase as any).rpc("log_activity", {
+        _business_id: v.row.business.id,
+        _action: "subscription_updated",
+        _entity_type: "subscriptions",
+        _entity_id: v.row.subscription?.id ?? null,
+        _details: { plan: v.plan, period: v.period, status: v.status, duration_days: v.durationDays },
+      });
       qc.invalidateQueries({ queryKey: ["admin-subscriptions"] });
       setEditing(null);
     },
@@ -179,6 +186,13 @@ export default function AdminSubscriptions() {
     },
     onSuccess: (_, v) => {
       toast({ title: v.activate ? "Subscription activated" : "Subscription disabled" });
+      (supabase as any).rpc("log_activity", {
+        _business_id: v.row.business.id,
+        _action: v.activate ? "subscription_granted" : "subscription_disabled",
+        _entity_type: "subscriptions",
+        _entity_id: v.row.subscription?.id ?? null,
+        _details: { by: "admin" },
+      });
       qc.invalidateQueries({ queryKey: ["admin-subscriptions"] });
     },
     onError: (e: Error) =>

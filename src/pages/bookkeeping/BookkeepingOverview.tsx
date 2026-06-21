@@ -111,7 +111,7 @@ export default function BookkeepingOverview() {
           <h1 className="text-2xl font-bold font-display text-foreground">Bookkeeping Overview</h1>
           <p className="text-muted-foreground mt-1">Track income, expenses, and financial health.</p>
         </div>
-        <Dialog open={showAddTx} onOpenChange={setShowAddTx}>
+        <Dialog open={showAddTx} onOpenChange={(v) => { setShowAddTx(v); if (v && !txForm.reference_number) setTxForm(p => ({ ...p, reference_number: genRef() })); }}>
           <DialogTrigger asChild>
             <Button className="gap-2"><Plus className="h-4 w-4" /> Record Transaction</Button>
           </DialogTrigger>
@@ -123,7 +123,7 @@ export default function BookkeepingOverview() {
             <div className="grid gap-4 py-2">
               <div className="grid grid-cols-2 gap-4">
                 <div><Label>Type</Label>
-                  <Select value={txForm.type} onValueChange={v => setTxForm(p => ({ ...p, type: v }))}>
+                  <Select value={txForm.type} onValueChange={v => setTxForm(p => ({ ...p, type: v, category: "" }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="income">Income</SelectItem><SelectItem value="expense">Expense</SelectItem></SelectContent>
                   </Select>

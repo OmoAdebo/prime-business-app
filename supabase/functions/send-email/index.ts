@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     }
 
     const payload: Record<string, unknown> = {
-      from: from || "Prime <onboarding@resend.dev>",
+      from: from || "Prime <noreply@getprime.app>",
       to: Array.isArray(to) ? to : [to],
       subject,
     };

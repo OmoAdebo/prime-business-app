@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { ExportMenu } from "@/components/ExportMenu";
 
 export default function BankingTransactions() {
   const { user } = useAuth();

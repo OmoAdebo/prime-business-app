@@ -20,11 +20,20 @@ import {
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 
-const CATEGORIES = [
-  "Sales Revenue", "Service Revenue", "Rent", "Utilities", "Salaries",
-  "Office Supplies", "Marketing", "Transportation", "Maintenance", "Insurance",
-  "Professional Fees", "Inventory Purchase", "Equipment", "Miscellaneous"
+const INCOME_CATEGORIES = [
+  "Sales Revenue", "Service Revenue", "Interest Income", "Rental Income",
+  "Commission", "Refunds Received", "Other Income",
 ];
+const EXPENSE_CATEGORIES = [
+  "Rent", "Utilities", "Salaries", "Office Supplies", "Marketing",
+  "Transportation", "Maintenance", "Insurance", "Professional Fees",
+  "Inventory Purchase", "Equipment", "Bank Charges", "Taxes", "Miscellaneous",
+];
+function genRef() {
+  const d = new Date();
+  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+  return `TXN-${ymd}-${Math.floor(1000 + Math.random() * 9000)}`;
+}
 const PAYMENT_METHODS = ["Cash", "Bank Transfer", "Card", "Mobile Money", "Cheque"];
 
 function formatNaira(amount: number) {
@@ -102,7 +111,7 @@ export default function BookkeepingOverview() {
           <h1 className="text-2xl font-bold font-display text-foreground">Bookkeeping Overview</h1>
           <p className="text-muted-foreground mt-1">Track income, expenses, and financial health.</p>
         </div>
-        <Dialog open={showAddTx} onOpenChange={setShowAddTx}>
+        <Dialog open={showAddTx} onOpenChange={(v) => { setShowAddTx(v); if (v && !txForm.reference_number) setTxForm(p => ({ ...p, reference_number: genRef() })); }}>
           <DialogTrigger asChild>
             <Button className="gap-2"><Plus className="h-4 w-4" /> Record Transaction</Button>
           </DialogTrigger>
@@ -114,7 +123,7 @@ export default function BookkeepingOverview() {
             <div className="grid gap-4 py-2">
               <div className="grid grid-cols-2 gap-4">
                 <div><Label>Type</Label>
-                  <Select value={txForm.type} onValueChange={v => setTxForm(p => ({ ...p, type: v }))}>
+                  <Select value={txForm.type} onValueChange={v => setTxForm(p => ({ ...p, type: v, category: "" }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="income">Income</SelectItem><SelectItem value="expense">Expense</SelectItem></SelectContent>
                   </Select>
@@ -124,7 +133,11 @@ export default function BookkeepingOverview() {
               <div><Label>Category</Label>
                 <Select value={txForm.category} onValueChange={v => setTxForm(p => ({ ...p, category: v }))}>
                   <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-                  <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  <SelectContent>
+                    {(txForm.type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(c => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div><Label>Description</Label><Input value={txForm.description} onChange={e => setTxForm(p => ({ ...p, description: e.target.value }))} placeholder="Brief description" /></div>
@@ -142,7 +155,13 @@ export default function BookkeepingOverview() {
                 <Label htmlFor="vat" className="text-sm">Include VAT (7.5%)</Label>
                 {txForm.include_vat && txForm.amount && <span className="text-xs text-muted-foreground ml-auto">VAT: {formatNaira(parseFloat(txForm.amount) * 0.075)}</span>}
               </div>
-              <div><Label>Reference Number (optional)</Label><Input value={txForm.reference_number} onChange={e => setTxForm(p => ({ ...p, reference_number: e.target.value }))} placeholder="INV-001" /></div>
+              <div>
+                <Label>Reference Number (auto-generated)</Label>
+                <div className="flex gap-2">
+                  <Input value={txForm.reference_number} onChange={e => setTxForm(p => ({ ...p, reference_number: e.target.value }))} placeholder="TXN-…" />
+                  <Button type="button" variant="outline" size="sm" onClick={() => setTxForm(p => ({ ...p, reference_number: genRef() }))}>Regen</Button>
+                </div>
+              </div>
               <div><Label>Notes (optional)</Label><Textarea value={txForm.notes} onChange={e => setTxForm(p => ({ ...p, notes: e.target.value }))} rows={2} /></div>
             </div>
             <DialogFooter>

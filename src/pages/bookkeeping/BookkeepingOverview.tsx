@@ -133,7 +133,11 @@ export default function BookkeepingOverview() {
               <div><Label>Category</Label>
                 <Select value={txForm.category} onValueChange={v => setTxForm(p => ({ ...p, category: v }))}>
                   <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-                  <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  <SelectContent>
+                    {(txForm.type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map(c => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div><Label>Description</Label><Input value={txForm.description} onChange={e => setTxForm(p => ({ ...p, description: e.target.value }))} placeholder="Brief description" /></div>
@@ -151,7 +155,13 @@ export default function BookkeepingOverview() {
                 <Label htmlFor="vat" className="text-sm">Include VAT (7.5%)</Label>
                 {txForm.include_vat && txForm.amount && <span className="text-xs text-muted-foreground ml-auto">VAT: {formatNaira(parseFloat(txForm.amount) * 0.075)}</span>}
               </div>
-              <div><Label>Reference Number (optional)</Label><Input value={txForm.reference_number} onChange={e => setTxForm(p => ({ ...p, reference_number: e.target.value }))} placeholder="INV-001" /></div>
+              <div>
+                <Label>Reference Number (auto-generated)</Label>
+                <div className="flex gap-2">
+                  <Input value={txForm.reference_number} onChange={e => setTxForm(p => ({ ...p, reference_number: e.target.value }))} placeholder="TXN-…" />
+                  <Button type="button" variant="outline" size="sm" onClick={() => setTxForm(p => ({ ...p, reference_number: genRef() }))}>Regen</Button>
+                </div>
+              </div>
               <div><Label>Notes (optional)</Label><Textarea value={txForm.notes} onChange={e => setTxForm(p => ({ ...p, notes: e.target.value }))} rows={2} /></div>
             </div>
             <DialogFooter>

@@ -20,11 +20,20 @@ import {
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 
-const CATEGORIES = [
-  "Sales Revenue", "Service Revenue", "Rent", "Utilities", "Salaries",
-  "Office Supplies", "Marketing", "Transportation", "Maintenance", "Insurance",
-  "Professional Fees", "Inventory Purchase", "Equipment", "Miscellaneous"
+const INCOME_CATEGORIES = [
+  "Sales Revenue", "Service Revenue", "Interest Income", "Rental Income",
+  "Commission", "Refunds Received", "Other Income",
 ];
+const EXPENSE_CATEGORIES = [
+  "Rent", "Utilities", "Salaries", "Office Supplies", "Marketing",
+  "Transportation", "Maintenance", "Insurance", "Professional Fees",
+  "Inventory Purchase", "Equipment", "Bank Charges", "Taxes", "Miscellaneous",
+];
+function genRef() {
+  const d = new Date();
+  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+  return `TXN-${ymd}-${Math.floor(1000 + Math.random() * 9000)}`;
+}
 const PAYMENT_METHODS = ["Cash", "Bank Transfer", "Card", "Mobile Money", "Cheque"];
 
 function formatNaira(amount: number) {

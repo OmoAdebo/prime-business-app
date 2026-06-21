@@ -138,8 +138,15 @@ export default function AdminSubscriptions() {
         if (error) throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (_d, v) => {
       toast({ title: "Subscription updated" });
+      (supabase as any).rpc("log_activity", {
+        _business_id: v.row.business.id,
+        _action: "subscription_updated",
+        _entity_type: "subscriptions",
+        _entity_id: v.row.subscription?.id ?? null,
+        _details: { plan: v.plan, period: v.period, status: v.status, duration_days: v.durationDays },
+      });
       qc.invalidateQueries({ queryKey: ["admin-subscriptions"] });
       setEditing(null);
     },

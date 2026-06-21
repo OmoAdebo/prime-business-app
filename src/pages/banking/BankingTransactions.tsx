@@ -168,6 +168,7 @@ export default function BankingTransactions() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Filters */}

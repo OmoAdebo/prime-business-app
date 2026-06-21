@@ -111,6 +111,31 @@ export default function BankingTransactions() {
           <h2 className="text-xl font-bold">Transactions</h2>
           <p className="text-sm text-muted-foreground">{filtered.length} transaction(s)</p>
         </div>
+        <div className="flex gap-2 items-center">
+          <ExportMenu
+            filename="bank-statement"
+            title={`Statement of Account — ${business?.company_name ?? ""}`}
+            rows={filtered.map((t: any) => ({
+              date: new Date(t.transaction_date).toLocaleDateString(),
+              account: `${t.bank_accounts?.account_name ?? ""} (${t.bank_accounts?.bank_name ?? ""})`,
+              type: t.type,
+              description: t.description ?? "",
+              reference: t.reference ?? "",
+              category: t.category ?? "",
+              amount: `${t.type === "credit" ? "+" : "-"}₦${Number(t.amount).toLocaleString()}`,
+              status: t.is_reconciled ? "Reconciled" : "Pending",
+            }))}
+            columns={[
+              { key: "date", label: "Date" },
+              { key: "account", label: "Account" },
+              { key: "type", label: "Type" },
+              { key: "description", label: "Description" },
+              { key: "reference", label: "Reference" },
+              { key: "category", label: "Category" },
+              { key: "amount", label: "Amount" },
+              { key: "status", label: "Status" },
+            ]}
+          />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild><Button size="sm" className="h-10 min-h-[44px]"><Plus className="h-4 w-4 mr-2" />Record Transaction</Button></DialogTrigger>
           <DialogContent className="max-w-[95vw] sm:max-w-md">

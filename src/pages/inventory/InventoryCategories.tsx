@@ -67,9 +67,27 @@ export default function InventoryCategories() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Categories</h1>
-        <p className="text-muted-foreground mt-1">Product categories and their inventory breakdown.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Categories</h1>
+          <p className="text-muted-foreground mt-1">Product categories and their inventory breakdown.</p>
+        </div>
+        <ExportMenu
+          filename="categories"
+          title="Categories Report"
+          rows={categories.map((c) => ({
+            name: c.name,
+            products: c.products.length,
+            total_stock: c.totalStock,
+            total_value: c.totalValue,
+          }))}
+          columns={[
+            { key: "name", label: "Category" },
+            { key: "products", label: "Products" },
+            { key: "total_stock", label: "Total Stock" },
+            { key: "total_value", label: "Total Value (₦)" },
+          ]}
+        />
       </div>
 
       <div className="relative max-w-sm">

@@ -871,11 +871,46 @@ function TeamTab() {
   const inviteMutation = useMutation({
     mutationFn: async () => {
       if (!inviteEmail || !user) throw new Error("Missing fields");
-      const { error } = await supabase.from("team_invitations").insert({ email: inviteEmail, role: inviteRole, invited_by: user.id });
+      const { data: invite, error } = await supabase
+        .from("team_invitations")
+        .insert({ email: inviteEmail, role: inviteRole, invited_by: user.id })
+        .select("token")
+        .single();
       if (error) throw error;
+
+      const acceptUrl = `${window.location.origin}/accept-invite?token=${invite.token}`;
+      const inviterName = (user as any)?.user_metadata?.full_name || user.email || "Your teammate";
+      const html = `
+        <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a">
+          <div style="background:#10b981;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0;font-weight:700;font-size:18px">Prime — Team invitation</div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-top:0;padding:20px;border-radius:0 0 8px 8px">
+            <p>Hi there,</p>
+            <p><strong>${inviterName}</strong> has invited you to join their team on Prime as <strong>${inviteRole.replace(/_/g, " ")}</strong>.</p>
+            <p style="margin:24px 0"><a href="${acceptUrl}" style="background:#10b981;color:#fff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:600;display:inline-block">Accept invitation</a></p>
+            <p style="font-size:12px;color:#64748b">Or copy this link: <br/>${acceptUrl}</p>
+            <p style="font-size:12px;color:#64748b">This invitation expires in 7 days.</p>
+          </div>
+        </div>`;
+
+      const { error: mailErr } = await supabase.functions.invoke("send-email", {
+        body: { to: inviteEmail, subject: `${inviterName} invited you to join their team on Prime`, html },
+      });
+      if (mailErr) {
+        // Don't fail the mutation — record was created, just surface the link
+        return { emailSent: false, acceptUrl };
+      }
+      return { emailSent: true, acceptUrl };
     },
-    onSuccess: () => {
-      toast({ title: "Invitation sent", description: `Invitation sent to ${inviteEmail}.` });
+    onSuccess: (result) => {
+      if (result?.emailSent) {
+        toast({ title: "Invitation sent", description: `Email delivered to ${inviteEmail}.` });
+      } else {
+        toast({
+          title: "Invitation saved (email failed)",
+          description: `Share this link with them: ${result?.acceptUrl}`,
+          variant: "destructive",
+        });
+      }
       setInviteEmail("");
       queryClient.invalidateQueries({ queryKey: ["team-invitations"] });
     },

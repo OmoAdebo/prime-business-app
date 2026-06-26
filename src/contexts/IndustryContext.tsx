@@ -17,7 +17,7 @@ export function IndustryProvider({ children }: { children: ReactNode }) {
   const value = useMemo<IndustryContextValue>(() => {
     const category = (business as any)?.business_category ?? null;
     const subcategory = (business as any)?.business_subcategory ?? null;
-    const config = getIndustryConfig(category);
+    const config = getIndustryConfig(category, subcategory);
     return { config, terms: config.terms, category, subcategory, loading: isLoading };
   }, [business, isLoading]);
 

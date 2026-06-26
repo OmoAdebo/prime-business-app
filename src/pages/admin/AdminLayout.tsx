@@ -6,8 +6,7 @@ import { cn } from '@/lib/utils';
 
 const NAV = [
   { to: '/admin', end: true, icon: LayoutDashboard, label: 'Overview' },
-  { to: '/admin/businesses', icon: Building2, label: 'Businesses' },
-  { to: '/admin/users', icon: Users, label: 'Users' },
+  { to: '/admin/users', icon: Users, label: 'Users & Businesses' },
   { to: '/admin/subscriptions', icon: CreditCard, label: 'Subscriptions' },
   { to: '/admin/admins', icon: Shield, label: 'Admin Management' },
   { to: '/admin/activity', icon: Activity, label: 'Activity Logs' },

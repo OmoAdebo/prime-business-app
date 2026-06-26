@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { ClipboardList, Plus, Search } from "lucide-react";
 import { motion } from "framer-motion";
+import { ExportMenu } from "@/components/ExportMenu";
 
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
@@ -102,6 +103,27 @@ export default function InventoryPurchaseOrders() {
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Purchase Orders</h1>
           <p className="text-muted-foreground mt-1 text-sm">Create and track orders from suppliers.</p>
         </div>
+        <div className="flex flex-wrap gap-2">
+          <ExportMenu
+            filename="purchase-orders"
+            title="Purchase Orders"
+            rows={(purchaseOrders as any[]).map((o: any) => ({
+              po_number: o.po_number || o.id?.slice(0, 8),
+              supplier: o.suppliers?.name || "",
+              status: o.status,
+              total_amount: o.total_amount,
+              expected_delivery: o.expected_delivery,
+              created_at: o.created_at,
+            }))}
+            columns={[
+              { key: "po_number", label: "PO #" },
+              { key: "supplier", label: "Supplier" },
+              { key: "status", label: "Status" },
+              { key: "total_amount", label: "Total (₦)" },
+              { key: "expected_delivery", label: "Expected" },
+              { key: "created_at", label: "Created" },
+            ]}
+          />
         <Dialog open={showAdd} onOpenChange={setShowAdd}>
           <DialogTrigger asChild><Button className="gap-2 h-10 min-h-[44px]"><Plus className="h-4 w-4" /> New Purchase Order</Button></DialogTrigger>
           <DialogContent className="max-w-[95vw] sm:max-w-md">
@@ -121,6 +143,7 @@ export default function InventoryPurchaseOrders() {
             <DialogFooter><Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>{createMutation.isPending ? "Creating..." : "Create Order"}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">

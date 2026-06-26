@@ -555,9 +555,18 @@ export default function Payroll() {
             <div><Label>Phone</Label><Input value={empForm.phone} onChange={(e) => setEmpForm({ ...empForm, phone: e.target.value })} /></div>
             <div><Label>Position</Label><Input value={empForm.position} onChange={(e) => setEmpForm({ ...empForm, position: e.target.value })} /></div>
             <div>
-              <Label>Department</Label>
+              <div className="flex items-center justify-between">
+                <Label>Department</Label>
+                <button
+                  type="button"
+                  onClick={() => { setEmployeeOpen(false); setDepartmentOpen(true); }}
+                  className="text-xs text-primary hover:underline"
+                >
+                  + New department
+                </button>
+              </div>
               <Select value={empForm.department_id} onValueChange={(v) => setEmpForm({ ...empForm, department_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={departments?.length ? "Select" : "No departments yet — add one"} /></SelectTrigger>
                 <SelectContent>{departments?.map((d) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>

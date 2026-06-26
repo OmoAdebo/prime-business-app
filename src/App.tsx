@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { InstallPromptGuard } from "@/components/InstallPromptGuard";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -83,6 +84,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <InstallPromptGuard />
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -97,7 +99,7 @@ const App = () => (
             <Route element={<ProtectedRoute allowedRoles={['super_admin', 'admin', 'support_admin']} />}>
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminOverview />} />
-                <Route path="businesses" element={<AdminBusinesses />} />
+                <Route path="businesses" element={<Navigate to="/admin/users" replace />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="subscriptions" element={<AdminSubscriptions />} />
                 <Route path="admins" element={<AdminManagement />} />

@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
 import { ClipboardList, Plus, Search } from "lucide-react";
 import { motion } from "framer-motion";
+import { ExportMenu } from "@/components/ExportMenu";
 
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;

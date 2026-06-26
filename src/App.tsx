@@ -83,6 +83,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <InstallPromptGuard />
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />

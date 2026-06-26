@@ -199,7 +199,8 @@ export default function InventoryStock() {
             </div>
             <DialogFooter><Button onClick={() => recordMutation.mutate()} disabled={!form.product_id || !form.quantity || recordMutation.isPending}>{recordMutation.isPending ? "Saving..." : "Record"}</Button></DialogFooter>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <Tabs defaultValue="levels">

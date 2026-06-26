@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Layers, Plus, ArrowRightLeft, Search } from "lucide-react";
 import { useVoiceForm } from "@/hooks/use-voice-form";
 import { motion } from "framer-motion";
+import { ExportMenu } from "@/components/ExportMenu";
 
 export default function InventoryStock() {
   const { user } = useAuth();

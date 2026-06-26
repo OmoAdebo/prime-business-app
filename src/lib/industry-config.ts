@@ -295,11 +295,94 @@ export const INDUSTRY_CONFIG: Record<BusinessCategory, IndustryConfig> = {
   },
 };
 
+/**
+ * Subcategory overrides — deep-merged into the base category config when the
+ * business sets `business_subcategory`. Only specify fields that differ; everything
+ * else falls back to the parent category. Keys must match the strings in
+ * `INDUSTRY_CONFIG[*].subcategories` exactly.
+ */
+export const SUBCATEGORY_OVERRIDES: Record<string, Record<string, Partial<IndustryConfig>>> = {
+  Agriculture: {
+    "Agro-Processing": {
+      hint: "Adding value to raw produce — milling, packaging, preservation",
+      units: ["batches", "kg", "bags", "cartons", "tonnes"],
+      defaultUnit: "batches",
+      terms: { ...DEFAULTS, customer: "Buyer", customers: "Buyers", product: "Processed Item", products: "Processed Items", inventory: "Production Stock" },
+      dashboardSections: ["revenue", "production", "buyers", "inventory", "invoices"],
+      quickActions: [
+        { label: "New Production Batch", action: "open-add-product", route: "/inventory/products" },
+        { label: "Add Buyer", action: "open-add-customer", route: "/customers" },
+        { label: "Record Sale", action: "open-create-invoice", route: "/invoicing" },
+        { label: "Add Transaction", action: "open-record-transaction", route: "/bookkeeping" },
+      ],
+      kpis: [
+        { key: "revenue", label: "Processed Sales", helper: "Value of sold output" },
+        { key: "production", label: "Batches (7d)", helper: "Output volume" },
+        { key: "yield", label: "Yield Ratio", helper: "Output / input" },
+        { key: "inventory", label: "Stock Value", helper: "Finished + raw" },
+      ],
+    },
+    Livestock: {
+      units: ["head", "kg", "litres", "crates"],
+      defaultUnit: "head",
+      terms: { ...DEFAULTS, product: "Animal", products: "Animals", inventory: "Herd / Stock" },
+    },
+    Aquaculture: {
+      units: ["ponds", "kg", "fingerlings"],
+      defaultUnit: "kg",
+      terms: { ...DEFAULTS, product: "Fish", products: "Fish", inventory: "Pond Stock" },
+    },
+    "Agri-Tech": {
+      hint: "Tech-enabled agriculture — data, drones, marketplaces",
+      terms: { ...DEFAULTS, customer: "User", customers: "Users", product: "Solution", products: "Solutions" },
+      navOverrides: { "/inventory": "Catalog" },
+    },
+  },
+  Healthcare: {
+    Pharmacy: { units: ["tablets", "bottles", "packs", "vials"], defaultUnit: "tablets" },
+    Hospital: { terms: { ...DEFAULTS, customer: "Patient", customers: "Patients" }, units: ["visits", "doses", "procedures"], defaultUnit: "visits" },
+    Laboratory: { terms: { ...DEFAULTS, sale: "Test", sales: "Tests" }, units: ["tests", "samples"], defaultUnit: "tests" },
+    "Medical Devices": { units: ["units", "kits", "sets"], defaultUnit: "units" },
+  },
+  Finance: {
+    Fintech: { hint: "Digital-first financial products", terms: { ...DEFAULTS, customer: "User", customers: "Users", sale: "Transaction", sales: "Transactions" } },
+    Microfinance: { hint: "Small-ticket loans & savings", terms: { ...DEFAULTS, customer: "Member", customers: "Members" } },
+    Cooperative: { terms: { ...DEFAULTS, customer: "Member", customers: "Members" } },
+  },
+  Technology: {
+    SaaS: { units: ["seats", "workspaces", "MRR"], defaultUnit: "seats" },
+    Hardware: { units: ["units", "boxes"], defaultUnit: "units" },
+    "Consulting / Dev Shop": { terms: { ...DEFAULTS, customer: "Client", customers: "Clients", product: "Service", products: "Services" }, units: ["hours", "projects"], defaultUnit: "hours" },
+  },
+  Manufacturing: {
+    "Food Processing": { units: ["batches", "kg", "bags", "cartons"], defaultUnit: "batches" },
+    Textiles: { units: ["yards", "rolls", "pieces"], defaultUnit: "yards" },
+    Chemicals: { units: ["litres", "kg", "drums"], defaultUnit: "litres" },
+  },
+};
+
 export const BUSINESS_CATEGORIES = Object.keys(INDUSTRY_CONFIG) as BusinessCategory[];
 
-export function getIndustryConfig(category?: string | null): IndustryConfig {
-  if (category && (category in INDUSTRY_CONFIG)) {
-    return INDUSTRY_CONFIG[category as BusinessCategory];
-  }
-  return INDUSTRY_CONFIG.MSMEs;
+function mergeConfig(base: IndustryConfig, override?: Partial<IndustryConfig>): IndustryConfig {
+  if (!override) return base;
+  return {
+    ...base,
+    ...override,
+    terms: { ...base.terms, ...(override.terms ?? {}) },
+    units: override.units ?? base.units,
+    quickActions: override.quickActions ?? base.quickActions,
+    dashboardSections: override.dashboardSections ?? base.dashboardSections,
+    navOverrides: { ...base.navOverrides, ...(override.navOverrides ?? {}) },
+    hiddenModules: override.hiddenModules ?? base.hiddenModules,
+    kpis: override.kpis ?? base.kpis,
+  };
+}
+
+export function getIndustryConfig(category?: string | null, subcategory?: string | null): IndustryConfig {
+  const base = category && (category in INDUSTRY_CONFIG)
+    ? INDUSTRY_CONFIG[category as BusinessCategory]
+    : INDUSTRY_CONFIG.MSMEs;
+  if (!subcategory) return base;
+  const override = SUBCATEGORY_OVERRIDES[base.category]?.[subcategory];
+  return mergeConfig(base, override);
 }

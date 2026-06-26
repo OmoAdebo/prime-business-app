@@ -47,7 +47,7 @@ export function PublicFooter() {
           </div>
         </div>
         <div className="mt-10 pt-6 border-t text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
+          © {new Date().getFullYear()} Oreone Inc. All rights reserved.
         </div>
       </div>
     </footer>

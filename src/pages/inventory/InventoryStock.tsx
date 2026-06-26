@@ -148,8 +148,23 @@ export default function InventoryStock() {
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Stock Management</h1>
           <p className="text-muted-foreground mt-1 text-sm">Track levels, movements, and adjustments. <span className="text-primary">Tip: New products can be added with initial stock from the Products page.</span></p>
         </div>
-        <Dialog open={showRecord} onOpenChange={setShowRecord}>
-          <DialogTrigger asChild><Button className="gap-2 h-10 min-h-[44px]"><Plus className="h-4 w-4" /> Record Movement</Button></DialogTrigger>
+        <div className="flex flex-wrap gap-2">
+          <ExportMenu
+            filename="stock-levels"
+            title="Stock Levels Report"
+            rows={stockLevels.map((sl: any) => ({
+              product: sl.products?.name || "",
+              quantity: sl.quantity,
+              location_id: sl.location_id || "",
+            }))}
+            columns={[
+              { key: "product", label: "Product" },
+              { key: "quantity", label: "Quantity" },
+              { key: "location_id", label: "Location" },
+            ]}
+          />
+          <Dialog open={showRecord} onOpenChange={setShowRecord}>
+            <DialogTrigger asChild><Button className="gap-2 h-10 min-h-[44px]"><Plus className="h-4 w-4" /> Record Movement</Button></DialogTrigger>
           <DialogContent className="max-w-[95vw] sm:max-w-md">
             <DialogHeader><DialogTitle>Record Stock Movement</DialogTitle></DialogHeader>
             <div className="grid gap-4 py-2">

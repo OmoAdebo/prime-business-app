@@ -1,75 +1,103 @@
-# Testing Feedback — Implementation Plan
+## Scope
 
-## 1. Bookkeeping
+Eight fixes from the 24 June review, grouped by area.
 
-**Category filtering by type**
-- Split the existing `CATEGORIES` constant into `INCOME_CATEGORIES` and `EXPENSE_CATEGORIES` in `src/pages/Bookkeeping.tsx`.
-- In the Record Transaction modal, render the list based on `txForm.type` (income vs. expense). Reset `category` when the type changes.
+---
 
-**Auto-generated Ref number**
-- On modal open, prefill `reference_number` with `TXN-YYYYMMDD-XXXX` (random 4-char). Keep the field editable but read-only-looking with a "Regenerate" icon.
+### 1. Team invitations actually send email
 
-**Custom categories + Category management**
-- New table `transaction_categories` (business_id, name, type [income|expense], is_default, created_by). Seed defaults on first read via a hook.
-- Replace the Select with a combobox that lists DB categories filtered by type and includes an "+ Add new category" inline action which inserts into `transaction_categories`.
-- Add a small "Manage categories" link/button next to the field opening a `CategoryManagerDialog` (list, rename, delete, add) scoped to the current business and the active type.
+`src/pages/Settings.tsx` inserts into `team_invitations` but never calls the `send-email` edge function, so no email goes out.
 
-## 2. Banking
+- After successful insert, get back the row's `token`, build an accept URL (`${SITE_URL}/accept-invite?token=...`), and invoke `send-email` with a branded HTML template (company name, inviter name, role, CTA button, 7‑day expiry note).
+- Surface failures distinctly: "Invitation saved but email failed — copy this link" with a copy button as a fallback.
+- Quick check on the `send-email` function: confirm it returns a structured `{ ok, id, error }` and surfaces Resend errors. Add minimal logging.
 
-- Add a "Download Statement" button on `/banking/transactions` and account detail header. Generates a PDF/CSV/Excel of filtered transactions client-side now (server/Paystack integration later). A tooltip notes "Bank-issued statement available after Paystack integration" for the official statement option.
+### 2. Inline "create new" routing for foreign-key dropdowns
 
-## 3. Universal Export (CSV / Excel / PDF)
+Pattern: every dropdown that picks a related record gets a `+ Create new …` item at the bottom. Choosing it navigates to the origin tab/page with a `?returnTo=…&prefill=…` query, and after the new record is created the user is bounced back with the new id pre-selected (via `sessionStorage` handoff so we don't refetch state).
 
-- Extend `src/components/ImportExportButtons.tsx` (or create `ExportMenu.tsx`) to expose a single split-button with three formats:
-  - CSV (existing util)
-  - Excel via `xlsx` (already in deps if present, else add)
-  - PDF via `jspdf` + `jspdf-autotable`
-- Wire it into: Bookkeeping transactions, Banking transactions, Invoicing list, Invoicing per-row, Customers, Inventory, Payroll, Reports.
+Identified instances to wire up:
 
-## 4. Invoicing
+| Form / modal | Field | Origin |
+|---|---|---|
+| Payroll → Add Employee | Department | `/payroll` → Departments tab |
+| Payroll → Add Employee | Job title | `/payroll` → Jobs tab |
+| Invoicing → New Invoice | Customer | `/customers` |
+| Invoicing → New Invoice | Product (line item) | `/inventory/products` |
+| POS → cart add | Product | `/inventory/products` |
+| Inventory → Products | Category | `/inventory/categories` |
+| Inventory → Products | Supplier | `/inventory/suppliers` |
+| Inventory → Products | Location | `/inventory/stock` (locations) |
+| Inventory → Purchase Orders | Supplier | `/inventory/suppliers` |
+| Inventory → Stock movement | Location | `/inventory/stock` |
+| Bookkeeping → Journal Entry | Account | `/bookkeeping/chart-of-accounts` |
+| Banking → Transfer / Scheduled | Beneficiary | `/banking/beneficiaries` |
+| Banking → Transfer | From account | `/banking/accounts` |
+| Budgeting → New Budget Item | Category/Account | `/bookkeeping/chart-of-accounts` |
+| Debt/Credit → New Receivable | Customer | `/customers` |
+| Debt/Credit → New Payable | Supplier | `/inventory/suppliers` |
+| Store Management → assign staff | Employee | `/payroll` → Employees |
 
-- Per-invoice export: add a row action menu (CSV / Excel / PDF) on `/invoicing` that exports just that invoice (header + line items + totals).
-- Confirm the existing "add customer name when generating invoice" still works (already resolved per user).
-- Fix Voice agent (see section 7).
+Build one small reusable `<EntitySelect>` wrapper around the existing `Select` so we don't duplicate the routing/return logic per form.
 
-## 5. Customers
+### 3. Inventory import/export on all sub-pages
 
-- Add Edit action on each row in `/customers` opening a dialog (reuse Create form). Update via Supabase `customers` row matching `business_id`.
+Currently only `/inventory/products` has `ImportExportButtons`. Add to:
 
-## 6. Business Owner Dashboard Revamp
+- `InventoryCategories` (CSV import/export)
+- `InventorySuppliers` (CSV/Excel import, PDF export)
+- `InventoryStock` (CSV import for stock adjustments, PDF stock report)
+- `InventoryPurchaseOrders` (CSV import, PDF export per PO + list)
+- `InventoryReports` (PDF export of each report)
+- `InventoryOverview` (PDF summary export)
 
-- Add "Add Transaction" to Quick Actions on `/dashboard` (opens the same Record Transaction modal via a shared component extracted from Bookkeeping). For industries where bookkeeping is not the primary flow (e.g. retail/POS), substitute "New Sale" or "New Invoice" using `industry-config.ts`.
-- Tighten the Quick Actions grid with industry-aware labels and icons; surface zero-data CTAs.
-- Polish hero KPIs, add a "Recent Activity" mini-feed and a "This Week" chart strip.
+Reuse `ImportExportButtons` / `ExportMenu`; add per-table column maps and validators.
 
-## 7. Voice Agent — global active state
+### 4. Admin activity log revamp (`/admin/activity`)
 
-- Move the `VoiceCaptureProvider` mount to the top of `AppLayout` (currently scoped lower), so every `/dashboard/**` page shares one provider instance.
-- Audit pages whose dialogs/forms don't currently call `useVoiceForm`: Invoicing create-invoice dialog, Customers, Inventory product, POS, Payroll runs, Banking transfer. Wire `useVoiceForm({ enabled: open, ... })` on each.
-- Fix Invoicing controls: `FloatingVoiceButton` mic/on/off buttons not firing — verify event handlers receive the `autoListen` state from context and re-render. Ensure z-index sits above Sheet/Dialog overlays.
-- Add a persistent toggle in `AppLayout` header so the on/off state is always reachable, mirroring the floating control.
+Tabbed view backed by the existing `activity_logs` table plus new filters:
 
-## 8. Settings persistence bug (fundhillmfb@gmail.com)
+- Tabs: **Authentication** (sign-in/sign-up/password reset/role changes), **User Activity** (CRUD on business data), **Admin Operations** (subscription grant/disable, announcements, role assignments), **System** (errors, edge function failures).
+- Filters: date range, user (search by email), role, action type, entity type, business.
+- Backfill: add a small migration to record auth events via a trigger on `auth.users` → `activity_logs` (sign-up only; sign-in via client-side log on `AuthContext`).
+- Keep showing email instead of UUID (already done) and add CSV export of the filtered view.
 
-- Audit the Business tab save handler in `src/pages/Settings.tsx`: confirm it updates `businesses` (not just `business_settings`) and that `useBusiness()` invalidates its query on success.
-- Add a verification gate fix: `OnboardingGuard` likely checks specific required fields (CAC/TIN/state/LGA). Add logging and ensure the form writes every required column. If certain fields are saved to `business_settings` instead of `businesses`, migrate them.
-- Add a post-save `queryClient.invalidateQueries(['business'])` so other modules don't see stale data.
+### 5. Mobile "install / suggestion" prompt cleanup
 
-## 9. Admin Dashboard
+Investigate which prompt is showing on `getprime.app` mobile (likely the PWA install banner from `public/manifest.json` + `sw.js`, or a leftover toast). Either gate it behind an explicit dismiss-remembered flag or remove it from public marketing pages and only show inside the app shell after login.
 
-- Stop showing UUIDs in `/admin/activity` and elsewhere. Join `activity_logs.user_id → profiles + auth.users.email`; show `email` (or full name) plus a human label for `entity_type` (e.g. "Invoice #INV-00012") by looking up the entity name where feasible.
-- Expand admin activity logging: add a server-side trigger or explicit `log_activity` calls for admin actions (subscription grant/disable, user enable/disable, role change, announcement post). Add filters (actor, action, date range) and search by email.
-- Add the public site's reusable Navbar + Footer (`PublicNavbar`, `PublicFooter`) to `AdminLayout` so admins can jump back to marketing pages. Keep the admin sidebar.
+### 6. Consolidate `/admin/businesses` into `/admin/users`
+
+- Delete `AdminBusinesses.tsx` route and sidebar entry.
+- Extend `AdminUsers.tsx`:
+  - Show **Name** as the business owner's full name (already in payload) — confirm column reads `full_name`, fall back to email.
+  - Add filter chips: **All / Business Owners / Individuals / Team Members / Admins**.
+  - Add a secondary column "Business" (company_name) and a search across name/email/company.
+  - Row click → side panel with the business details that used to live on `/admin/businesses` (industry, CAC, TIN, address, plan, created_at).
+
+### 7. Footer copyright
+
+`src/components/PublicFooter.tsx` line ~50: replace `© {year} {SITE_NAME}. All rights reserved.` with `© {year} Oreone Inc. All rights reserved.` Keep `SITE_NAME` for branding elsewhere. Audit for the same string in `AppLayout`, emails, and PDFs and update consistently.
+
+### 8. Onboarding industry/subcategory mismatch
+
+Reported: user picks **Agriculture → Agro Processing** but dashboard shows harvest/farming widgets — meaning we read `business_category` (Agriculture) and ignore `business_subcategory`.
+
+- Audit `IndustryContext` and `INDUSTRY_CONFIG` lookups: today they key only on `BusinessCategory`. Extend to consider `business_subcategory` for terminology, quick actions, KPIs, and hidden modules where it materially changes the workflow (Agro Processing vs Crop Farming vs Livestock, Pharmacy vs Hospital, Fintech vs Traditional Banking, etc.).
+- Add a `subcategoryConfig?: Partial<IndustryConfig>` map per category and deep-merge over the base category config when a subcategory is set.
+- Verify `Onboarding.tsx` actually persists `business_subcategory` (it does in the payload — confirm DB column exists; if not, migration to add it).
+- Add a "Change industry" action in Settings → Business so users can correct a wrong pick.
+
+---
 
 ## Technical notes
 
-- New migration: `transaction_categories` (+ RLS using `user_belongs_to_business`, GRANTs to authenticated/service_role). Seed defaults via client-side upsert on first load.
-- New deps if missing: `xlsx`, `jspdf`, `jspdf-autotable`.
-- Shared component: `RecordTransactionDialog` extracted from Bookkeeping for reuse in dashboard Quick Actions.
-- Voice fix likely a context scoping bug; verify with console logs after moving provider.
-- No changes to `src/integrations/supabase/client.ts` or auto-generated types.
+- **Edge function**: `send-email` already exists with `getprime.app` sender; we just need to call it from the invite flow and from any future server-side notifications.
+- **Activity backfill**: use a single SECURITY DEFINER trigger on `auth.users` insert; sign-ins logged from `AuthContext.onAuthStateChange` via `log_activity` RPC.
+- **EntitySelect**: lives at `src/components/EntitySelect.tsx`, generic over `{id,label}`; supports `createRoute`, `createLabel`, optional `prefill`.
+- **Return-trip handoff**: `sessionStorage` key `pendingEntity:<kind>` set by origin page on create, consumed by `EntitySelect` on mount.
 
-## Out of scope (deferred)
+## Out of scope (call out, don't build)
 
-- Real Paystack statement-of-account API (waiting on Paystack integration).
-- Offline/PWA work (separate approved track).
+- Re-architecting industry config into a full rules engine — we'll only deep-merge subcategory overrides for now.
+- Per-user push notifications for the mobile prompt.

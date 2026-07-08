@@ -1,7 +1,10 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 
-const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')!;
-const GATEWAY = 'https://ai.gateway.lovable.dev/v1/chat/completions';
+// Direct Google Gemini API (free tier). Set GEMINI_API_KEY in the new
+// Supabase project's edge-function secrets: https://aistudio.google.com/apikey
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY')!;
+const MODEL = 'gemini-2.5-flash';
+const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
 const SYSTEM = `You are Prime, the in-app AI assistant for Prime Business Suite — a Nigerian SMB platform (currency: Naira ₦).
 You help business owners run their dashboard by reasoning about what they want and CALLING TOOLS to act.
@@ -16,144 +19,123 @@ Rules:
 - Map industry-specific terminology to the right tool: "patient" → customer, "medication"/"drug" → product, "buyer" → customer, "SKU" → product, "client" → customer, "bill" → invoice.
 - IF an "active form" context is provided, the user is dictating field values into an open modal. Call the fill_form_fields tool with the form_id and a values object whose keys match the form's declared field names. Convert date phrases like "June 15" or "next Friday" to ISO YYYY-MM-DD. Convert spoken numbers ("fifty thousand") to integers. Only include fields the user actually mentioned. Do NOT call any other open_* tool while a form is active unless the user explicitly says "open" or "new" of a different form.`;
 
-const TOOLS = [
+// Gemini function declarations (same shape as OpenAI tools, minus the outer wrapper)
+const FUNCTION_DECLARATIONS = [
   {
-    type: 'function',
-    function: {
-      name: 'fill_form_fields',
-      description: 'Fill fields in the currently open form/modal with values dictated by the user. Use ONLY when an active_form is provided in the context.',
-      parameters: {
-        type: 'object',
-        properties: {
-          form_id: { type: 'string', description: 'The form_id of the active form (must match exactly).' },
-          values: { type: 'object', description: 'Map of field name → value. Field names must match the active form schema. Dates as YYYY-MM-DD, numbers as plain integers.' },
-        },
-        required: ['form_id', 'values'],
+    name: 'fill_form_fields',
+    description: 'Fill fields in the currently open form/modal with values dictated by the user. Use ONLY when an active_form is provided in the context.',
+    parameters: {
+      type: 'object',
+      properties: {
+        form_id: { type: 'string', description: 'The form_id of the active form (must match exactly).' },
+        values: { type: 'object', description: 'Map of field name → value. Field names must match the active form schema. Dates as YYYY-MM-DD, numbers as plain integers.' },
+      },
+      required: ['form_id', 'values'],
+    },
+  },
+  {
+    name: 'navigate',
+    description: 'Navigate to a page in the app',
+    parameters: {
+      type: 'object',
+      properties: {
+        path: { type: 'string', description: 'App route, e.g. /dashboard, /reports, /banking, /inventory/products, /payroll, /pos, /store, /customers, /settings, /budgeting, /help' },
+        label: { type: 'string', description: 'Human readable destination name' },
+      },
+      required: ['path', 'label'],
+    },
+  },
+  {
+    name: 'open_create_invoice',
+    description: 'Open the Create Invoice / Bill dialog, optionally prefilled.',
+    parameters: {
+      type: 'object',
+      properties: {
+        customer_name: { type: 'string' },
+        amount: { type: 'number', description: 'Total amount in Naira' },
+        description: { type: 'string' },
+        due_date: { type: 'string', description: 'ISO date YYYY-MM-DD' },
+        quantity: { type: 'number' },
+        product_name: { type: 'string' },
+        unit_price: { type: 'number' },
       },
     },
   },
   {
-    type: 'function',
-    function: {
-      name: 'navigate',
-      description: 'Navigate to a page in the app',
-      parameters: {
-        type: 'object',
-        properties: {
-          path: { type: 'string', description: 'App route, e.g. /dashboard, /reports, /banking, /inventory/products, /payroll, /pos, /store, /customers, /settings, /budgeting, /help' },
-          label: { type: 'string', description: 'Human readable destination name' },
-        },
-        required: ['path', 'label'],
+    name: 'open_add_product',
+    description: 'Open the Add Product / Medication / SKU dialog.',
+    parameters: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        price: { type: 'number' },
+        sku: { type: 'string' },
+        quantity: { type: 'number' },
+        unit: { type: 'string' },
+        category: { type: 'string' },
       },
     },
   },
   {
-    type: 'function',
-    function: {
-      name: 'open_create_invoice',
-      description: 'Open the Create Invoice / Bill dialog, optionally prefilled.',
-      parameters: {
-        type: 'object',
-        properties: {
-          customer_name: { type: 'string' },
-          amount: { type: 'number', description: 'Total amount in Naira' },
-          description: { type: 'string' },
-          due_date: { type: 'string', description: 'ISO date YYYY-MM-DD' },
-          quantity: { type: 'number' },
-          product_name: { type: 'string' },
-          unit_price: { type: 'number' },
-        },
-      },
-    },
+    name: 'open_record_expense',
+    description: 'Open the record-expense dialog.',
+    parameters: { type: 'object', properties: { amount: { type: 'number' }, description: { type: 'string' }, category: { type: 'string' }, date: { type: 'string' } } },
   },
   {
-    type: 'function',
-    function: {
-      name: 'open_add_product',
-      description: 'Open the Add Product / Medication / SKU dialog.',
-      parameters: {
-        type: 'object',
-        properties: {
-          name: { type: 'string' },
-          price: { type: 'number' },
-          sku: { type: 'string' },
-          quantity: { type: 'number' },
-          unit: { type: 'string' },
-          category: { type: 'string' },
-        },
-      },
-    },
+    name: 'open_add_customer',
+    description: 'Open the Add Customer / Patient / Client dialog.',
+    parameters: { type: 'object', properties: { name: { type: 'string' }, email: { type: 'string' }, phone: { type: 'string' }, address: { type: 'string' } } },
   },
   {
-    type: 'function',
-    function: {
-      name: 'open_record_expense',
-      description: 'Open the record-expense dialog.',
-      parameters: { type: 'object', properties: { amount: { type: 'number' }, description: { type: 'string' }, category: { type: 'string' }, date: { type: 'string' } } },
-    },
+    name: 'open_new_transfer',
+    description: 'Open the new bank transfer dialog.',
+    parameters: { type: 'object', properties: { amount: { type: 'number' }, recipient: { type: 'string' }, account_number: { type: 'string' }, bank: { type: 'string' }, note: { type: 'string' } } },
   },
   {
-    type: 'function',
-    function: {
-      name: 'open_add_customer',
-      description: 'Open the Add Customer / Patient / Client dialog.',
-      parameters: { type: 'object', properties: { name: { type: 'string' }, email: { type: 'string' }, phone: { type: 'string' }, address: { type: 'string' } } },
-    },
+    name: 'open_add_supplier',
+    description: 'Open the Add Supplier / Vendor dialog.',
+    parameters: { type: 'object', properties: { name: { type: 'string' }, email: { type: 'string' }, phone: { type: 'string' }, address: { type: 'string' } } },
   },
   {
-    type: 'function',
-    function: {
-      name: 'open_new_transfer',
-      description: 'Open the new bank transfer dialog.',
-      parameters: { type: 'object', properties: { amount: { type: 'number' }, recipient: { type: 'string' }, account_number: { type: 'string' }, bank: { type: 'string' }, note: { type: 'string' } } },
-    },
+    name: 'open_stock_movement',
+    description: 'Open the stock movement dialog (stock in, stock out, adjustment).',
+    parameters: { type: 'object', properties: { product_name: { type: 'string' }, quantity: { type: 'number' }, movement_type: { type: 'string', enum: ['in', 'out', 'adjust'] }, note: { type: 'string' } } },
   },
   {
-    type: 'function',
-    function: {
-      name: 'open_add_supplier',
-      description: 'Open the Add Supplier / Vendor dialog.',
-      parameters: { type: 'object', properties: { name: { type: 'string' }, email: { type: 'string' }, phone: { type: 'string' }, address: { type: 'string' } } },
-    },
+    name: 'open_journal_entry',
+    description: 'Open the journal entry dialog.',
+    parameters: { type: 'object', properties: { description: { type: 'string' }, amount: { type: 'number' }, debit_account: { type: 'string' }, credit_account: { type: 'string' } } },
   },
   {
-    type: 'function',
-    function: {
-      name: 'open_stock_movement',
-      description: 'Open the stock movement dialog (stock in, stock out, adjustment).',
-      parameters: { type: 'object', properties: { product_name: { type: 'string' }, quantity: { type: 'number' }, movement_type: { type: 'string', enum: ['in', 'out', 'adjust'] }, note: { type: 'string' } } },
-    },
+    name: 'open_payroll_run',
+    description: 'Open the payroll dialog to start a payroll run or record a salary.',
+    parameters: { type: 'object', properties: { period: { type: 'string' }, employee_name: { type: 'string' }, amount: { type: 'number' } } },
   },
   {
-    type: 'function',
-    function: {
-      name: 'open_journal_entry',
-      description: 'Open the journal entry dialog.',
-      parameters: { type: 'object', properties: { description: { type: 'string' }, amount: { type: 'number' }, debit_account: { type: 'string' }, credit_account: { type: 'string' } } },
-    },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'open_payroll_run',
-      description: 'Open the payroll dialog to start a payroll run or record a salary.',
-      parameters: { type: 'object', properties: { period: { type: 'string' }, employee_name: { type: 'string' }, amount: { type: 'number' } } },
-    },
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'open_create_order',
-      description: 'Open the create order dialog for a sales order.',
-      parameters: { type: 'object', properties: { customer_name: { type: 'string' }, product_name: { type: 'string' }, quantity: { type: 'number' }, total: { type: 'number' } } },
-    },
+    name: 'open_create_order',
+    description: 'Open the create order dialog for a sales order.',
+    parameters: { type: 'object', properties: { customer_name: { type: 'string' }, product_name: { type: 'string' }, quantity: { type: 'number' }, total: { type: 'number' } } },
   },
 ];
+
+// Convert OpenAI-style chat messages to Gemini "contents" array
+function toGeminiContents(messages: any[]) {
+  return messages
+    .filter((m) => m.role === 'user' || m.role === 'assistant')
+    .map((m) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: String(m.content ?? '') }],
+    }));
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    if (!GEMINI_API_KEY) {
+      return new Response(JSON.stringify({ error: 'config', message: 'GEMINI_API_KEY is not set on this project.' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     const { messages, page, industry, active_form } = await req.json();
     if (!Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: 'messages array required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -171,30 +153,33 @@ Deno.serve(async (req) => {
         : '');
 
     const payload = {
-      model: 'google/gemini-2.5-flash',
-      messages: [{ role: 'system', content: SYSTEM + ctx }, ...messages],
-      tools: TOOLS,
-      tool_choice: 'auto',
+      systemInstruction: { parts: [{ text: SYSTEM + ctx }] },
+      contents: toGeminiContents(messages),
+      tools: [{ functionDeclarations: FUNCTION_DECLARATIONS }],
+      generationConfig: { temperature: 0.4 },
     };
 
-    const r = await fetch(GATEWAY, {
+    const r = await fetch(`${ENDPOINT}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
 
     if (r.status === 429) return new Response(JSON.stringify({ error: 'rate_limit', message: 'Too many requests. Try again in a moment.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    if (r.status === 402) return new Response(JSON.stringify({ error: 'payment_required', message: 'AI credits exhausted. Please top up.' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    if (!r.ok) return new Response(JSON.stringify({ error: 'gateway_error', detail: await r.text() }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (!r.ok) {
+      const detail = await r.text();
+      return new Response(JSON.stringify({ error: 'gemini_error', status: r.status, detail }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     const data = await r.json();
-    const msg = data.choices?.[0]?.message ?? {};
-    const reply: string = msg.content ?? '';
-    const toolCalls = (msg.tool_calls ?? []).map((tc: any) => {
-      let args: any = {};
-      try { args = JSON.parse(tc.function?.arguments ?? '{}'); } catch {}
-      return { name: tc.function?.name, args };
-    });
+    const parts = data?.candidates?.[0]?.content?.parts ?? [];
+
+    let reply = '';
+    const toolCalls: { name: string; args: any }[] = [];
+    for (const p of parts) {
+      if (p.text) reply += p.text;
+      if (p.functionCall) toolCalls.push({ name: p.functionCall.name, args: p.functionCall.args ?? {} });
+    }
 
     return new Response(JSON.stringify({ reply, tool_calls: toolCalls }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -1,0 +1,6 @@
+id,business_id,account_name,bank_name,account_number,account_type,currency,current_balance,is_active,created_at,updated_at
+55bab4e7-aeb9-45d3-b9cd-3ce003196b14,381de87f-dcb0-44c0-9353-8f16f7086d70,Business Savings,FCMB,1234567890,current,NGN,10000,t,2026-06-08 19:50:55.158136+00,2026-06-08 19:53:41.576805+00
+83e323da-c9d8-49fa-adf6-56c11605611d,381de87f-dcb0-44c0-9353-8f16f7086d70,Savings Account,Access Bank,5434543254,savings,NGN,200000,t,2026-06-08 19:55:40.707939+00,2026-06-08 19:56:14.346867+00
+cd941b5f-8a2a-4b8e-8100-46214aabd16c,1d912655-c3d8-479f-b6ed-31b957b36fe5,Business Savings,GTBank,1234323454,current,NGN,75999,t,2026-06-24 20:37:50.204373+00,2026-06-24 20:38:30.979534+00
+6689a3e0-f2ca-494d-bb74-018831cfefe1,e117631c-0819-4c3a-af09-0d75428157ac,Yemi Adebo,Sterling Bank,0018018302,savings,NGN,2000,t,2026-07-09 15:55:54.711964+00,2026-07-09 15:58:42.882408+00
+139ae33c-fba8-408e-bea9-9b36085d123f,1d912655-c3d8-479f-b6ed-31b957b36fe5,Veritatis eveniet i,Nam natus est aut ac,Itaque cor,domiciliary,NGN,0,t,2026-07-09 19:48:53.745591+00,2026-07-09 19:48:53.745591+00

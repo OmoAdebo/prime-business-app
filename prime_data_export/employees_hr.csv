@@ -1,0 +1,2 @@
+id,business_id,user_id,department_id,employee_number,full_name,email,phone,position,employment_type,hire_date,termination_date,basic_salary,bank_name,account_number,tax_id,pension_id,status,currency,created_at,updated_at
+aeb2fb08-1348-4f0f-8951-c960b81f4f85,e117631c-0819-4c3a-af09-0d75428157ac,,53f58637-1e78-4c7e-960c-9e945610b68e,,YEMI ADEBO,adebo_yemi@hotmail.com,08028550099,Manager,full_time,2026-07-09,,120000,Sterling Bank,0018018302,,,active,NGN,2026-07-09 16:27:47.565629+00,2026-07-09 16:27:47.565629+00

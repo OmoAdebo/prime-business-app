@@ -1,0 +1,2 @@
+id,business_id,bank_account_id,employee_id,wallet_name,balance,spending_limit,currency,is_active,created_by,notes,created_at,updated_at
+5b1db0e8-e496-4da8-a553-8d469ca7b186,381de87f-dcb0-44c0-9353-8f16f7086d70,,,Petty Cash for Peter,0,,NGN,t,7f474b33-d49d-4fb3-8342-1c6f232ccf77,,2026-06-08 19:54:54.715914+00,2026-06-08 19:54:54.715914+00

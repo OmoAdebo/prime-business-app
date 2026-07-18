@@ -1,0 +1,2 @@
+id,business_id,requested_amount,purpose,term_months,monthly_revenue,total_assets,existing_debt,risk_score,risk_assessment,ai_recommendation,status,submitted_at,reviewed_at,reviewed_by,rejection_reason,currency,created_at,updated_at
+25459470-5b56-47d1-9508-8b599c14e925,1d912655-c3d8-479f-b6ed-31b957b36fe5,300100,Sed in cupidatat mol,11,6,36,8,55,Medium Risk,Application requires further review.,submitted,2026-03-25 13:37:59.599+00,,,,NGN,2026-03-25 13:38:01.972069+00,2026-03-25 13:38:01.972069+00

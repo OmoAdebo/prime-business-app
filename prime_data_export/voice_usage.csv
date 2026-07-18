@@ -1,0 +1,137 @@
+id,user_id,command_text,action_type,success,created_at
+a20081af-a40c-42cf-956f-67f4b207fbf7,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,hi my name is,general,t,2026-03-26 13:45:40.598695+00
+d58a8d3f-0725-4822-87f6-c74b00e96c33,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,hi my name is John Solomon and I'm testing this,general,t,2026-03-26 13:45:48.269408+00
+b97b82a4-8ba4-42b5-9401-045cb8f6cd22,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,show today's sales,query_sales,t,2026-03-26 13:45:59.622916+00
+1a45e999-d7dc-4e10-886e-25c4190a2966,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,what's my balance,query_balance,t,2026-03-26 13:46:12.988491+00
+f4604081-26f2-4fbb-b767-670b2328a9f1,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,strategies it's,general,t,2026-03-26 14:14:24.963602+00
+3304a816-b7c2-4124-9ced-52effcdaf5d6,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,ok the voice command has a good understanding of what I'm saying so it's now in turn allows us to make decision on what once used to do,general,t,2026-03-26 14:14:37.649448+00
+c907efe8-933f-4178-a084-569ca1e80124,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,ok no problem,general,t,2026-04-09 20:06:27.225681+00
+742cfdf3-0f0d-4a7f-8e17-e043e4e2b050,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,dashboard,unrecognized,f,2026-04-09 20:12:53.2004+00
+9b0af8d5-bc19-40df-8d7a-9b329b762ef9,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,go to my inventory,unrecognized,f,2026-04-09 20:13:06.405465+00
+6f3c9139-5ae5-4746-8fcc-19db0d1891f9,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,open POS,navigate_pos,t,2026-04-09 20:13:19.958252+00
+680511cd-25a7-4a34-9142-c754e7eeddfb,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,check my balance,query_balance,t,2026-04-09 20:13:39.722211+00
+c65fb5fb-7747-46cf-9ebc-b145c35d53e1,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,create invoice,create_invoice,t,2026-04-09 20:24:04.837422+00
+81587fa5-dc03-48fb-af3d-e93996398d4f,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,we have again it's just a simple way,unrecognized,f,2026-04-16 14:33:21.94648+00
+5525205a-0799-470f-8b8b-a3d3478bbba8,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,create invoice,create_invoice,t,2026-04-16 14:33:36.898216+00
+22f86c4c-f453-461e-ac30-add02a3b64f6,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,open inventory,query_inventory,t,2026-04-16 14:33:45.101035+00
+c8e6279e-978d-4022-9637-99d7f62f6b17,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,create invoice,create_invoice,t,2026-04-16 14:34:27.518123+00
+bb63d35c-7761-4221-a202-802f907c365b,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,go to payroll,navigate_payroll,t,2026-04-16 14:34:34.131653+00
+9e272137-7681-454f-9cb4-a1a34e890fa2,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,I want to create an invoice for Victor makinde,navigate_voice,t,2026-05-22 10:40:41.365413+00
+2fb28f45-24b1-4b6b-a735-56e159885102,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,I want to create an invoice,unrecognized,f,2026-05-22 10:40:58.180477+00
+01ab25f8-84c2-4d0b-b51a-879a7527af01,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,check my balance,query_balance,t,2026-05-22 10:41:48.611488+00
+1671d704-5d8d-43be-b7ae-b12169a9213a,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,create an invoice,navigate_voice,t,2026-05-22 10:42:28.069937+00
+8f8fb652-95e2-459a-ba52-b3d86b0f01fb,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,open POS,navigate_pos,t,2026-05-22 10:42:49.435314+00
+263f5993-af28-4e6f-9596-4c113882db22,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,"Create an invoice for John Doe for ₦50,000",open_create_invoice,t,2026-06-06 23:33:35.786711+00
+3f61ac13-c1c5-463f-9d85-b47b912d3087,6644b209-45b9-4a4d-ac47-e3f0c7cedd7d,Open the reports page,navigate,t,2026-06-08 19:25:58.687863+00
+f18c5f8f-02bc-412d-a95d-6c11341618ea,7f474b33-d49d-4fb3-8342-1c6f232ccf77,create an invoice for John Solomon,open_create_invoice,t,2026-06-08 20:40:06.781142+00
+4d45030a-ec3d-42c1-9d1e-b2ae04a3f4bc,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,"surprise the cost 10,000",open_record_expense,t,2026-06-09 17:37:45.95249+00
+54ccfb99-bb0a-4cab-b02e-e39acad35c67,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,"create an invoice for Peter James the cost $2,000",open_create_invoice,t,2026-06-09 17:38:21.585046+00
+4f77b393-87bc-4546-aa5c-3001341b60e9,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,April 2025,fill_form_fields,t,2026-06-12 09:37:47.966697+00
+76fc080e-97b4-4395-84ca-c31d33778fb2,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,um 3rd of,fill_form_fields,t,2026-06-12 09:37:48.205907+00
+851454a3-6b1e-48ac-b1f3-70b4a1500c6e,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,customer,fill_form_fields,t,2026-06-12 09:37:59.017471+00
+ac5c3c8a-ae59-4658-9b47-5c8fc73b434b,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,line items,fill_form_fields,t,2026-06-12 09:38:00.748418+00
+879be2cb-4ef3-40c1-b699-daff86856e59,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,bread,fill_form_fields,t,2026-06-12 09:38:02.524605+00
+4bf592c0-69bd-45b3-b99c-f51838afe985,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,add another item sugar,fill_form_fields,t,2026-06-12 09:38:11.693619+00
+a9282ab1-1f6b-422b-ab0e-b7c30f6bf8c8,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,click on add items and include bread so two items in total,chat,t,2026-06-12 09:38:22.884123+00
+ffaed15e-9fa1-484e-939f-80d49c161426,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,bread,fill_form_fields,t,2026-06-12 09:38:35.13486+00
+2096135e-e20a-4a21-8cde-cef90113fd4e,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,three quantity,fill_form_fields,t,2026-06-12 09:38:37.653936+00
+470a073d-0c2a-454a-815c-a048b8fe1ac8,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,Open the reports page,navigate,t,2026-06-13 18:42:52.900689+00
+e0461ce2-20b4-42b2-b375-1c79c3910626,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,voice by default is always listening so you can always choose to turn it off or not but as I'm talking now you can see the display at the moment right,chat,t,2026-06-14 19:10:56.451566+00
+3f931fb5-00f5-4be7-b019-4efc59199714,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,hello can,chat,t,2026-06-14 19:11:04.364624+00
+70f99ec1-e203-4592-ac81-ffe605af5392,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so looking at my experience this is bottom section it's always the microwaves always active,chat,t,2026-06-14 19:11:10.334212+00
+fdf636bd-0797-4157-8da8-4477ebba024e,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so by default is always active you can choose to turn it off,chat,t,2026-06-14 19:11:19.412408+00
+cf5f3288-66fc-47a9-929f-e232667c0fcd,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,but by default is always on so that's how it works but I notice the require in need a bit of,chat,t,2026-06-14 19:11:29.315523+00
+8e9b6b06-442b-418c-9fe3-4e2ee7ed3e65,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,of the because pointable to add the particular,chat,t,2026-06-14 19:11:34.945945+00
+5cd15fde-02a7-4ec7-8abe-4d5be5711011,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,line ID more,chat,t,2026-06-14 19:11:36.767345+00
+87ffb617-3591-4ea4-832c-46215208fb88,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,to add a second item so for inst,fill_form_fields,t,2026-06-14 19:11:40.809765+00
+3d59e3ee-38dc-4a8e-b543-a6127e9cdd55,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,date 19 July 2005,fill_form_fields,t,2026-06-14 19:11:49.895672+00
+25b28986-71ba-42d2-a213-4b58125b8ba5,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so it feels the date correctly right so,fill_form_fields,t,2026-06-14 19:11:55.846606+00
+b65309a4-88dc-4a08-9a4c-5765115189f3,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay and also line item but if I want to add in another item,chat,t,2026-06-14 19:12:00.258321+00
+1691bdf5-d62f-4e79-9d94-f030195acfba,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so that smartness that you should add another item it does not that smart functionality does not work the Voice works I was able to put this date I was able to so let's see for the second item put in shoes,chat,t,2026-06-14 19:12:17.870867+00
+f3e23be8-c2a0-4784-9748-e2e6cc005747,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,for the second item put in shoes,chat,t,2026-06-14 19:12:23.736619+00
+bea94fa0-0fa0-438a-8a80-f50d2239cf6c,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so again it's not smart enough to handle most items just one so let's look for a record that just hand,chat,t,2026-06-14 19:12:34.066969+00
+5f3b6894-fa17-40c6-b035-3adcd124063c,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,just for journal alone,fill_form_fields,t,2026-06-14 19:13:00.877458+00
+ec557afc-de0e-4054-84b0-b5893e527465,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,do you understand,chat,t,2026-06-14 19:13:07.461187+00
+d5128b85-b495-4799-bff8-5cfacfa3fa45,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,yeah yeah I get you I get a friend,chat,t,2026-06-14 19:13:09.900342+00
+cf21e4f9-54a4-406b-bf1f-ef25095869f6,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,on automatic it's always active by default that's what the invoicing page out spread across I've already noted to spread across for all pages so there is also going to maintain the,chat,t,2026-06-14 19:17:19.284238+00
+88114d79-58ec-4961-afb9-5a233b2b111d,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,auto,fill_form_fields,t,2026-06-14 19:17:20.909249+00
+5ca2e316-496f-46c8-a896-5a8c18883e1a,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,why some point you need to find the way to make a smart,chat,t,2026-06-14 19:17:27.555006+00
+7033077e-d823-4d22-bc35-9c076dd0ccf3,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,um again voice,fill_form_fields,t,2026-06-14 19:17:34.192927+00
+edc3a4d9-e063-4b06-9824-b97eca011d0f,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay um,chat,t,2026-06-14 19:17:44.598896+00
+d33bcb01-9e39-4ffd-aecc-5bca6f6a4d5c,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,it handles property,fill_form_fields,t,2026-06-14 19:17:50.634607+00
+0fd2ab23-9965-4df3-b202-cf6b0546297e,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,hello okay,chat,t,2026-06-14 19:18:32.809712+00
+12f25ac3-cbad-49e2-b359-14d90b6a087b,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so,chat,t,2026-06-14 19:24:46.566495+00
+feb271d8-d6ab-46bf-ad23-15ed64df856d,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,yeah yeah yeah,chat,t,2026-06-14 19:25:10.177673+00
+620b3bf0-daf7-49e2-b8c3-c07ed55b3dc4,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,that's fine what that section itself and then um,chat,t,2026-06-14 19:25:16.082677+00
+afd42464-aa5b-46c4-aba3-7cb68b2ecc8c,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,when we create other invoice uh invoicing,chat,t,2026-06-14 19:25:19.926673+00
+7a3dd753-952f-4c42-9d8c-5d02e12faca6,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,have the customers the customer name,fill_form_fields,t,2026-06-14 19:25:31.084309+00
+20492ea5-8388-446b-b781-bf52d84a7bc0,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,that's not can I have a structure,chat,t,2026-06-14 19:25:41.869203+00
+cdb6ac5f-a61c-4811-abe0-932429eefffc,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,of the,open_create_invoice,t,2026-06-14 19:25:43.236673+00
+05a7bac8-f015-4406-a994-a7899b44eef4,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,statement or accounts,chat,t,2026-06-14 19:25:45.420754+00
+f4fa8d98-38dd-4b77-80de-d54173c13989,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,cuz we have a,open_create_invoice,t,2026-06-14 19:25:54.640539+00
+acc667e9-c65d-4c84-8bc2-0e061e5d9b0b,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,no one has crazy no no no no no that's that's not what I meant I what I meant is,chat,t,2026-06-14 19:26:10.624532+00
+f940f709-e6a5-4bf7-b3e1-68955eb17dcd,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,this season of because you just like he's just like um like uh like from your app now it you you can you can generate your statement of account now you can download it right,chat,t,2026-06-14 19:25:59.76721+00
+45f21fb8-5da7-450c-918f-ae8e9fe9a34f,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,if you are saying invoice to somebody,chat,t,2026-06-14 19:27:55.89793+00
+643cd258-d46d-4662-a868-6195004620ce,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,right you should be able to,chat,t,2026-06-14 19:27:59.38528+00
+9b22f407-7676-4598-bea6-1569a1161ce1,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,uh,chat,t,2026-06-14 19:28:00.256498+00
+f477eabd-a66f-4c21-bf14-80c71490e78d,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,export it as a um,chat,t,2026-06-14 19:28:05.453957+00
+0e743a47-4a87-47b5-b472-09519e253ffc,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,what's it called now as the as a PDF PDF not just um,chat,t,2026-06-14 19:28:10.588965+00
+6552cbd6-aea6-43e3-b513-6c9a7d978cbf,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,sorry,chat,t,2026-06-14 19:28:16.950382+00
+47353555-1258-4c41-9a67-2120a5cd2e1a,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,are you there,chat,t,2026-06-14 19:28:18.073275+00
+1516aa87-73f0-4fc4-98ee-a1d85f7f2417,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,not just a,chat,t,2026-06-14 19:28:20.375858+00
+b5013af9-a666-435e-82b0-a2a5f6f311eb,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,makes,chat,t,2026-06-14 19:28:25.055271+00
+1be1ee69-03dc-43f3-9577-b41894bfa549,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,yeah I said not just yeah yeah yeah yeah yeah because doesn't make sense,chat,t,2026-06-14 19:28:25.575278+00
+fe16a72f-3f97-4b99-9bc3-405de9fb6d08,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,they can they guys it's possible to edit uh this thing,chat,t,2026-06-14 19:28:29.147259+00
+0f681bda-7660-44c8-ac05-38bba53e9a6f,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,is,chat,t,2026-06-14 19:28:35.120398+00
+4c68cb9c-6aa7-4a96-9b24-453be73fcd6f,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,yeah yeah,chat,t,2026-06-14 19:28:46.525324+00
+254b9191-5bdf-4d2b-920b-b23a95995050,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so that customer option on way customer is it that the,fill_form_fields,t,2026-06-14 19:29:04.539781+00
+08f2edea-81d3-4895-979e-f4199d1b6a3c,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,is that um create a customer first before that before you can select a customer,chat,t,2026-06-14 19:29:09.103923+00
+61aea36a-fa6b-4e5d-95a2-e44fbbb58630,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,invoice invoice invoicing,open_create_invoice,t,2026-06-14 19:29:31.605643+00
+6c86a3d0-795e-404b-92ae-f5ceaf60f733,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,and it's going to be based on the customers that you have,chat,t,2026-06-14 19:29:37.706272+00
+50097de4-e1b8-45fa-b801-f592a8d1562b,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay,chat,t,2026-06-14 19:29:42.97384+00
+193b35c8-8bb4-44f9-90c2-19fd46007e62,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,information or client record let me just pop it,chat,t,2026-06-14 19:29:44.988964+00
+b22161cd-293d-40cf-8ab5-dfc5d32bb1f3,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,John Solomon,fill_form_fields,t,2026-06-14 19:29:47.792096+00
+f8cf918a-645c-412d-b453-362d88e0acf7,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,desperate description,chat,t,2026-06-14 19:29:49.687545+00
+f76c5241-5f71-411a-beee-df45e085ed39,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay um The Voice works here so let me start to,chat,t,2026-06-14 19:29:59.289873+00
+f721094b-0515-4457-a010-738cedfce058,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,phone number 08113 699280,chat,t,2026-06-14 19:30:15.300848+00
+1f02d025-0bbf-4d50-b4ff-fc225fae25a6,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,what did you go to where did you go to the app clients,navigate,t,2026-06-14 19:30:16.046372+00
+481df586-0eb7-47ca-aa60-c12d9750303e,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so,chat,t,2026-06-14 19:30:18.923877+00
+45033963-7e0f-4907-a9cc-5a5dd2e2bdf8,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,our phone number 081 13699280,fill_form_fields,t,2026-06-14 19:30:24.426637+00
+1158dd40-bc4d-4301-b8f0-4a2e37d4a85a,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,company misspa Technologies,fill_form_fields,t,2026-06-14 19:30:24.540361+00
+23325dbb-00b0-4c30-b203-92702279d4ad,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay address show you my this street Lagos,fill_form_fields,t,2026-06-14 19:30:33.230344+00
+6778c875-83bb-4e38-829d-9d60ae41e5c5,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay showing mad okay Lagos address Lagos,fill_form_fields,t,2026-06-14 19:30:44.396507+00
+d220dffe-4704-4413-9b31-6caa8df3e421,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay showing a man okay Lagos address,fill_form_fields,t,2026-06-14 19:30:45.794459+00
+d3efde24-8c02-4c27-81fd-bcf93c1a3280,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay,fill_form_fields,t,2026-06-14 19:30:49.729894+00
+1b9e3fc3-6d62-417e-a60f-306f1a053e58,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay it's now changed the name,fill_form_fields,t,2026-06-14 19:30:50.992894+00
+df80ff37-dbe5-4e43-9d60-aba9000f572f,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,it's now changed the need,navigate,t,2026-06-14 19:30:52.15674+00
+dfde59c4-f18b-4d56-aab9-f0afaa65e1cf,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,the name John Solomon,fill_form_fields,t,2026-06-14 19:30:54.426412+00
+1396a420-554d-4f0a-8c5d-1b8642b926bd,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,the name John Solomon,fill_form_fields,t,2026-06-14 19:30:55.620766+00
+027f1f2e-8bdc-46af-82f7-e49540ec096e,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,hard customer,open_add_customer,t,2026-06-14 19:30:59.625488+00
+3c8a9d66-d503-42b8-ab41-6ae60b85ac89,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,at customer,fill_form_fields,t,2026-06-14 19:31:00.745475+00
+f404d18a-d5e8-4e7e-b8c0-f0987e0a3d09,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so I don't think is smart enough to perform a an action database which I think,fill_form_fields,t,2026-06-14 19:31:09.050598+00
+5e601ee7-e861-4d64-81d3-eec5ef3f2114,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so I don't think it's worth enough to perform actions database which I think should not be it's still okay,navigate,t,2026-06-14 19:31:13.969194+00
+774727c5-0fe5-4f9d-a5a1-de6e8f1c353d,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay,navigate,t,2026-06-14 19:31:14.505236+00
+e3ee9d80-7cdc-46f7-bf0a-cef048e19262,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,yeah yeah they should be able to review uh distribute to review that,navigate,t,2026-06-14 19:31:18.254345+00
+debe4316-01f1-4f1e-b392-ae460168c7dd,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay,chat,t,2026-06-14 19:31:29.467314+00
+55c777c2-de3d-4a9f-9afc-feece8814f35,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,/ns edit this,chat,t,2026-06-14 19:31:31.786052+00
+db158060-2d27-49a1-ab7f-84bba29577dd,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,news this,chat,t,2026-06-14 19:31:33.177513+00
+75958fef-779f-4014-a189-5791341c1c99,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,is not,chat,t,2026-06-14 19:31:36.060074+00
+9dfd3ff1-9252-4f8a-90cb-00273ab62773,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so,fill_form_fields,t,2026-06-14 19:31:58.500148+00
+3862702e-65e3-40bc-af70-54e4c870063c,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,here so if I come to invoicing I think was it invoicing,navigate,t,2026-06-14 19:32:05.899269+00
+6818c89a-44b9-4132-b7e3-e95d952a9b8a,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,sure um where are we here so if I come to invoice in I think was it invoice,chat,t,2026-06-14 19:32:05.989605+00
+13fd8e2b-cfbc-428e-9c8e-8878bd56e0b5,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,I'll be select the particular,chat,t,2026-06-14 19:32:17.784949+00
+d3442a06-d051-4d78-8c1c-7c54ae8c8fdb,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,that's why I can't see it here right yeah okay I see that,chat,t,2026-06-14 19:32:28.558569+00
+4a5af6fc-eab5-461b-a5a9-020a32572d26,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,invoice a lot of that okay let's use this control is not working in just this invoice,fill_form_fields,t,2026-06-14 19:32:37.587745+00
+f6f350a5-130d-4b0b-85dc-50336516f765,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,which control,chat,t,2026-06-14 19:32:39.653758+00
+c330d6f1-ac20-4f05-a8af-ab2235fc901e,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay,navigate,t,2026-06-14 19:32:43.896599+00
+97cb8f4c-b360-4f46-8ae5-23388c4bb09e,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,did you click on that uh date,chat,t,2026-06-14 19:33:33.319164+00
+4b6b1c4f-c128-44e8-82f1-2866d219c344,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,and then under this thing,chat,t,2026-06-14 19:33:35.4413+00
+3a8212c3-c696-4da6-b65b-a378ca7343b0,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,click on oh no yeah increase inverse,navigate,t,2026-06-14 19:33:43.574426+00
+ef8675d1-68a8-4b32-a555-93342bfad7a6,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,uh,chat,t,2026-06-14 19:34:06.762395+00
+d225e5e7-72bc-41cc-bfcf-fab767cec008,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,oh okay that's corrected itself okay okay just collector yourself,chat,t,2026-06-14 19:34:13.087425+00
+1a1b0aa5-03c6-4db3-9188-4a9cf174567e,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,okay,chat,t,2026-06-14 19:34:14.344528+00
+d8d7211b-fb24-410c-9acb-6be86533f83d,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,no select no I was saying something like 23 it was given me the date when I click on the that date the yes does giving me not even four figures it was given like 20 uh 2026 then I have another zero at the back but it's okay now,fill_form_fields,t,2026-06-14 19:34:43.859624+00
+48b0bd7e-e120-4ca9-a580-8c9090765f4a,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,it's okay now,chat,t,2026-06-14 19:34:46.843172+00
+1081847e-2c49-450c-bad6-076c87476dec,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,so like I said we couldn't finish,chat,t,2026-06-14 19:35:29.180959+00
+2af3a15c-ee57-4890-8d23-68bd3f5f5a57,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,uh so that was just what um I was able to,chat,t,2026-06-14 19:35:30.450448+00
+a985d27b-9a56-48f7-952e-d1fe23e446c3,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,to do tomorrow I will make sure I I'll go through,fill_form_fields,t,2026-06-14 19:35:39.973635+00

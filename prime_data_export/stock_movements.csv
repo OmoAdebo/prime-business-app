@@ -1,0 +1,4 @@
+id,business_id,product_id,from_location_id,to_location_id,quantity,movement_type,reference,notes,created_by,created_at
+6ef52972-d219-4c96-b254-3bb33e9ea1cb,1d912655-c3d8-479f-b6ed-31b957b36fe5,d3edac50-f074-4b97-beb4-0e17fa693b6f,,e22776d7-e8f7-4767-9da3-085cbb97ed78,31,receipt,,,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,2026-04-17 12:50:33.462251+00
+60717d7b-f883-4151-adb8-2e51a0988528,1d912655-c3d8-479f-b6ed-31b957b36fe5,ec694677-93a5-49e2-ab06-0db90a853281,,,20,receipt,,,61b0ce54-cad5-4ce0-bbee-92f26bf8a34a,2026-04-17 13:01:20.670608+00
+1f587426-2a9f-4bea-8dc9-c01db893415e,d1b4991f-b179-4b96-a772-4321af55c067,cece25a5-130a-4ddd-a155-955b96ff3fbd,,89b3c121-1b23-46b9-af64-f00ef5c41b9d,5,transfer,,fdtfhytkut,cb62446d-a2fe-4a24-9a1e-f1c52ed0f535,2026-07-09 22:00:32.442698+00

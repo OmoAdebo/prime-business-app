@@ -1,0 +1,7 @@
+id,business_id,name,sku,barcode,description,category,unit_price,cost_price,currency,unit_of_measure,image_url,is_active,low_stock_threshold,created_at,updated_at
+ec694677-93a5-49e2-ab06-0db90a853281,1d912655-c3d8-479f-b6ed-31b957b36fe5,Indomie,Indo - 001,,,Food & Beverages,8500.00,7000.00,NGN,pcs,,t,11,2026-04-17 12:31:00.478832+00,2026-04-17 12:31:36.57843+00
+d3edac50-f074-4b97-beb4-0e17fa693b6f,1d912655-c3d8-479f-b6ed-31b957b36fe5,Bread,BREAD-01,,Porro ipsum exceptur,Electronics,17.00,30.00,NGN,pcs,,t,2,2026-03-22 22:59:53.913033+00,2026-04-17 12:51:14.584155+00
+7fae0032-1fb0-4adf-a06b-ff058396064f,ce3ea0d1-69da-4c85-99a9-fd7e5c7fb144,Computers,002,12347,Dell Laptops,Other,250000.00,200000.00,NGN,pcs,,t,10,2026-06-29 16:13:57.912733+00,2026-06-29 16:21:20.872869+00
+e73398aa-5b7b-44a8-8e32-5c09a44e1f0f,ce3ea0d1-69da-4c85-99a9-fd7e5c7fb144,Indomie,001,12345,5 packs of ,Food & Beverages,14500.00,12000.00,NGN,cartons,,t,10,2026-06-29 16:03:12.035371+00,2026-06-29 16:21:39.508174+00
+db8c3350-44fe-4587-a7e2-dc4db7df335b,ce3ea0d1-69da-4c85-99a9-fd7e5c7fb144,Samsung TV 32  ,,123490,Samsung TV 32  inches Black,Electronics,350000.00,300000.00,NGN,pcs,,t,10,2026-06-29 16:24:43.484299+00,2026-06-29 16:24:43.484299+00
+cece25a5-130a-4ddd-a155-955b96ff3fbd,d1b4991f-b179-4b96-a772-4321af55c067,chin chin,001,,,Food & Beverages,3500.00,3000.00,NGN,cartons,,t,20,2026-07-09 21:53:42.097844+00,2026-07-09 21:53:42.097844+00

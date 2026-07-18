@@ -1,0 +1,3 @@
+id,storefront_id,product_id,is_featured,display_order,is_visible,created_at
+d2b6f351-fb26-4543-9dec-547a196c1bc0,6c5a07bb-e5aa-4c1c-88f7-13926360a210,ec694677-93a5-49e2-ab06-0db90a853281,f,0,t,2026-04-17 13:06:50.037234+00
+ac6616f7-0504-4d9b-b4fa-0ea4173d992f,6c5a07bb-e5aa-4c1c-88f7-13926360a210,d3edac50-f074-4b97-beb4-0e17fa693b6f,f,0,t,2026-03-26 14:17:26.478561+00

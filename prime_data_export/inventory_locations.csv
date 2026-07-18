@@ -1,0 +1,4 @@
+id,business_id,name,address,type,is_active,created_at,updated_at,manager_id,phone,email,operating_hours
+e22776d7-e8f7-4767-9da3-085cbb97ed78,1d912655-c3d8-479f-b6ed-31b957b36fe5,Delectus eveniet r,Quod hic et quis a c,branch,t,2026-03-27 14:42:10.526228+00,2026-03-27 14:42:18.720203+00,,Exercitation magna d,Ut eius dignissimos ,Itaque sed voluptate
+89b3c121-1b23-46b9-af64-f00ef5c41b9d,d1b4991f-b179-4b96-a772-4321af55c067,Lekki,Lekki,outlet,t,2026-07-09 21:56:51.327737+00,2026-07-09 21:56:51.327737+00,,+2348069731522,fundhillmfb@gmail.com,Mon - Sat 8pm - 6pm
+022d7bbc-9195-45ae-8e09-a8efd6ebbd7b,d1b4991f-b179-4b96-a772-4321af55c067,GBagada,lagos,branch,t,2026-07-09 21:58:48.188529+00,2026-07-09 21:58:48.188529+00,,08028990088,,Mon - Sat 8am - 6pm 

@@ -1,0 +1,2 @@
+id,business_id,logo_url,primary_color,secondary_color,brand_name,email_format,created_at,updated_at,font_family,accent_color,sidebar_style
+cc9fa256-d86a-4fb0-9e78-24fbdf357fb9,1d912655-c3d8-479f-b6ed-31b957b36fe5,,#8b21c4,#f50ae1,"",first.last@domain,2026-03-21 13:54:26.592245+00,2026-03-29 13:32:58.996038+00,DM Sans,#d147b3,default

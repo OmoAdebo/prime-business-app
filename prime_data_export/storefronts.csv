@@ -1,0 +1,3 @@
+id,business_id,store_name,subdomain,description,logo_url,banner_url,primary_color,is_published,currency,contact_email,contact_phone,created_at,updated_at
+6c5a07bb-e5aa-4c1c-88f7-13926360a210,1d912655-c3d8-479f-b6ed-31b957b36fe5,MisparTech,mispartech,A store front for mispar technologies,,,#22c55e,t,NGN,mispartech@gmail.com,09071282961,2026-03-25 13:35:09.735645+00,2026-03-25 13:35:27.81541+00
+f3b1d870-c85a-4fa5-870c-23300628ca4c,e117631c-0819-4c3a-af09-0d75428157ac,Yaweh Shops,delink,we sell different types of wears both for male and female,,,#22c55e,t,NGN,yemi.adebo1@gmail.com,08028550099,2026-07-09 16:20:04.42012+00,2026-07-09 16:20:21.436294+00

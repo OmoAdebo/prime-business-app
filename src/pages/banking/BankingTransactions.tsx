@@ -27,6 +27,7 @@ export default function BankingTransactions() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterReconciled, setFilterReconciled] = useState("all");
+  const [filterSource, setFilterSource] = useState("all");
   const [txnAccountId, setTxnAccountId] = useState("");
   const [txnType, setTxnType] = useState("debit");
   const [txnAmount, setTxnAmount] = useState("");
@@ -102,8 +103,10 @@ export default function BankingTransactions() {
     if (filterType !== "all" && t.type !== filterType) return false;
     if (filterReconciled === "reconciled" && !t.is_reconciled) return false;
     if (filterReconciled === "pending" && t.is_reconciled) return false;
+    if (filterSource !== "all" && ((t as any).source ?? "manual") !== filterSource) return false;
     return true;
   });
+
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">

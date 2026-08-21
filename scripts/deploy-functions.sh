@@ -21,10 +21,16 @@ FUNCTIONS=(
   "activate-free-plan"
   "create-admin-user"
   "paystack-init"
+  "paystack-banks"
+  "paystack-resolve-account"
+  "paystack-subaccount"
+  "paystack-charge"
+  "paystack-webhook"
   "send-email"
   "toggle-user-status"
   "voice-agent"
 )
+
 
 for fn in "${FUNCTIONS[@]}"; do
   echo "→ Deploying $fn"

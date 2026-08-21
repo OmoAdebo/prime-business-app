@@ -197,6 +197,14 @@ export default function BankingTransactions() {
             <SelectItem value="pending">Pending</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={filterSource} onValueChange={setFilterSource}>
+          <SelectTrigger className="w-[120px] sm:w-[160px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Sources</SelectItem>
+            <SelectItem value="manual">Manual</SelectItem>
+            <SelectItem value="paystack">Paystack</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Mobile card view */}

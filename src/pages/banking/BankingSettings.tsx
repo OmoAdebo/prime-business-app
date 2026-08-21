@@ -42,6 +42,13 @@ export default function BankingSettings() {
         </Card>
 
         <Card>
+          <CardHeader><CardTitle>Payments</CardTitle><CardDescription>Receive customer payments into your own bank account</CardDescription></CardHeader>
+          <CardContent>
+            <Button variant="outline" asChild><Link to="/banking/payments">Manage payout account</Link></Button>
+          </CardContent>
+        </Card>
+
+        <Card>
           <CardHeader><CardTitle>Automation</CardTitle><CardDescription>Automated banking features</CardDescription></CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">

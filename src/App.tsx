@@ -19,6 +19,7 @@ import BookkeepingLayout from "./pages/bookkeeping/BookkeepingLayout";
 import InventoryLayout from "./pages/inventory/InventoryLayout";
 import BankingOverview from "./pages/banking/BankingOverview";
 import BankingAccounts from "./pages/banking/BankingAccounts";
+import BankingPayments from "./pages/banking/BankingPayments";
 import BankingTransactions from "./pages/banking/BankingTransactions";
 import BankingTransfers from "./pages/banking/BankingTransfers";
 import BankingAnalytics from "./pages/banking/BankingAnalytics";
@@ -113,6 +114,8 @@ const App = () => (
               <Route path="/banking" element={<BankingLayout />}>
                 <Route index element={<BankingOverview />} />
                 <Route path="accounts" element={<BankingAccounts />} />
+                <Route path="payments" element={<BankingPayments />} />
+
                 <Route path="transactions" element={<BankingTransactions />} />
                 <Route path="transfers" element={<BankingTransfers />} />
                 <Route path="analytics" element={<BankingAnalytics />} />

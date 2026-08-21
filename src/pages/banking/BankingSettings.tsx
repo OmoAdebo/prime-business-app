@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +39,13 @@ export default function BankingSettings() {
                 </SelectContent>
               </Select>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Payments</CardTitle><CardDescription>Receive customer payments into your own bank account</CardDescription></CardHeader>
+          <CardContent>
+            <Button variant="outline" asChild><Link to="/banking/payments">Manage payout account</Link></Button>
           </CardContent>
         </Card>
 

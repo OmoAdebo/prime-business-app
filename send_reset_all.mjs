@@ -1,15 +1,8 @@
 #!/usr/bin/env node
 /**
- * send_reset_all.mjs
+ * send_reset_emails.mjs
  * 
  * Generates password reset links for Supabase users and sends them via Resend.
- * 
- * Environment Variables:
- *   SUPABASE_URL
- *   SUPABASE_SERVICE_ROLE_KEY
- *   RESEND_API_KEY
- *   DRY_RUN=1 (Optional: if set, prints links instead of sending emails)
- *   ONLY_EMAIL="user@example.com" (Optional: if set, only processes this specific user)
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -17,16 +10,15 @@ import { createClient } from "@supabase/supabase-js";
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const DRY_RUN = process.env.DRY_RUN === "1";
-const ONLY_EMAIL = process.env.ONLY_EMAIL;
+const TARGET_EMAIL = process.env.TARGET_EMAIL;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error("❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
 
-if (!DRY_RUN && !RESEND_API_KEY) {
-  console.error("❌ Missing RESEND_API_KEY. Set it or use DRY_RUN=1");
+if (!RESEND_API_KEY) {
+  console.error("❌ Missing RESEND_API_KEY");
   process.exit(1);
 }
 
@@ -34,7 +26,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false }
 });
 
-// Branded Emerald Template for Resend
 const EMAIL_TEMPLATE = (actionLink) => `
 <!DOCTYPE html>
 <html>
@@ -91,8 +82,6 @@ async function sendEmail(to, subject, html) {
       Authorization: `Bearer ${RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      // TODO: Update this to your verified Resend domain (e.g., "Prime <noreply@getprime.app>")
-      // "onboarding@resend.dev" is Resend's test domain and works for sending to your own email.
       from: "Prime <onboarding@resend.dev>", 
       to: [to],
       subject: subject,
@@ -109,17 +98,21 @@ async function sendEmail(to, subject, html) {
 
 async function main() {
   console.log("🚀 Starting password reset process...\n");
-  if (DRY_RUN) console.log("🔍 DRY RUN MODE: Emails will NOT be sent.\n");
-  if (ONLY_EMAIL) console.log(`🎯 ONLY EMAIL MODE: Processing only ${ONLY_EMAIL}\n`);
+  
+  if (TARGET_EMAIL) {
+    console.log(`🎯 TARGET EMAIL MODE: Processing ONLY ${TARGET_EMAIL}\n`);
+  } else {
+    console.log("⚠️  BROADCAST MODE: Processing ALL users.\n");
+  }
 
   let users = [];
   const { data, error } = await supabase.auth.admin.listUsers();
   if (error) throw error;
   
-  if (ONLY_EMAIL) {
-    users = data.users.filter(u => u.email.toLowerCase() === ONLY_EMAIL.toLowerCase());
+  if (TARGET_EMAIL) {
+    users = data.users.filter(u => u.email.toLowerCase() === TARGET_EMAIL.toLowerCase());
     if (users.length === 0) {
-      console.error(`❌ User ${ONLY_EMAIL} not found in Supabase.`);
+      console.error(`❌ User ${TARGET_EMAIL} not found in Supabase.`);
       process.exit(1);
     }
   } else {
@@ -135,28 +128,25 @@ async function main() {
     process.stdout.write(`→ ${user.email.padEnd(35)} `);
     
     try {
+      // ✅ FIX: Added options.redirectTo to force the link to go to the reset page
       const { data, error } = await supabase.auth.admin.generateLink({
         type: "recovery",
         email: user.email,
+        options: {
+          redirectTo: "https://getprime.app/reset-password"
+        }
       });
 
       if (error) throw error;
 
       const actionLink = data.properties.action_link;
-      
-      if (DRY_RUN) {
-        console.log(`[DRY RUN] Link: ${actionLink}`);
-        successCount++;
-        continue;
-      }
-
       const html = EMAIL_TEMPLATE(actionLink);
+      
       await sendEmail(user.email, "Reset your Prime password", html);
       
       console.log("✓ Sent");
       successCount++;
       
-      // Small delay to avoid hitting Resend rate limits
       await new Promise(resolve => setTimeout(resolve, 200));
 
     } catch (err) {

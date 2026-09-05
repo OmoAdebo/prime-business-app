@@ -56,7 +56,11 @@ export default function BankingPayments() {
     staleTime: 1000 * 60 * 60,
   });
 
-  const { data: account, isLoading: accountLoading } = useQuery({
+  const {
+    data: account,
+    isLoading: accountLoading,
+    error: accountError,
+  } = useQuery({
     queryKey: ["payment-account", businessId],
     queryFn: async () => {
       const { data, error } = await (supabase as any)
@@ -66,9 +70,14 @@ export default function BankingPayments() {
         .eq("provider", "paystack")
         .maybeSingle();
       if (error) throw error;
-      return data as PaymentAccount | null;
+      return (data ?? null) as PaymentAccount | null;
     },
     enabled: !!businessId,
+    retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: payments = [] } = useQuery({
@@ -84,6 +93,11 @@ export default function BankingPayments() {
       return data ?? [];
     },
     enabled: !!businessId,
+    retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   const connected = !!account?.subaccount_code;
@@ -191,6 +205,10 @@ export default function BankingPayments() {
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading…
               </div>
+            ) : accountError ? (
+              <p className="text-sm text-muted-foreground">
+                We couldn't load your settlement account right now. Please refresh the page and try again.
+              </p>
             ) : showForm ? (
               <>
                 <div className="space-y-2">

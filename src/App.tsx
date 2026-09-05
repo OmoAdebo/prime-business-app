@@ -76,7 +76,15 @@ import VoiceCommand from "./pages/VoiceCommand";
 import Loans from "./pages/Loans";
 import Employees from "./pages/Employees";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 30_000,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

@@ -316,6 +316,55 @@ export default function BankingPayments() {
 
       <Card>
         <CardHeader>
+          <CardTitle className="text-base">Step-by-step guide: getting paid with Prime</CardTitle>
+          <CardDescription>Everything you need, from connecting your bank account to seeing the money land</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          {[
+            {
+              title: "Step 1 — Connect your payout account",
+              body: "On this page, pick your bank, type your 10-digit account number and tap Verify. We show the account name registered with your bank. If it is correct, tap Connect payout account. Use a business account in your business name where possible.",
+            },
+            {
+              title: "Step 2 — Confirm your details are live",
+              body: "Once connected, the badge at the top of this page turns Active. Test mode means payments are simulated for practice; Live mode means real money. You can tap Change account at any time to switch banks — new payments settle to the new account.",
+            },
+            {
+              title: "Step 3 — Ask a customer to pay",
+              body: "Create an invoice in Invoicing and send it, or list your products in Online Store and share your store link. Your customer pays by card, bank transfer or USSD on a secure Paystack page — they never see your bank details.",
+            },
+            {
+              title: "Step 4 — Watch the payment come in",
+              body: "Successful payments appear under Recent payments below within seconds, with the reference, customer, amount and channel. The matching invoice or order is marked paid automatically, and a matching entry is added in Banking → Transactions.",
+            },
+            {
+              title: "Step 5 — Receive your settlement",
+              body: "Paystack pays out to your connected bank account on its normal settlement cycle (usually the next working day), minus the platform fee shown on this page. Your bank alert is the final confirmation.",
+            },
+            {
+              title: "Step 6 — Reconcile and report",
+              body: "Use Banking → Transactions with the Source filter set to Payments to review card and transfer income, then export from Reports for your accountant or tax filing.",
+            },
+          ].map((s) => (
+            <div key={s.title} className="rounded-lg border bg-muted/30 p-4">
+              <p className="text-sm font-semibold">{s.title}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{s.body}</p>
+            </div>
+          ))}
+          <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 md:col-span-2">
+            <p className="text-sm font-semibold">Good to know</p>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+              <li>Only the business owner can add or change the payout account.</li>
+              <li>If verification fails, check the account number and that the bank matches — Paystack must recognise the pair.</li>
+              <li>Failed or abandoned payments also show below, so you can follow up with the customer.</li>
+              <li>Refunds and disputes are handled through Paystack support; the record here stays for your books.</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle className="text-base">Recent payments</CardTitle>
           <CardDescription>Latest customer payments processed through Paystack</CardDescription>
         </CardHeader>

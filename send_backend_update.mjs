@@ -25,13 +25,16 @@ const FROM_EMAIL = process.env.FROM_EMAIL || 'Prime <noreply@getprime.app>';
 const SUBJECT = process.env.SUBJECT || 'Important: set your new Prime password';
 const DRY_RUN = !!process.env.DRY_RUN;
 const ONLY_EMAIL = process.env.ONLY_EMAIL?.toLowerCase();
+// Set USE_SUPABASE_MAILER=1 to let Supabase send its own reset email
+// (uses the template pasted into Authentication → Email Templates → Reset Password).
+const USE_SUPABASE_MAILER = !!process.env.USE_SUPABASE_MAILER;
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error('Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY');
   process.exit(1);
 }
-if (!RESEND_KEY && !DRY_RUN) {
-  console.error('Missing RESEND_API_KEY (or set DRY_RUN=1)');
+if (!RESEND_KEY && !DRY_RUN && !USE_SUPABASE_MAILER) {
+  console.error('Missing RESEND_API_KEY (or set DRY_RUN=1 / USE_SUPABASE_MAILER=1)');
   process.exit(1);
 }
 

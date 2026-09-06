@@ -46,6 +46,13 @@ export default function BankingPayments() {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
 
+  const [reqOpen, setReqOpen] = useState(false);
+  const [reqName, setReqName] = useState("");
+  const [reqEmail, setReqEmail] = useState("");
+  const [reqAmount, setReqAmount] = useState("");
+  const [reqLink, setReqLink] = useState<string | null>(null);
+  const [reqLoading, setReqLoading] = useState(false);
+
   const { data: banks = [], isLoading: banksLoading } = useQuery({
     queryKey: ["paystack-banks"],
     queryFn: async () => {

@@ -87,9 +87,17 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const failures = [];
   for (const u of target) {
     try {
-      const link = await recoveryLink(u.email);
-      if (DRY_RUN) console.log(`DRY  ${u.email} -> ${link.slice(0, 90)}...`);
-      else console.log(`SENT ${u.email} (${await sendViaResend(u.email, render(link, u.email))})`);
+      if (USE_SUPABASE_MAILER) {
+        // Supabase sends its own "Reset password" email using the template
+        // configured in Authentication → Email Templates. No Resend needed.
+        const { error } = await admin.auth.resetPasswordForEmail(u.email, { redirectTo: REDIRECT_TO });
+        if (error) throw error;
+        console.log(`SENT ${u.email} (via Supabase mailer)`);
+      } else {
+        const link = await recoveryLink(u.email);
+        if (DRY_RUN) console.log(`DRY  ${u.email} -> ${link.slice(0, 90)}...`);
+        else console.log(`SENT ${u.email} (${await sendViaResend(u.email, render(link, u.email))})`);
+      }
       ok++;
       await sleep(600); // stay well under Supabase's hourly auth-email/link limits
     } catch (e) {

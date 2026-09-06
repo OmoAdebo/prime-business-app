@@ -89,6 +89,14 @@ export default function Login() {
           <p className="text-muted-foreground mt-1">Sign in to your business suite</p>
         </div>
 
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm text-foreground">
+          <p className="font-medium">We upgraded Prime</p>
+          <p className="mt-1 text-muted-foreground">
+            Your account and all your data moved to our new, faster platform. Passwords could not be carried
+            over — if your old one no longer works, click <span className="font-medium">Forgot password?</span> to set a new one.
+          </p>
+        </div>
+
         <Card>
           <CardContent className="pt-6">
             <form onSubmit={handleLogin} className="space-y-4">

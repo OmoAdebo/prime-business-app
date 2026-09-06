@@ -25,13 +25,16 @@ const FROM_EMAIL = process.env.FROM_EMAIL || 'Prime <noreply@getprime.app>';
 const SUBJECT = process.env.SUBJECT || 'Important: set your new Prime password';
 const DRY_RUN = !!process.env.DRY_RUN;
 const ONLY_EMAIL = process.env.ONLY_EMAIL?.toLowerCase();
+// Set USE_SUPABASE_MAILER=1 to let Supabase send its own reset email
+// (uses the template pasted into Authentication → Email Templates → Reset Password).
+const USE_SUPABASE_MAILER = !!process.env.USE_SUPABASE_MAILER;
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error('Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY');
   process.exit(1);
 }
-if (!RESEND_KEY && !DRY_RUN) {
-  console.error('Missing RESEND_API_KEY (or set DRY_RUN=1)');
+if (!RESEND_KEY && !DRY_RUN && !USE_SUPABASE_MAILER) {
+  console.error('Missing RESEND_API_KEY (or set DRY_RUN=1 / USE_SUPABASE_MAILER=1)');
   process.exit(1);
 }
 
@@ -87,9 +90,17 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const failures = [];
   for (const u of target) {
     try {
-      const link = await recoveryLink(u.email);
-      if (DRY_RUN) console.log(`DRY  ${u.email} -> ${link.slice(0, 90)}...`);
-      else console.log(`SENT ${u.email} (${await sendViaResend(u.email, render(link, u.email))})`);
+      if (USE_SUPABASE_MAILER) {
+        // Supabase sends its own "Reset password" email using the template
+        // configured in Authentication → Email Templates. No Resend needed.
+        const { error } = await admin.auth.resetPasswordForEmail(u.email, { redirectTo: REDIRECT_TO });
+        if (error) throw error;
+        console.log(`SENT ${u.email} (via Supabase mailer)`);
+      } else {
+        const link = await recoveryLink(u.email);
+        if (DRY_RUN) console.log(`DRY  ${u.email} -> ${link.slice(0, 90)}...`);
+        else console.log(`SENT ${u.email} (${await sendViaResend(u.email, render(link, u.email))})`);
+      }
       ok++;
       await sleep(600); // stay well under Supabase's hourly auth-email/link limits
     } catch (e) {

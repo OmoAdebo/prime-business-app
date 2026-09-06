@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { BadgeCheck, CreditCard, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
+import { BadgeCheck, Copy, CreditCard, Link2, Loader2, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/use-business";
 import { Button } from "@/components/ui/button";

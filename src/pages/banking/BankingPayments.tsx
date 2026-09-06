@@ -176,6 +176,64 @@ export default function BankingPayments() {
     }
   };
 
+  const createPaymentRequest = async () => {
+    const amount = Number(reqAmount);
+    if (!(amount > 0)) {
+      toast.error("Enter an amount greater than zero");
+      return;
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(reqEmail)) {
+      toast.error("Enter a valid customer email");
+      return;
+    }
+    setReqLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("paystack-charge", {
+        body: {
+          amount,
+          email: reqEmail.trim(),
+          customer_name: reqName.trim() || null,
+          callback_url: `${window.location.origin}/banking/payments`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setReqLink(data.authorization_url);
+      toast.success("Payment link ready — share it with your customer");
+      queryClient.invalidateQueries({ queryKey: ["payment-transactions", businessId] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Could not create the payment link");
+    } finally {
+      setReqLoading(false);
+    }
+  };
+
+  const resetRequest = () => {
+    setReqOpen(false);
+    setReqLink(null);
+    setReqName("");
+    setReqEmail("");
+    setReqAmount("");
+  };
+
+  const stats = useMemo(() => {
+    const now = new Date();
+    let received = 0;
+    let month = 0;
+    let pending = 0;
+    for (const p of payments as any[]) {
+      const amt = Number(p.amount || 0);
+      if (p.status === "success") {
+        received += amt;
+        const d = new Date(p.paid_at ?? p.created_at);
+        if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) month += amt;
+      } else if (p.status === "pending") {
+        pending += amt;
+      }
+    }
+    return { received, month, pending };
+  }, [payments]);
+
   const statusBadge = () => {
     if (!account) return <Badge variant="secondary">Not connected</Badge>;
     if (account.status === "active") return <Badge className="bg-primary text-primary-foreground">Active</Badge>;
@@ -192,11 +250,107 @@ export default function BankingPayments() {
             Connect your bank account to receive customer payments directly
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {statusBadge()}
           {account && !account.is_live && <Badge variant="outline">Test mode</Badge>}
+          <Button
+            className="min-h-11"
+            onClick={() => (connected ? setReqOpen(true) : toast.error("Connect your payout account first"))}
+          >
+            <Link2 className="mr-2 h-4 w-4" /> Request payment
+          </Button>
         </div>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[
+          { label: "Received (all time)", value: stats.received },
+          { label: "Received this month", value: stats.month },
+          { label: "Awaiting payment", value: stats.pending },
+        ].map((s) => (
+          <Card key={s.label}>
+            <CardContent className="flex items-center gap-3 pt-6">
+              <div className="rounded-lg bg-primary/10 p-2 text-primary">
+                <Wallet className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+                <p className="text-lg font-semibold">{naira(s.value)}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Dialog open={reqOpen} onOpenChange={(o) => (o ? setReqOpen(true) : resetRequest())}>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Request a payment</DialogTitle>
+            <DialogDescription>
+              Create a secure payment link and share it with your customer. The money settles into your connected account.
+            </DialogDescription>
+          </DialogHeader>
+
+          {reqLink ? (
+            <div className="space-y-3">
+              <Label>Payment link</Label>
+              <div className="flex gap-2">
+                <Input readOnly value={reqLink} className="min-h-11 text-xs" />
+                <Button
+                  variant="outline"
+                  className="min-h-11"
+                  onClick={() => {
+                    navigator.clipboard.writeText(reqLink);
+                    toast.success("Link copied");
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Hello${reqName ? " " + reqName : ""}, please pay ${naira(Number(reqAmount))} here: ${reqLink}`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex text-sm text-primary hover:underline"
+              >
+                Share on WhatsApp
+              </a>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label>Customer name (optional)</Label>
+                <Input value={reqName} onChange={(e) => setReqName(e.target.value)} className="min-h-11" placeholder="Chinedu Okafor" />
+              </div>
+              <div className="space-y-2">
+                <Label>Customer email</Label>
+                <Input type="email" value={reqEmail} onChange={(e) => setReqEmail(e.target.value)} className="min-h-11" placeholder="customer@email.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Amount (₦)</Label>
+                <Input
+                  inputMode="decimal"
+                  value={reqAmount}
+                  onChange={(e) => setReqAmount(e.target.value.replace(/[^\d.]/g, ""))}
+                  className="min-h-11"
+                  placeholder="25000"
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            {reqLink ? (
+              <Button variant="outline" onClick={resetRequest} className="min-h-11">Done</Button>
+            ) : (
+              <Button onClick={createPaymentRequest} disabled={reqLoading} className="min-h-11">
+                {reqLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create payment link
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

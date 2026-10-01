@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/use-business";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIndustry } from "@/contexts/IndustryContext";
+import { InsightCards } from "@/components/InsightCards";
 import { dispatchAction, type AppAction } from "@/lib/action-bus";
 
 const KPI_ICONS: Record<string, any> = {
@@ -175,6 +176,8 @@ export default function Dashboard() {
           </Card>
         ))}
       </div>
+
+      <InsightCards />
 
       {/* Quick Actions */}
       <Card>

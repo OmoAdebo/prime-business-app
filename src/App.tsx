@@ -75,6 +75,10 @@ import SystemReview from "./pages/SystemReview";
 import VoiceCommand from "./pages/VoiceCommand";
 import Loans from "./pages/Loans";
 import Employees from "./pages/Employees";
+import GrowthOpportunities from "./pages/GrowthOpportunities";
+import FinancialHealth from "./pages/FinancialHealth";
+import AdminPlanFeatures from "./pages/admin/AdminPlanFeatures";
+import { FeatureAccessProvider } from "@/contexts/FeatureAccessContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -95,6 +99,7 @@ const App = () => (
         <ScrollToTop />
         <InstallPromptGuard />
         <AuthProvider>
+          <FeatureAccessProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
@@ -111,6 +116,7 @@ const App = () => (
                 <Route path="businesses" element={<Navigate to="/admin/users" replace />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="subscriptions" element={<AdminSubscriptions />} />
+                <Route path="plan-features" element={<AdminPlanFeatures />} />
                 <Route path="admins" element={<AdminManagement />} />
                 <Route path="activity" element={<AdminActivity />} />
                 <Route path="announcements" element={<AdminAnnouncements />} />
@@ -169,9 +175,12 @@ const App = () => (
               <Route path="/voice" element={<VoiceCommand />} />
               <Route path="/loans" element={<Loans />} />
               <Route path="/employees" element={<Employees />} />
+              <Route path="/growth" element={<GrowthOpportunities />} />
+              <Route path="/financial-health" element={<FinancialHealth />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </FeatureAccessProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

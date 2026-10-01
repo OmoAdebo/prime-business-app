@@ -19,6 +19,8 @@ import {
   UserCheck,
   ShoppingCart,
   Mic,
+  TrendingUp,
+  Activity,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -40,6 +42,16 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { useFeatureAccess } from "@/contexts/FeatureAccessContext";
+
+const FEATURE_BY_URL: Record<string, string> = {
+  "/banking": "module.banking", "/bookkeeping": "module.bookkeeping", "/invoicing": "module.invoicing",
+  "/pos": "module.pos", "/inventory": "module.inventory", "/customers": "module.customers",
+  "/payroll": "module.payroll", "/debt-credit": "module.debt-credit", "/store": "module.store",
+  "/store-management": "module.store-management", "/budgeting": "module.budgeting", "/capital": "module.capital",
+  "/reports": "module.reports", "/voice": "module.voice", "/growth": "insights.growth",
+  "/financial-health": "insights.financial-health",
+};
 
 interface NavItem {
   title: string;
@@ -70,6 +82,8 @@ const operationsItems: NavItem[] = [
 ];
 
 const insightItems: NavItem[] = [
+  { title: "Growth Opportunities", url: "/growth", icon: TrendingUp, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
+  { title: "Financial Health", url: "/financial-health", icon: Activity, allowedRoles: ['super_admin', 'business_owner', 'accountant'] },
   { title: "Capital Access", url: "/capital", icon: PiggyBank, allowedRoles: ['super_admin', 'business_owner'] },
   { title: "Reports", url: "/reports", icon: BarChart3, allowedRoles: ['super_admin', 'business_owner', 'store_manager', 'accountant'] },
   { title: "System Review", url: "/system-review", icon: Monitor, allowedRoles: ['super_admin'] },
@@ -102,7 +116,9 @@ interface NavGroupProps {
 }
 
 function NavGroup({ label, items, collapsed, userRoles, navOverrides, hiddenModules }: NavGroupProps) {
-  const filtered = applyIndustry(filterByRole(items, userRoles), navOverrides, hiddenModules);
+  const { isEnabled } = useFeatureAccess();
+  const filtered = applyIndustry(filterByRole(items, userRoles), navOverrides, hiddenModules)
+    .filter((i) => !FEATURE_BY_URL[i.url] || isEnabled(FEATURE_BY_URL[i.url]));
   if (filtered.length === 0) return null;
 
   return (

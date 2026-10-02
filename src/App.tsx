@@ -1,4 +1,5 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query";
+import { logFailure } from "@/lib/monitoring";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { InstallPromptGuard } from "@/components/InstallPromptGuard";
@@ -78,9 +79,30 @@ import Employees from "./pages/Employees";
 import GrowthOpportunities from "./pages/GrowthOpportunities";
 import FinancialHealth from "./pages/FinancialHealth";
 import AdminPlanFeatures from "./pages/admin/AdminPlanFeatures";
+import AdminMonitoring from "./pages/admin/AdminMonitoring";
 import { FeatureAccessProvider } from "@/contexts/FeatureAccessContext";
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error: any, query) => {
+      logFailure({
+        category: "data",
+        action: `query:${String(query.queryKey?.[0] ?? "unknown")}`,
+        message: error?.message || String(error),
+        code: error?.code ?? null,
+      });
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error: any, _v, _c, mutation) => {
+      logFailure({
+        category: "data",
+        action: `mutation:${String(mutation.options.mutationKey?.[0] ?? "unknown")}`,
+        message: error?.message || String(error),
+        code: error?.code ?? null,
+      });
+    },
+  }),
   defaultOptions: {
     queries: {
       retry: 1,
@@ -117,6 +139,7 @@ const App = () => (
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="subscriptions" element={<AdminSubscriptions />} />
                 <Route path="plan-features" element={<AdminPlanFeatures />} />
+                <Route path="monitoring" element={<AdminMonitoring />} />
                 <Route path="admins" element={<AdminManagement />} />
                 <Route path="activity" element={<AdminActivity />} />
                 <Route path="announcements" element={<AdminAnnouncements />} />

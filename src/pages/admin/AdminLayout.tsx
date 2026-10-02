@@ -1,6 +1,6 @@
 import { NavLink, Outlet, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { LayoutDashboard, Building2, Users, Shield, Activity, Megaphone, CreditCard, LogOut, Home, ExternalLink, ToggleRight } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, Shield, Activity, Megaphone, CreditCard, LogOut, Home, ExternalLink, ToggleRight, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -9,6 +9,7 @@ const NAV = [
   { to: '/admin/users', icon: Users, label: 'Users & Businesses' },
   { to: '/admin/subscriptions', icon: CreditCard, label: 'Subscriptions' },
   { to: '/admin/plan-features', icon: ToggleRight, label: 'Plan Features' },
+  { to: '/admin/monitoring', icon: Gauge, label: 'Monitoring' },
   { to: '/admin/admins', icon: Shield, label: 'Admin Management' },
   { to: '/admin/activity', icon: Activity, label: 'Activity Logs' },
   { to: '/admin/announcements', icon: Megaphone, label: 'Announcements' },

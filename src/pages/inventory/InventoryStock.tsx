@@ -21,6 +21,9 @@ import { Layers, Plus, ArrowRightLeft, Search } from "lucide-react";
 import { useVoiceForm } from "@/hooks/use-voice-form";
 import { motion } from "framer-motion";
 import { ExportMenu } from "@/components/ExportMenu";
+import { LocationSelect } from "@/components/LocationSelect";
+import { adjustStock } from "@/lib/stock";
+import { formatQty } from "@/lib/units";
 
 export default function InventoryStock() {
   const { user } = useAuth();
@@ -109,24 +112,14 @@ export default function InventoryStock() {
 
   const recordMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("stock_movements").insert({
-        business_id: businessId!, product_id: form.product_id,
-        to_location_id: form.to_location_id || null,
-        quantity: parseInt(form.quantity), movement_type: form.movement_type,
-        notes: form.notes || null, created_by: user!.id,
+      const qty = parseInt(form.quantity);
+      if (!qty || qty <= 0) throw new Error("Enter a quantity greater than 0");
+      const outbound = ["sale", "issue"].includes(form.movement_type);
+      await adjustStock({
+        businessId: businessId!, productId: form.product_id, locationId: form.to_location_id || null,
+        delta: outbound ? -qty : qty, movementType: form.movement_type as any,
+        notes: form.notes || null, userId: user?.id,
       });
-      if (error) throw error;
-
-      if (form.to_location_id) {
-        const qty = parseInt(form.quantity);
-        const adj = form.movement_type === "receipt" ? qty : form.movement_type === "sale" ? -qty : qty;
-        const { data: existing } = await supabase.from("stock_levels").select("*").eq("product_id", form.product_id).eq("location_id", form.to_location_id).maybeSingle();
-        if (existing) {
-          await supabase.from("stock_levels").update({ quantity: existing.quantity + adj }).eq("id", existing.id);
-        } else {
-          await supabase.from("stock_levels").insert({ product_id: form.product_id, location_id: form.to_location_id, quantity: Math.max(0, adj) });
-        }
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock_movements"] });
@@ -147,7 +140,7 @@ export default function InventoryStock() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Stock Management</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Track levels, movements, and adjustments. <span className="text-primary">Tip: New products can be added with initial stock from the Products page.</span></p>
+          <p className="text-muted-foreground mt-1 text-sm">Overview of stock per location and full movement history. Add, edit and restock products from the <a href="/inventory/products" className="text-primary underline">Products page</a>.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <ExportMenu
@@ -156,12 +149,12 @@ export default function InventoryStock() {
             rows={stockLevels.map((sl: any) => ({
               product: sl.products?.name || "",
               quantity: sl.quantity,
-              location_id: sl.location_id || "",
+              location: sl.inventory_locations?.name || "",
             }))}
             columns={[
               { key: "product", label: "Product" },
               { key: "quantity", label: "Quantity" },
-              { key: "location_id", label: "Location" },
+              { key: "location", label: "Location" },
             ]}
           />
           <Dialog open={showRecord} onOpenChange={setShowRecord}>
@@ -176,8 +169,8 @@ export default function InventoryStock() {
                   <SelectContent>
                     <SelectItem value="receipt">Receipt (Stock In)</SelectItem>
                     <SelectItem value="sale">Sale (Stock Out)</SelectItem>
-                    <SelectItem value="adjustment">Adjustment</SelectItem>
-                    <SelectItem value="transfer">Transfer</SelectItem>
+                    <SelectItem value="issue">Issue / Remove (Stock Out)</SelectItem>
+                    <SelectItem value="adjustment">Adjustment (Stock In)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -190,10 +183,7 @@ export default function InventoryStock() {
               </div>
               <div>
                 <Label>Location</Label>
-                <Select value={form.to_location_id} onValueChange={v => setForm(p => ({ ...p, to_location_id: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Select location" /></SelectTrigger>
-                  <SelectContent>{locations.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}</SelectContent>
-                </Select>
+                <LocationSelect value={form.to_location_id} onChange={v => setForm(p => ({ ...p, to_location_id: v }))} />
               </div>
               <div><Label>Quantity *</Label><Input type="number" min="1" value={form.quantity} onChange={e => setForm(p => ({ ...p, quantity: e.target.value }))} /></div>
               <div><Label>Notes</Label><Textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} rows={2} /></div>
@@ -226,12 +216,12 @@ export default function InventoryStock() {
                     <TableHeader><TableRow><TableHead>Product</TableHead><TableHead className="hidden sm:table-cell">Location</TableHead><TableHead className="text-right">Quantity</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
                     <TableBody>
                       {filteredLevels.map((sl: any) => {
-                        const isLow = sl.quantity <= (sl.products?.low_stock_threshold || 10);
+                        const isLow = sl.quantity <= (sl.products?.low_stock_threshold ?? 10);
                         return (
                           <TableRow key={sl.id}>
                             <TableCell className="font-medium">{sl.products?.name || "—"}</TableCell>
                             <TableCell className="text-sm text-muted-foreground hidden sm:table-cell">{sl.inventory_locations?.name || "—"}</TableCell>
-                            <TableCell className="text-right font-mono">{sl.quantity} {sl.products?.unit_of_measure || ""}</TableCell>
+                            <TableCell className="text-right font-mono">{formatQty(sl.quantity, sl.products?.unit_of_measure)}</TableCell>
                             <TableCell><Badge variant={isLow ? "destructive" : "secondary"}>{isLow ? "Low Stock" : "In Stock"}</Badge></TableCell>
                           </TableRow>
                         );

@@ -16,15 +16,14 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ResponsiveTable } from "@/components/ui/responsive-table";
-import { Package, Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Package, Plus, Search, Edit, Trash2, PlusCircle, MinusCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { ImportExportButtons } from "@/components/ImportExportButtons";
 import { useVoiceForm } from "@/hooks/use-voice-form";
+import { UNITS, PRODUCT_CATEGORIES, formatQty, normalizeUnit } from "@/lib/units";
+import { adjustStock, ensureDefaultLocation, totalFor } from "@/lib/stock";
+import { LocationSelect } from "@/components/LocationSelect";
 
-const PRODUCT_CATEGORIES = [
-  "Electronics", "Food & Beverages", "Clothing", "Health & Beauty",
-  "Home & Garden", "Office Supplies", "Raw Materials", "Packaging", "Other"
-];
 
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
@@ -47,6 +46,7 @@ export default function InventoryProducts() {
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [adjust, setAdjust] = useState<{ product: any; dir: 1 | -1; qty: string; location_id: string; note: string } | null>(null);
 
   useVoiceForm({
     enabled: showAdd,
@@ -135,45 +135,32 @@ export default function InventoryProducts() {
         low_stock_threshold: parseInt(form.low_stock_threshold) || 10, barcode: form.barcode || null,
       };
 
+      const qty = parseInt(form.initial_quantity) || 0;
+      let productId = editId;
       if (editId) {
         const { error } = await supabase.from("products").update(payload).eq("id", editId);
         if (error) throw error;
-        // For edits, do an adjustment if quantity is non-zero
-        const adjQty = parseInt(form.initial_quantity);
-        if (adjQty && form.location_id) {
-          await supabase.from("stock_movements").insert({
-            business_id: businessId!, product_id: editId,
-            to_location_id: form.location_id, quantity: Math.abs(adjQty),
-            movement_type: "adjustment", notes: "Adjustment from product edit", created_by: user!.id,
-          });
-          const { data: existing } = await supabase.from("stock_levels").select("*").eq("product_id", editId).eq("location_id", form.location_id).maybeSingle();
-          if (existing) {
-            await supabase.from("stock_levels").update({ quantity: existing.quantity + adjQty }).eq("id", existing.id);
-          } else {
-            await supabase.from("stock_levels").insert({ product_id: editId, location_id: form.location_id, quantity: Math.max(0, adjQty) });
-          }
-        }
       } else {
         const { data: created, error } = await supabase.from("products").insert(payload).select().single();
         if (error) throw error;
-        // Initial stock receipt
-        const initQty = parseInt(form.initial_quantity);
-        if (initQty > 0 && form.location_id && created) {
-          await supabase.from("stock_movements").insert({
-            business_id: businessId!, product_id: created.id,
-            to_location_id: form.location_id, quantity: initQty,
-            movement_type: "receipt", notes: "Initial stock", created_by: user!.id,
-          });
-          await supabase.from("stock_levels").insert({
-            product_id: created.id, location_id: form.location_id, quantity: initQty,
-          });
-        }
+        productId = created.id;
+      }
+      if (qty !== 0 && productId) {
+        const locationId = form.location_id || (await ensureDefaultLocation(businessId!));
+        await adjustStock({
+          businessId: businessId!, productId, locationId, delta: qty,
+          movementType: editId ? "adjustment" : "receipt",
+          notes: editId ? "Adjustment from product edit" : "Opening stock",
+          userId: user?.id,
+        });
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["stock_levels"] });
       queryClient.invalidateQueries({ queryKey: ["stock_movements"] });
+      queryClient.invalidateQueries({ queryKey: ["inventory_locations"] });
+      queryClient.invalidateQueries({ queryKey: ["insight-data"] });
       setShowAdd(false); setEditId(null); setForm(emptyForm);
       toast({ title: editId ? "Product updated" : "Product added" });
     },
@@ -191,12 +178,31 @@ export default function InventoryProducts() {
     },
   });
 
+  const adjustMutation = useMutation({
+    mutationFn: async () => {
+      if (!adjust) return;
+      const n = parseInt(adjust.qty);
+      if (!n || n <= 0) throw new Error("Enter a quantity greater than 0");
+      await adjustStock({
+        businessId: businessId!, productId: adjust.product.id, locationId: adjust.location_id || null,
+        delta: n * adjust.dir, movementType: adjust.dir > 0 ? "receipt" : "issue",
+        notes: adjust.note || (adjust.dir > 0 ? "Stock added" : "Stock removed"), userId: user?.id,
+      });
+    },
+    onSuccess: () => {
+      ["stock_levels", "stock_movements", "inventory_locations", "insight-data"].forEach(k => queryClient.invalidateQueries({ queryKey: [k] }));
+      toast({ title: adjust?.dir === 1 ? "Stock added" : "Stock removed" });
+      setAdjust(null);
+    },
+    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
   const openEdit = (p: any) => {
     setEditId(p.id);
     setForm({
       name: p.name, sku: p.sku || "", category: p.category || "",
       description: p.description || "", unit_price: String(p.unit_price),
-      cost_price: String(p.cost_price), unit_of_measure: p.unit_of_measure || "pcs",
+      cost_price: String(p.cost_price), unit_of_measure: normalizeUnit(p.unit_of_measure),
       low_stock_threshold: String(p.low_stock_threshold || 10), barcode: p.barcode || "",
       initial_quantity: "0", location_id: locations[0]?.id || "",
     });
@@ -288,7 +294,7 @@ export default function InventoryProducts() {
                 <Label>Unit of Measure</Label>
                 <Select value={form.unit_of_measure} onValueChange={v => setForm(p => ({ ...p, unit_of_measure: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{["pcs","kg","litres","meters","boxes","packs","cartons","dozen"].map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                  <SelectContent>{UNITS.map(u => <SelectItem key={u.value} value={u.value}>{u.label} ({u.plural})</SelectItem>)}</SelectContent>
                 </Select>
               </div>
 
@@ -297,7 +303,7 @@ export default function InventoryProducts() {
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-sm">Stock</h4>
                   {editId && (
-                    <Badge variant="secondary" className="text-xs">Current: {currentStockForEdit} {form.unit_of_measure}</Badge>
+                    <Badge variant="secondary" className="text-xs">Current: {formatQty(currentStockForEdit, form.unit_of_measure)}</Badge>
                   )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -307,20 +313,14 @@ export default function InventoryProducts() {
                       type="number"
                       value={form.initial_quantity}
                       onChange={e => setForm(p => ({ ...p, initial_quantity: e.target.value }))}
-                      placeholder={editId ? "e.g. 10 to add, -5 to remove" : "e.g. 50"}
+                      placeholder={editId ? "e.g. 10 to add, -5 to remove" : `e.g. 50 (${UNITS.find(u => u.value === form.unit_of_measure)?.plural ?? "units"})`}
                     />
                   </div>
                   <div>
                     <Label className="text-xs">Location</Label>
-                    <Select value={form.location_id} onValueChange={v => setForm(p => ({ ...p, location_id: v }))}>
-                      <SelectTrigger><SelectValue placeholder={locations.length ? "Choose location" : "No locations — set up in Stock"} /></SelectTrigger>
-                      <SelectContent>{locations.map((l: any) => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}</SelectContent>
-                    </Select>
+                    <LocationSelect value={form.location_id} onChange={v => setForm(p => ({ ...p, location_id: v }))} />
                   </div>
                 </div>
-                {!locations.length && (
-                  <p className="text-xs text-muted-foreground">Add a location on the Stock page to track quantities per warehouse.</p>
-                )}
               </div>
             </div>
             <DialogFooter>
@@ -372,7 +372,7 @@ export default function InventoryProducts() {
                 </TableHeader>
                 <TableBody>
                   {filtered.map((p: any) => {
-                    const qty = stockLevels.filter((sl: any) => sl.product_id === p.id).reduce((q: number, sl: any) => q + sl.quantity, 0);
+                    const qty = totalFor(stockLevels as any, p.id);
                     const isLow = qty <= (p.low_stock_threshold || 10);
                     return (
                       <TableRow key={p.id}>
@@ -382,12 +382,14 @@ export default function InventoryProducts() {
                         <TableCell className="text-right text-sm hidden md:table-cell">{formatNaira(Number(p.cost_price))}</TableCell>
                         <TableCell className="text-right text-sm font-medium">{formatNaira(Number(p.unit_price))}</TableCell>
                         <TableCell className="text-right">
-                          <Badge variant={isLow ? "destructive" : "secondary"}>{qty} {p.unit_of_measure}</Badge>
+                          <Badge variant={isLow ? "destructive" : "secondary"}>{formatQty(qty, p.unit_of_measure)}</Badge>
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
-                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" onClick={() => openEdit(p)}><Edit className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px] text-destructive" onClick={() => deleteMutation.mutate(p.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" title="Add stock" onClick={() => setAdjust({ product: p, dir: 1, qty: "", location_id: locations[0]?.id || "", note: "" })}><PlusCircle className="h-3.5 w-3.5 text-primary" /></Button>
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" title="Remove stock" onClick={() => setAdjust({ product: p, dir: -1, qty: "", location_id: locations[0]?.id || "", note: "" })}><MinusCircle className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px]" title="Edit" onClick={() => openEdit(p)}><Edit className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px] text-destructive" onClick={() => { if (confirm(`Delete "${p.name}"? This cannot be undone.`)) deleteMutation.mutate(p.id); }}><Trash2 className="h-3.5 w-3.5" /></Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -399,6 +401,27 @@ export default function InventoryProducts() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!adjust} onOpenChange={(o) => !o && setAdjust(null)}>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{adjust?.dir === 1 ? "Add stock" : "Remove stock"} — {adjust?.product?.name}</DialogTitle>
+            <DialogDescription>Current: {adjust ? formatQty(totalFor(stockLevels as any, adjust.product.id), adjust.product.unit_of_measure) : ""}</DialogDescription>
+          </DialogHeader>
+          {adjust && (
+            <div className="grid gap-3">
+              <div><Label>Quantity ({UNITS.find(u => u.value === normalizeUnit(adjust.product.unit_of_measure))?.plural ?? "units"})</Label>
+                <Input type="number" min="1" value={adjust.qty} onChange={e => setAdjust({ ...adjust, qty: e.target.value })} /></div>
+              <div><Label>Location</Label><LocationSelect value={adjust.location_id} onChange={v => setAdjust({ ...adjust, location_id: v })} /></div>
+              <div><Label>Note</Label><Input value={adjust.note} onChange={e => setAdjust({ ...adjust, note: e.target.value })} placeholder={adjust.dir === 1 ? "e.g. New delivery from supplier" : "e.g. Damaged"} /></div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAdjust(null)}>Cancel</Button>
+            <Button onClick={() => adjustMutation.mutate()} disabled={adjustMutation.isPending}>{adjustMutation.isPending ? "Saving..." : "Save"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

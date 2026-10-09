@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { BadgeCheck, CreditCard, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
+import { BadgeCheck, Copy, CreditCard, Link2, Loader2, RefreshCw, ShieldCheck, Wallet } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/use-business";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,13 @@ export default function BankingPayments() {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
 
+  const [reqOpen, setReqOpen] = useState(false);
+  const [reqName, setReqName] = useState("");
+  const [reqEmail, setReqEmail] = useState("");
+  const [reqAmount, setReqAmount] = useState("");
+  const [reqLink, setReqLink] = useState<string | null>(null);
+  const [reqLoading, setReqLoading] = useState(false);
+
   const { data: banks = [], isLoading: banksLoading } = useQuery({
     queryKey: ["paystack-banks"],
     queryFn: async () => {
@@ -56,7 +64,11 @@ export default function BankingPayments() {
     staleTime: 1000 * 60 * 60,
   });
 
-  const { data: account, isLoading: accountLoading } = useQuery({
+  const {
+    data: account,
+    isLoading: accountLoading,
+    error: accountError,
+  } = useQuery({
     queryKey: ["payment-account", businessId],
     queryFn: async () => {
       const { data, error } = await (supabase as any)
@@ -66,9 +78,14 @@ export default function BankingPayments() {
         .eq("provider", "paystack")
         .maybeSingle();
       if (error) throw error;
-      return data as PaymentAccount | null;
+      return (data ?? null) as PaymentAccount | null;
     },
     enabled: !!businessId,
+    retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: payments = [] } = useQuery({
@@ -84,6 +101,11 @@ export default function BankingPayments() {
       return data ?? [];
     },
     enabled: !!businessId,
+    retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   const connected = !!account?.subaccount_code;
@@ -154,6 +176,64 @@ export default function BankingPayments() {
     }
   };
 
+  const createPaymentRequest = async () => {
+    const amount = Number(reqAmount);
+    if (!(amount > 0)) {
+      toast.error("Enter an amount greater than zero");
+      return;
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(reqEmail)) {
+      toast.error("Enter a valid customer email");
+      return;
+    }
+    setReqLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("paystack-charge", {
+        body: {
+          amount,
+          email: reqEmail.trim(),
+          customer_name: reqName.trim() || null,
+          callback_url: `${window.location.origin}/banking/payments`,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setReqLink(data.authorization_url);
+      toast.success("Payment link ready — share it with your customer");
+      queryClient.invalidateQueries({ queryKey: ["payment-transactions", businessId] });
+    } catch (e: any) {
+      toast.error(e.message ?? "Could not create the payment link");
+    } finally {
+      setReqLoading(false);
+    }
+  };
+
+  const resetRequest = () => {
+    setReqOpen(false);
+    setReqLink(null);
+    setReqName("");
+    setReqEmail("");
+    setReqAmount("");
+  };
+
+  const stats = useMemo(() => {
+    const now = new Date();
+    let received = 0;
+    let month = 0;
+    let pending = 0;
+    for (const p of payments as any[]) {
+      const amt = Number(p.amount || 0);
+      if (p.status === "success") {
+        received += amt;
+        const d = new Date(p.paid_at ?? p.created_at);
+        if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) month += amt;
+      } else if (p.status === "pending") {
+        pending += amt;
+      }
+    }
+    return { received, month, pending };
+  }, [payments]);
+
   const statusBadge = () => {
     if (!account) return <Badge variant="secondary">Not connected</Badge>;
     if (account.status === "active") return <Badge className="bg-primary text-primary-foreground">Active</Badge>;
@@ -170,11 +250,107 @@ export default function BankingPayments() {
             Connect your bank account to receive customer payments directly
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {statusBadge()}
           {account && !account.is_live && <Badge variant="outline">Test mode</Badge>}
+          <Button
+            className="min-h-11"
+            onClick={() => (connected ? setReqOpen(true) : toast.error("Connect your payout account first"))}
+          >
+            <Link2 className="mr-2 h-4 w-4" /> Request payment
+          </Button>
         </div>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[
+          { label: "Received (all time)", value: stats.received },
+          { label: "Received this month", value: stats.month },
+          { label: "Awaiting payment", value: stats.pending },
+        ].map((s) => (
+          <Card key={s.label}>
+            <CardContent className="flex items-center gap-3 pt-6">
+              <div className="rounded-lg bg-primary/10 p-2 text-primary">
+                <Wallet className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+                <p className="text-lg font-semibold">{naira(s.value)}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Dialog open={reqOpen} onOpenChange={(o) => (o ? setReqOpen(true) : resetRequest())}>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Request a payment</DialogTitle>
+            <DialogDescription>
+              Create a secure payment link and share it with your customer. The money settles into your connected account.
+            </DialogDescription>
+          </DialogHeader>
+
+          {reqLink ? (
+            <div className="space-y-3">
+              <Label>Payment link</Label>
+              <div className="flex gap-2">
+                <Input readOnly value={reqLink} className="min-h-11 text-xs" />
+                <Button
+                  variant="outline"
+                  className="min-h-11"
+                  onClick={() => {
+                    navigator.clipboard.writeText(reqLink);
+                    toast.success("Link copied");
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Hello${reqName ? " " + reqName : ""}, please pay ${naira(Number(reqAmount))} here: ${reqLink}`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex text-sm text-primary hover:underline"
+              >
+                Share on WhatsApp
+              </a>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label>Customer name (optional)</Label>
+                <Input value={reqName} onChange={(e) => setReqName(e.target.value)} className="min-h-11" placeholder="Chinedu Okafor" />
+              </div>
+              <div className="space-y-2">
+                <Label>Customer email</Label>
+                <Input type="email" value={reqEmail} onChange={(e) => setReqEmail(e.target.value)} className="min-h-11" placeholder="customer@email.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Amount (₦)</Label>
+                <Input
+                  inputMode="decimal"
+                  value={reqAmount}
+                  onChange={(e) => setReqAmount(e.target.value.replace(/[^\d.]/g, ""))}
+                  className="min-h-11"
+                  placeholder="25000"
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            {reqLink ? (
+              <Button variant="outline" onClick={resetRequest} className="min-h-11">Done</Button>
+            ) : (
+              <Button onClick={createPaymentRequest} disabled={reqLoading} className="min-h-11">
+                {reqLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create payment link
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -191,6 +367,10 @@ export default function BankingPayments() {
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading…
               </div>
+            ) : accountError ? (
+              <p className="text-sm text-muted-foreground">
+                We couldn't load your settlement account right now. Please refresh the page and try again.
+              </p>
             ) : showForm ? (
               <>
                 <div className="space-y-2">
@@ -295,6 +475,55 @@ export default function BankingPayments() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Step-by-step guide: getting paid with Prime</CardTitle>
+          <CardDescription>Everything you need, from connecting your bank account to seeing the money land</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          {[
+            {
+              title: "Step 1 — Connect your payout account",
+              body: "On this page, pick your bank, type your 10-digit account number and tap Verify. We show the account name registered with your bank. If it is correct, tap Connect payout account. Use a business account in your business name where possible.",
+            },
+            {
+              title: "Step 2 — Confirm your details are live",
+              body: "Once connected, the badge at the top of this page turns Active. Test mode means payments are simulated for practice; Live mode means real money. You can tap Change account at any time to switch banks — new payments settle to the new account.",
+            },
+            {
+              title: "Step 3 — Ask a customer to pay",
+              body: "Create an invoice in Invoicing and send it, or list your products in Online Store and share your store link. Your customer pays by card, bank transfer or USSD on a secure Paystack page — they never see your bank details.",
+            },
+            {
+              title: "Step 4 — Watch the payment come in",
+              body: "Successful payments appear under Recent payments below within seconds, with the reference, customer, amount and channel. The matching invoice or order is marked paid automatically, and a matching entry is added in Banking → Transactions.",
+            },
+            {
+              title: "Step 5 — Receive your settlement",
+              body: "Paystack pays out to your connected bank account on its normal settlement cycle (usually the next working day), minus the platform fee shown on this page. Your bank alert is the final confirmation.",
+            },
+            {
+              title: "Step 6 — Reconcile and report",
+              body: "Use Banking → Transactions with the Source filter set to Payments to review card and transfer income, then export from Reports for your accountant or tax filing.",
+            },
+          ].map((s) => (
+            <div key={s.title} className="rounded-lg border bg-muted/30 p-4">
+              <p className="text-sm font-semibold">{s.title}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{s.body}</p>
+            </div>
+          ))}
+          <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 md:col-span-2">
+            <p className="text-sm font-semibold">Good to know</p>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+              <li>Only the business owner can add or change the payout account.</li>
+              <li>If verification fails, check the account number and that the bank matches — Paystack must recognise the pair.</li>
+              <li>Failed or abandoned payments also show below, so you can follow up with the customer.</li>
+              <li>Refunds and disputes are handled through Paystack support; the record here stays for your books.</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

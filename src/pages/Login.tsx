@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { PublicLayout } from '@/components/PublicLayout';
+import { explainAuthError } from '@/lib/auth-errors';
+import { logFailure } from '@/lib/monitoring';
 
 const ADMIN_ROLES = ['super_admin', 'admin', 'support_admin'];
 
@@ -56,7 +58,9 @@ export default function Login() {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error || !data.user) {
-      toast.error(error?.message || 'Could not sign in');
+      const f = explainAuthError(error, 'login');
+      toast.error(f.title, { description: f.description, duration: 8000 });
+      logFailure({ category: 'auth', action: 'sign_in', message: error?.message || 'no user', code: f.code, email, severity: f.code === 'invalid_credentials' ? 'warning' : 'error' });
       setLoading(false);
       return;
     }
@@ -68,14 +72,22 @@ export default function Login() {
 
   const handleForgotPassword = async () => {
     if (!email) {
-      toast.error('Enter your email first');
+      toast.error('Enter your email first', { description: 'Type your email in the box above, then click "Forgot password?" again.' });
       return;
     }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
-    if (error) toast.error(error.message);
-    else toast.success('Check your email for a reset link');
+    if (error) {
+      const f = explainAuthError(error, 'reset-request');
+      toast.error(f.title, { description: f.description, duration: 8000 });
+      logFailure({ category: 'auth', action: 'reset_request', message: error.message, code: f.code, email });
+    } else {
+      toast.success('Reset email sent', {
+        description: `If an account exists for ${email}, a link is on its way. It can take a few minutes — check spam too. Use only the newest email.`,
+        duration: 10000,
+      });
+    }
   };
 
   return (
@@ -87,6 +99,14 @@ export default function Login() {
           </div>
           <h1 className="text-2xl font-bold font-display text-foreground">Welcome back to Prime</h1>
           <p className="text-muted-foreground mt-1">Sign in to your business suite</p>
+        </div>
+
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm text-foreground">
+          <p className="font-medium">We upgraded Prime</p>
+          <p className="mt-1 text-muted-foreground">
+            Your account and all your data moved to our new, faster platform. Passwords could not be carried
+            over — if your old one no longer works, click <span className="font-medium">Forgot password?</span> to set a new one.
+          </p>
         </div>
 
         <Card>

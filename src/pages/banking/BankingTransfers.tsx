@@ -47,7 +47,9 @@ export default function BankingTransfers() {
   const [description, setDescription] = useState("");
 
   // Same-bank transfer (different account at same bank)
-  const [sbFromAccount, setSbFromAccount] = useState("");
+  const [recipientMode, setRecipientMode] = useState<"own" | "other">("own");
+  const sbFromAccount = fromAccount;
+  const setSbFromAccount = setFromAccount;
   const [sbToAccountNumber, setSbToAccountNumber] = useState("");
   const [sbToAccountName, setSbToAccountName] = useState("");
   const [sbAmount, setSbAmount] = useState("");
@@ -63,7 +65,7 @@ export default function BankingTransfers() {
   const [ibBeneficiaryId, setIbBeneficiaryId] = useState("");
 
   useVoiceForm({
-    enabled: transferTab === "intra",
+    enabled: transferTab === "intra" && recipientMode === "own",
     formId: "intra-transfer",
     title: "Internal Transfer",
     fields: [
@@ -77,7 +79,7 @@ export default function BankingTransfers() {
   });
 
   useVoiceForm({
-    enabled: transferTab === "same-bank",
+    enabled: transferTab === "intra" && recipientMode === "other",
     formId: "same-bank-transfer",
     title: "Same-bank Transfer",
     fields: [
@@ -245,72 +247,65 @@ export default function BankingTransfers() {
       </div>
 
       <Tabs value={transferTab} onValueChange={setTransferTab} className="max-w-2xl">
-        <TabsList className="grid grid-cols-3 w-full">
-          <TabsTrigger value="intra" className="gap-1.5"><ArrowLeftRight className="h-4 w-4" /><span className="hidden sm:inline">Intra-Account</span><span className="sm:hidden">Own</span></TabsTrigger>
-          <TabsTrigger value="same" className="gap-1.5"><Building2 className="h-4 w-4" /><span className="hidden sm:inline">Same Bank</span><span className="sm:hidden">Same</span></TabsTrigger>
+        <TabsList className="grid grid-cols-2 w-full">
+          <TabsTrigger value="intra" className="gap-1.5"><ArrowLeftRight className="h-4 w-4" /><span className="hidden sm:inline">Between accounts</span><span className="sm:hidden">Same bank</span></TabsTrigger>
           <TabsTrigger value="inter" className="gap-1.5"><Send className="h-4 w-4" /><span className="hidden sm:inline">Inter-Bank</span><span className="sm:hidden">Other</span></TabsTrigger>
         </TabsList>
 
-        {/* INTRA-ACCOUNT */}
+        {/* BETWEEN ACCOUNTS (own accounts or someone at the same bank) */}
         <TabsContent value="intra">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><ArrowLeftRight className="h-5 w-5" />Between Your Accounts</CardTitle>
-              <CardDescription>Move money instantly between your own bank accounts</CardDescription>
+              <CardTitle className="flex items-center gap-2"><ArrowLeftRight className="h-5 w-5" />Between accounts</CardTitle>
+              <CardDescription>Move money to one of your own accounts, or send to someone at the same bank.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>From Account</Label>
+                <Label>From account</Label>
                 <Select value={fromAccount} onValueChange={setFromAccount}>
                   <SelectTrigger><SelectValue placeholder="Select source account" /></SelectTrigger>
                   <SelectContent>{accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.account_name} ({a.bank_name}) — ₦{a.current_balance.toLocaleString()}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>To Account</Label>
-                <Select value={toAccount} onValueChange={setToAccount}>
-                  <SelectTrigger><SelectValue placeholder="Select destination account" /></SelectTrigger>
-                  <SelectContent>{accounts.filter(a => a.id !== fromAccount).map(a => <SelectItem key={a.id} value={a.id}>{a.account_name} ({a.bank_name}) — ₦{a.current_balance.toLocaleString()}</SelectItem>)}</SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-2">
+                <Button type="button" variant={recipientMode === "own" ? "default" : "outline"} className="min-h-[44px]" onClick={() => setRecipientMode("own")}>
+                  <ArrowLeftRight className="h-4 w-4 mr-2" />My own account
+                </Button>
+                <Button type="button" variant={recipientMode === "other" ? "default" : "outline"} className="min-h-[44px]" onClick={() => setRecipientMode("other")}>
+                  <Building2 className="h-4 w-4 mr-2" />Someone at same bank
+                </Button>
               </div>
-              <div><Label>Amount (₦)</Label><Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" /></div>
-              <div><Label>Description (Optional)</Label><Input value={description} onChange={e => setDescription(e.target.value)} placeholder="e.g. Fund petty cash" /></div>
-              <Button className="w-full" onClick={() => intraTransfer.mutate()} disabled={intraTransfer.isPending || !fromAccount || !toAccount || !amount}>
-                {intraTransfer.isPending ? "Transferring..." : "Transfer Funds"}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* SAME BANK */}
-        <TabsContent value="same">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5" />Same-Bank Transfer</CardTitle>
-              <CardDescription>Send to another account within the same bank as your source account</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>From Account</Label>
-                <Select value={sbFromAccount} onValueChange={setSbFromAccount}>
-                  <SelectTrigger><SelectValue placeholder="Select source account" /></SelectTrigger>
-                  <SelectContent>{accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.account_name} ({a.bank_name}) — ₦{a.current_balance.toLocaleString()}</SelectItem>)}</SelectContent>
-                </Select>
-                {sbFromAccount && (
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    Recipient must be at <span className="font-medium text-foreground">{accounts.find(a => a.id === sbFromAccount)?.bank_name}</span>
-                  </p>
-                )}
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div><Label>Recipient Account Number *</Label><Input value={sbToAccountNumber} onChange={e => setSbToAccountNumber(e.target.value)} placeholder="10 digits" maxLength={10} /></div>
-                <div><Label>Recipient Account Name *</Label><Input value={sbToAccountName} onChange={e => setSbToAccountName(e.target.value)} placeholder="Account holder" /></div>
-              </div>
-              <div><Label>Amount (₦) *</Label><Input type="number" value={sbAmount} onChange={e => setSbAmount(e.target.value)} placeholder="0.00" /></div>
-              <div><Label>Narration</Label><Input value={sbNarration} onChange={e => setSbNarration(e.target.value)} placeholder="Payment description" /></div>
-              <Button className="w-full" onClick={() => sameBankTransfer.mutate()} disabled={sameBankTransfer.isPending || !sbFromAccount || !sbToAccountNumber || !sbToAccountName || !sbAmount}>
-                {sameBankTransfer.isPending ? "Sending..." : "Send Transfer"}
-              </Button>
+              {recipientMode === "own" ? (
+                <>
+                  <div>
+                    <Label>To account</Label>
+                    <Select value={toAccount} onValueChange={setToAccount}>
+                      <SelectTrigger><SelectValue placeholder={accounts.length > 1 ? "Select destination account" : "Add another account first"} /></SelectTrigger>
+                      <SelectContent>{accounts.filter(a => a.id !== fromAccount).map(a => <SelectItem key={a.id} value={a.id}>{a.account_name} ({a.bank_name}) — ₦{a.current_balance.toLocaleString()}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label>Amount (₦)</Label><Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" /></div>
+                  <div><Label>Description (optional)</Label><Input value={description} onChange={e => setDescription(e.target.value)} placeholder="e.g. Fund petty cash" /></div>
+                  <Button className="w-full min-h-[44px]" onClick={() => intraTransfer.mutate()} disabled={intraTransfer.isPending || !fromAccount || !toAccount || !amount}>
+                    {intraTransfer.isPending ? "Transferring..." : "Transfer funds"}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  {fromAccount && (
+                    <p className="text-xs text-muted-foreground">Recipient must bank with <span className="font-medium text-foreground">{accounts.find(a => a.id === fromAccount)?.bank_name}</span>. For other banks use the Inter-Bank tab.</p>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><Label>Recipient account number *</Label><Input value={sbToAccountNumber} onChange={e => setSbToAccountNumber(e.target.value.replace(/\D/g, ""))} placeholder="10 digits" maxLength={10} /></div>
+                    <div><Label>Recipient account name *</Label><Input value={sbToAccountName} onChange={e => setSbToAccountName(e.target.value)} placeholder="Account holder" /></div>
+                  </div>
+                  <div><Label>Amount (₦) *</Label><Input type="number" value={sbAmount} onChange={e => setSbAmount(e.target.value)} placeholder="0.00" /></div>
+                  <div><Label>Narration</Label><Input value={sbNarration} onChange={e => setSbNarration(e.target.value)} placeholder="Payment description" /></div>
+                  <Button className="w-full min-h-[44px]" onClick={() => sameBankTransfer.mutate()} disabled={sameBankTransfer.isPending || !fromAccount || !sbToAccountNumber || !sbToAccountName || !sbAmount}>
+                    {sameBankTransfer.isPending ? "Sending..." : "Send transfer"}
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

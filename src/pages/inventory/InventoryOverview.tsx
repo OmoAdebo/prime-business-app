@@ -180,7 +180,7 @@ export default function InventoryOverview() {
           <CardHeader><CardTitle className="text-base flex items-center gap-2"><MapPin className="h-4 w-4" /> Locations</CardTitle></CardHeader>
           <CardContent>
             {locations.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No locations added yet.</p>
+              <div className="text-sm text-muted-foreground text-center py-8">No locations added yet. <a href="/store-management" className="text-primary underline">Add one in Store Management</a> — or add a product and a "Main Store" is created for you.</div>
             ) : (
               <div className="space-y-3">
                 {locations.map((loc: any) => {

@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
             const paid = Number(inv.amount_paid ?? 0) + amount;
             await admin.from("invoices").update({
               amount_paid: paid,
-              status: paid >= Number(inv.total_amount ?? 0) ? "paid" : "partially_paid",
+              status: paid >= Number(inv.total_amount ?? 0) ? "paid" : "partial",
             }).eq("id", inv.id);
             await admin.from("invoice_payments").insert({
               invoice_id: inv.id,
@@ -144,6 +144,25 @@ Deno.serve(async (req) => {
               payment_date: (data.paid_at ?? new Date().toISOString()).slice(0, 10),
               payment_method: "paystack",
               reference,
+            });
+          }
+        }
+
+        // Record the income in bookkeeping so dashboard revenue updates (once per reference).
+        {
+          const { data: already } = await admin
+            .from("transactions").select("id").eq("business_id", bizId).eq("reference_number", reference).limit(1);
+          if (!already || already.length === 0) {
+            await admin.from("transactions").insert({
+              business_id: bizId,
+              type: "income",
+              category: "Sales",
+              description: `Paystack payment${data.customer?.email ? ` from ${data.customer.email}` : ""}`,
+              amount,
+              currency: data.currency ?? "NGN",
+              transaction_date: (data.paid_at ?? new Date().toISOString()).slice(0, 10),
+              reference_number: reference,
+              payment_method: "paystack",
             });
           }
         }

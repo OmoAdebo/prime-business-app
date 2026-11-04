@@ -84,7 +84,7 @@ export default function Login() {
       logFailure({ category: 'auth', action: 'reset_request', message: error.message, code: f.code, email });
     } else {
       toast.success('Reset email sent', {
-        description: `If an account exists for ${email}, a link is on its way. It can take a few minutes — check spam too. Use only the newest email.`,
+        description: `If an account exists for ${email}, a link is on its way. It can take a few minutes — check spam too. No mail after 2 minutes? Request another (one per minute), and use only the newest email.`,
         duration: 10000,
       });
     }

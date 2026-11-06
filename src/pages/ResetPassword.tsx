@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { PublicLayout } from '@/components/PublicLayout';
 import { explainAuthError } from '@/lib/auth-errors';
 import { logFailure } from '@/lib/monitoring';
@@ -16,6 +16,8 @@ type State = 'checking' | 'ready' | 'invalid';
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [state, setState] = useState<State>('checking');
   const [reason, setReason] = useState<{ title: string; description: string } | null>(null);
@@ -141,11 +143,21 @@ export default function ResetPassword() {
             <form onSubmit={handleReset} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New Password</Label>
-                <Input id="newPassword" type="password" placeholder="Min. 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <div className="relative">
+                  <Input id="newPassword" type={showPassword ? 'text' : 'password'} className="pr-10" placeholder="Min. 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2" aria-label={showPassword ? 'Hide new password' : 'Show new password'} aria-pressed={showPassword} onClick={() => setShowPassword((visible) => !visible)}>
+                    {showPassword ? <EyeOff /> : <Eye />}
+                  </Button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input id="confirmPassword" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+                <div className="relative">
+                  <Input id="confirmPassword" type={showConfirm ? 'text' : 'password'} className="pr-10" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2" aria-label={showConfirm ? 'Hide confirmation password' : 'Show confirmation password'} aria-pressed={showConfirm} onClick={() => setShowConfirm((visible) => !visible)}>
+                    {showConfirm ? <EyeOff /> : <Eye />}
+                  </Button>
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Updating...' : 'Update Password'}

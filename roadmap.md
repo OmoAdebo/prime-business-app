@@ -7,3 +7,5 @@
 - [x] Professional invoice PDF
 - [x] Banking transfers: merge intra + same-bank
 - [x] Webhook: income transaction on invoice payment (needs redeploy)
+- [x] Audit source/configuration for previous Lovable Cloud project references
+- [x] Add visibility toggles to both password reset fields

@@ -9,3 +9,5 @@
 - [x] Webhook: income transaction on invoice payment (needs redeploy)
 - [x] Audit source/configuration for previous Lovable Cloud project references
 - [x] Add visibility toggles to both password reset fields
+- [ ] Audit Prime Business product, architecture, UX, functionality, security, performance and scalability; deliver evidence-based report
+- [ ] Plan and implement admin management for Industry / Sector options and business-dashboard features/content

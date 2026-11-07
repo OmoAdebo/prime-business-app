@@ -25,7 +25,7 @@ export interface IndustryTerms {
 }
 
 export interface IndustryConfig {
-  category: BusinessCategory;
+  category: string;
   hint: string;
   subcategories: string[];
   terms: IndustryTerms;
@@ -363,11 +363,12 @@ export const SUBCATEGORY_OVERRIDES: Record<string, Record<string, Partial<Indust
 
 export const BUSINESS_CATEGORIES = Object.keys(INDUSTRY_CONFIG) as BusinessCategory[];
 
-function mergeConfig(base: IndustryConfig, override?: Partial<IndustryConfig>): IndustryConfig {
-  if (!override) return base;
+export function mergeIndustryConfig(base: IndustryConfig, override?: Partial<IndustryConfig>, category = base.category): IndustryConfig {
+  if (!override) return { ...base, category };
   return {
     ...base,
     ...override,
+    category,
     terms: { ...base.terms, ...(override.terms ?? {}) },
     units: override.units ?? base.units,
     quickActions: override.quickActions ?? base.quickActions,
@@ -378,11 +379,16 @@ function mergeConfig(base: IndustryConfig, override?: Partial<IndustryConfig>): 
   };
 }
 
-export function getIndustryConfig(category?: string | null, subcategory?: string | null): IndustryConfig {
-  const base = category && (category in INDUSTRY_CONFIG)
-    ? INDUSTRY_CONFIG[category as BusinessCategory]
+export function getIndustryConfig(
+  category?: string | null,
+  subcategory?: string | null,
+  persistedConfig?: Partial<IndustryConfig> | null,
+): IndustryConfig {
+  const resolvedCategory = category?.trim() || INDUSTRY_CONFIG.MSMEs.category;
+  const base = resolvedCategory in INDUSTRY_CONFIG
+    ? INDUSTRY_CONFIG[resolvedCategory as BusinessCategory]
     : INDUSTRY_CONFIG.MSMEs;
-  if (!subcategory) return base;
-  const override = SUBCATEGORY_OVERRIDES[base.category]?.[subcategory];
-  return mergeConfig(base, override);
+  const subcategoryOverride = subcategory ? SUBCATEGORY_OVERRIDES[base.category]?.[subcategory] : undefined;
+  const withSubcategory = mergeIndustryConfig(base, subcategoryOverride, resolvedCategory);
+  return mergeIndustryConfig(withSubcategory, persistedConfig ?? undefined, resolvedCategory);
 }

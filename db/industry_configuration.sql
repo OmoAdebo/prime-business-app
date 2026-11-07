@@ -40,6 +40,34 @@ CREATE TABLE IF NOT EXISTS public.industry_feature_access (
   PRIMARY KEY (industry_category, feature_key)
 );
 
+CREATE OR REPLACE FUNCTION public.sync_industry_feature_registry()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.industry_feature_access (industry_category, feature_key, enabled)
+  VALUES (NEW.category, NEW.feature_key, true)
+  ON CONFLICT (industry_category, feature_key) DO NOTHING;
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.sync_industry_category_registry()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF TG_OP = 'UPDATE' AND OLD.category <> NEW.category THEN
+    UPDATE public.businesses SET business_category = NEW.category WHERE business_category = OLD.category;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
 GRANT SELECT ON public.industry_feature_access TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON public.industry_feature_access TO authenticated;
 GRANT ALL ON public.industry_feature_access TO service_role;
@@ -54,6 +82,14 @@ CREATE POLICY "industry_feature_access_admin_write" ON public.industry_feature_a
   FOR ALL TO authenticated
   USING (public.has_role(auth.uid(), 'super_admin') OR public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'support_admin'))
   WITH CHECK (public.has_role(auth.uid(), 'super_admin') OR public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'support_admin'));
+
+DROP TRIGGER IF EXISTS sync_industry_feature_insert ON public.plan_features;
+CREATE TRIGGER sync_industry_feature_insert AFTER INSERT ON public.plan_features
+  FOR EACH ROW EXECUTE FUNCTION public.sync_industry_feature_registry();
+
+DROP TRIGGER IF EXISTS sync_industry_category_rename ON public.industry_profiles;
+CREATE TRIGGER sync_industry_category_rename AFTER UPDATE OF category ON public.industry_profiles
+  FOR EACH ROW EXECUTE FUNCTION public.sync_industry_category_registry();
 
 -- These initial rows provide existing sectors in the registration/onboarding selector.
 -- Dashboard settings start from the matching built-in profile and become fully editable in Admin.
@@ -78,6 +114,14 @@ SELECT ip.category, pf.feature_key,
     WHEN ip.category = 'Consultant' AND pf.feature_key IN ('module.pos', 'module.store', 'module.store-management') THEN false
     ELSE true
   END
+FROM public.industry_profiles ip
+CROSS JOIN public.plan_features pf
+ON CONFLICT (industry_category, feature_key) DO NOTHING;
+
+-- Seed plan access rows for current built-in and custom sectors (new sectors are unrestricted
+-- by industry unless an admin changes the relevant feature toggles).
+INSERT INTO public.industry_feature_access (industry_category, feature_key, enabled)
+SELECT ip.category, pf.feature_key, true
 FROM public.industry_profiles ip
 CROSS JOIN public.plan_features pf
 ON CONFLICT (industry_category, feature_key) DO NOTHING;
